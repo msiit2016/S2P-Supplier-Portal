@@ -21,7 +21,9 @@ import {
   Search, 
   ShieldCheck, 
   FileCheck2,
-  ArrowRight
+  ArrowRight,
+  Layers,
+  X
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -153,11 +155,28 @@ export const SupplierRfps: React.FC = () => {
 
   const [selectedEventId, setSelectedEventId] = useState<string>('src-apex-01');
   const [filterType, setFilterType] = useState<string>('ALL');
+  const [selectedBuyer, setSelectedBuyer] = useState<string>('ALL');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [aiDrafting, setAiDrafting] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  const activeEvent = events.find(e => e.id === selectedEventId) || events[0];
+  const uniqueBuyers = Array.from(new Map(events.map(e => [e.buyerOrgId, e.buyerName])).entries());
+
+  const filteredEvents = events.filter(e => {
+    if (filterType !== 'ALL' && e.type !== filterType) return false;
+    if (selectedBuyer !== 'ALL' && e.buyerOrgId !== selectedBuyer) return false;
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      e.eventNumber.toLowerCase().includes(q) ||
+      e.title.toLowerCase().includes(q) ||
+      e.buyerName.toLowerCase().includes(q) ||
+      e.category.toLowerCase().includes(q)
+    );
+  });
+
+  const activeEvent = filteredEvents.find(e => e.id === selectedEventId) || filteredEvents[0] || events[0];
 
   // Calculations for active event bid
   const totalBidAmount = activeEvent.lineItems.reduce((sum, item) => sum + (item.quantity * item.bidUnitPrice), 0);
@@ -253,13 +272,8 @@ export const SupplierRfps: React.FC = () => {
     setTimeout(() => setToastMsg(null), 6000);
   };
 
-  const filteredEvents = events.filter(e => {
-    if (filterType === 'ALL') return true;
-    return e.type === filterType;
-  });
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Toast Notification */}
       {toastMsg && (
         <div className="bg-emerald-50 border-l-4 border-emerald-500 p-3.5 rounded-r-xl shadow-xs flex items-center justify-between animate-in fade-in slide-in-from-top-1">
@@ -267,95 +281,144 @@ export const SupplierRfps: React.FC = () => {
             <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>{toastMsg}</span>
           </div>
-          <button onClick={() => setToastMsg(null)} className="text-emerald-700 font-bold hover:underline text-xs">
-            Dismiss
+          <button onClick={() => setToastMsg(null)} className="text-emerald-700 font-bold hover:underline text-xs cursor-pointer">
+            <X className="w-4 h-4" />
           </button>
         </div>
       )}
 
-      {/* Header Cockpit */}
-      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 rounded-2xl p-6 text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6 border border-slate-800">
-        <div>
-          <div className="flex items-center space-x-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 uppercase tracking-wider">
-              Autonomous Sourcing & Tenders
-            </span>
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-              3 Active Enterprise Events
-            </span>
+      {/* Compact Unified Header Bar */}
+      <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3.5">
+        {/* Left: Title, Badge & Context */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 shrink-0">
+              <FileCheck2 className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-base font-bold text-slate-900 tracking-tight">RFPs & Bids</h1>
+                <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                  {filteredEvents.length} opportunities
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500">Review buyer tenders, configure pricing, and submit competitive bids</p>
+            </div>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight">Enterprise RFPs, RFIs & Sourcing Bids</h1>
-          <p className="text-slate-300 text-xs mt-1 max-w-2xl leading-relaxed">
-            Review incoming requests for proposals from enterprise buyers, prepare competitive rate cards, and leverage AI to draft compliant technical proposals.
-          </p>
         </div>
 
-        <div className="flex items-center space-x-2 shrink-0">
+        {/* Right: Integrated Controls & Actions */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Search Input */}
+          <div className="relative flex-1 sm:flex-initial">
+            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search RFPs, buyers..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full sm:w-44 text-xs pl-8 pr-3 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50/70"
+            />
+          </div>
+
+          {/* Event Type Filter Dropdown */}
+          <select
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+            className="text-xs border border-slate-200 rounded-lg px-2.5 py-1.5 bg-white text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+            title="Filter by event type"
+          >
+            <option value="ALL">All Event Types ({events.length})</option>
+            <option value="RFP">RFPs (Proposals)</option>
+            <option value="RFI">RFIs (Information)</option>
+            <option value="BID">Formal Bids</option>
+          </select>
+
+          {/* Buyer Filter Dropdown */}
+          <select
+            value={selectedBuyer}
+            onChange={(e) => setSelectedBuyer(e.target.value)}
+            className="text-xs border border-slate-200 rounded-lg px-2.5 py-1.5 bg-white text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+            title="Filter by buyer enterprise"
+          >
+            <option value="ALL">All Buyers ({uniqueBuyers.length})</option>
+            {uniqueBuyers.map(([id, name]) => (
+              <option key={id} value={id}>{name}</option>
+            ))}
+          </select>
+
+          {/* Catalog Rates Shortcut Button */}
           <button
             onClick={() => navigate('/catalog')}
-            className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-xl text-xs font-semibold transition"
+            className="px-3 py-1.5 border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-semibold shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
+            title="Check published catalog unit prices"
           >
-            Review Catalog Rates
+            <Layers className="w-3.5 h-3.5 text-slate-500" />
+            <span>Catalog Rates</span>
           </button>
+
+          {/* AI Sourcing Copilot Button */}
           <button
             onClick={handleAiDraftResponses}
             disabled={aiDrafting}
-            className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-emerald-600 hover:from-indigo-500 hover:to-emerald-500 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center space-x-1.5"
+            className="px-3 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-lg text-xs font-bold shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+            title="Auto-draft technical responses from Master Profile & Document Vault"
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-            <span>{aiDrafting ? 'Drafting...' : 'AI Sourcing Copilot'}</span>
+            <span>{aiDrafting ? 'Drafting...' : 'AI Copilot'}</span>
           </button>
         </div>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-        <div className="flex items-center space-x-2 text-xs">
-          <button
-            onClick={() => setFilterType('ALL')}
-            className={`px-3 py-1.5 rounded-xl font-bold transition ${
-              filterType === 'ALL'
-                ? 'bg-slate-900 text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900 bg-slate-100'
-            }`}
-          >
-            All Events ({events.length})
-          </button>
-          <button
-            onClick={() => setFilterType('RFP')}
-            className={`px-3 py-1.5 rounded-xl font-bold transition ${
-              filterType === 'RFP'
-                ? 'bg-indigo-600 text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900 bg-slate-100'
-            }`}
-          >
-            RFPs (Proposals)
-          </button>
-          <button
-            onClick={() => setFilterType('RFI')}
-            className={`px-3 py-1.5 rounded-xl font-bold transition ${
-              filterType === 'RFI'
-                ? 'bg-teal-600 text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900 bg-slate-100'
-            }`}
-          >
-            RFIs (Information)
-          </button>
-          <button
-            onClick={() => setFilterType('BID')}
-            className={`px-3 py-1.5 rounded-xl font-bold transition ${
-              filterType === 'BID'
-                ? 'bg-emerald-600 text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900 bg-slate-100'
-            }`}
-          >
-            Formal Bids
-          </button>
+      {/* Slim Opportunity Pipeline Summary */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+        <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs flex items-center justify-between">
+          <div>
+            <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Pipeline Value</div>
+            <div className="text-sm font-extrabold text-slate-900 mt-0.5 font-mono">
+              ${events.reduce((sum, e) => sum + e.estimatedValue, 0).toLocaleString()}
+            </div>
+          </div>
+          <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+            <DollarSign className="w-4 h-4" />
+          </div>
         </div>
 
-        <span className="text-xs text-slate-500">
-          Showing <strong>{filteredEvents.length}</strong> sourcing opportunities
-        </span>
+        <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs flex items-center justify-between">
+          <div>
+            <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Active Events</div>
+            <div className="text-sm font-extrabold text-indigo-700 mt-0.5">
+              {events.length} Opportunities
+            </div>
+          </div>
+          <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+            <FileCheck2 className="w-4 h-4" />
+          </div>
+        </div>
+
+        <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs flex items-center justify-between">
+          <div>
+            <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Next Deadline</div>
+            <div className="text-sm font-extrabold text-amber-700 mt-0.5">
+              Nov 15, 2026
+            </div>
+          </div>
+          <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+            <Clock className="w-4 h-4" />
+          </div>
+        </div>
+
+        <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs flex items-center justify-between">
+          <div>
+            <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Participating Buyers</div>
+            <div className="text-sm font-extrabold text-slate-900 mt-0.5">
+              {uniqueBuyers.length} Enterprises
+            </div>
+          </div>
+          <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center font-bold">
+            <Building2 className="w-4 h-4" />
+          </div>
+        </div>
       </div>
 
       {/* Main Grid: Left Event List + Right Bid Workbench */}
@@ -422,6 +485,14 @@ export const SupplierRfps: React.FC = () => {
               </div>
             );
           })}
+
+          {filteredEvents.length === 0 && (
+            <div className="bg-white rounded-2xl p-8 border border-slate-200 text-center text-xs">
+              <FileCheck2 className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+              <div className="font-bold text-slate-800">No matching sourcing events</div>
+              <p className="text-slate-400 mt-0.5">Try clearing your search query or adjusting your filters.</p>
+            </div>
+          )}
         </div>
 
         {/* RIGHT: INTERACTIVE BID & PROPOSAL WORKBENCH */}
