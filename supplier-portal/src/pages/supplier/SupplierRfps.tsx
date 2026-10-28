@@ -408,13 +408,13 @@ export const SupplierRfps: React.FC = () => {
         <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs flex items-center justify-between gap-2 min-w-0">
           <div className="min-w-0 flex-1">
             <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider truncate">
-              {selectedBuyer === 'ALL' ? 'Participating Buyers' : 'Selected Buyer'}
+              {selectedBuyer === 'ALL' ? 'Enterprise Buyers' : 'Selected Buyer'}
             </div>
             <div 
               className="text-sm font-extrabold text-slate-900 mt-0.5 truncate"
-              title={selectedBuyer === 'ALL' ? `${uniqueBuyers.length} Enterprises` : selectedBuyerName}
+              title={selectedBuyer === 'ALL' ? `All Buyers (${uniqueBuyers.length})` : selectedBuyerName}
             >
-              {selectedBuyer === 'ALL' ? `${uniqueBuyers.length} Enterprises` : selectedBuyerName}
+              {selectedBuyer === 'ALL' ? `All Buyers (${uniqueBuyers.length})` : selectedBuyerName}
             </div>
           </div>
           <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center font-bold shrink-0">

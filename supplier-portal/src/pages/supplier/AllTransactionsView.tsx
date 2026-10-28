@@ -16,7 +16,8 @@ import {
   TrendingUp,
   FileSpreadsheet,
   X,
-  CreditCard
+  CreditCard,
+  Building2
 } from 'lucide-react';
 
 export const AllTransactionsView: React.FC = () => {
@@ -90,6 +91,9 @@ export const AllTransactionsView: React.FC = () => {
   const pendingPaymentValue = filteredInvoices
     .filter((i) => i.paymentStatus !== 'PAID')
     .reduce((sum, i) => sum + (i.totalAmount || 0), 0);
+
+  const selectedBuyerObj = buyers.find((b) => b.buyerOrgId === selectedBuyerFilter);
+  const selectedBuyerName = selectedBuyerObj ? selectedBuyerObj.buyerName : selectedBuyerFilter;
 
   // Export to Excel / CSV
   const handleExportToExcel = () => {
@@ -343,17 +347,17 @@ export const AllTransactionsView: React.FC = () => {
         <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs flex items-center justify-between gap-2 min-w-0">
           <div className="min-w-0 flex-1">
             <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider truncate">
-              {selectedBuyerFilter === 'ALL' ? 'Connected Buyers' : 'Selected Buyer'}
+              {selectedBuyerFilter === 'ALL' ? 'Enterprise Buyers' : 'Selected Buyer'}
             </div>
             <div 
               className="text-sm font-extrabold text-slate-900 mt-0.5 truncate"
-              title={selectedBuyerFilter === 'ALL' ? `${buyers.length} Enterprise Buyers` : buyers.find(b => b.buyerOrgId === selectedBuyerFilter)?.buyerName || '1 Buyer'}
+              title={selectedBuyerFilter === 'ALL' ? `All Buyers (${buyers.length})` : selectedBuyerName}
             >
-              {selectedBuyerFilter === 'ALL' ? `${buyers.length} Enterprise Buyers` : buyers.find(b => b.buyerOrgId === selectedBuyerFilter)?.buyerName || '1 Buyer'}
+              {selectedBuyerFilter === 'ALL' ? `All Buyers (${buyers.length})` : selectedBuyerName}
             </div>
           </div>
           <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center font-bold shrink-0">
-            <CreditCard className="w-4 h-4" />
+            <Building2 className="w-4 h-4" />
           </div>
         </div>
       </div>
