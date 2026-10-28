@@ -44,6 +44,7 @@ export const SupplierDocVault: React.FC = () => {
   const [expiryDate, setExpiryDate] = useState('2027-12-31');
   const [isPermanent, setIsPermanent] = useState(false);
   const [fileName, setFileName] = useState('certificate_upload.pdf');
+  const [showExpiryBanner, setShowExpiryBanner] = useState(true);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Preview modal state
@@ -168,20 +169,10 @@ export const SupplierDocVault: React.FC = () => {
               <FolderLock className="w-4 h-4" />
             </div>
             <div>
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-2">
                 <h1 className="text-base font-bold text-slate-900 tracking-tight">Document Vault</h1>
-                <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                  <span>{activeCount} Verified</span>
-                </span>
-                {expiringCount > 0 && (
-                  <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200 flex items-center gap-1">
-                    <AlertTriangle className="w-3 h-3 text-amber-500" />
-                    <span>{expiringCount} Renewal Due</span>
-                  </span>
-                )}
-                <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
-                  {complianceDocs.length} Total
+                <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  {filteredDocs.length} documents
                 </span>
               </div>
               <p className="text-[11px] text-slate-500">Upload and manage your company documents</p>
@@ -262,8 +253,8 @@ export const SupplierDocVault: React.FC = () => {
       )}
 
       {/* Expiry Warning Callout */}
-      {expiringCount > 0 && filterStatus !== 'ACTIVE' && (
-        <div className="bg-amber-50/80 border border-amber-200 rounded-2xl p-4 flex items-center justify-between gap-4">
+      {showExpiryBanner && expiringCount > 0 && filterStatus !== 'ACTIVE' && (
+        <div className="bg-amber-50/80 border border-amber-200 rounded-2xl p-4 flex items-center justify-between gap-4 animate-fade-in">
           <div className="flex items-center space-x-3 text-xs text-amber-900">
             <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
               <AlertTriangle className="w-4 h-4 text-amber-600" />
@@ -272,12 +263,21 @@ export const SupplierDocVault: React.FC = () => {
               <span className="font-bold">Renewal required:</span> 1 certificate expires in 20 days. Upload an updated policy to avoid order or payment holds.
             </div>
           </div>
-          <button
-            onClick={() => handleRenewDoc('doc-002')}
-            className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-bold shadow-xs shrink-0 cursor-pointer transition"
-          >
-            Renew Policy
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => handleRenewDoc('doc-002')}
+              className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-bold shadow-xs shrink-0 cursor-pointer transition"
+            >
+              Renew Policy
+            </button>
+            <button
+              onClick={() => setShowExpiryBanner(false)}
+              className="p-1.5 text-amber-600 hover:text-amber-800 hover:bg-amber-100/80 rounded-lg transition cursor-pointer"
+              title="Dismiss warning"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       )}
 
