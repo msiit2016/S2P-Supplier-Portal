@@ -340,14 +340,19 @@ export const AllTransactionsView: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs flex items-center justify-between">
-          <div>
-            <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Connected Buyers</div>
-            <div className="text-sm font-extrabold text-slate-900 mt-0.5">
+        <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs flex items-center justify-between gap-2 min-w-0">
+          <div className="min-w-0 flex-1">
+            <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider truncate">
+              {selectedBuyerFilter === 'ALL' ? 'Connected Buyers' : 'Selected Buyer'}
+            </div>
+            <div 
+              className="text-sm font-extrabold text-slate-900 mt-0.5 truncate"
+              title={selectedBuyerFilter === 'ALL' ? `${buyers.length} Enterprise Buyers` : buyers.find(b => b.buyerOrgId === selectedBuyerFilter)?.buyerName || '1 Buyer'}
+            >
               {selectedBuyerFilter === 'ALL' ? `${buyers.length} Enterprise Buyers` : buyers.find(b => b.buyerOrgId === selectedBuyerFilter)?.buyerName || '1 Buyer'}
             </div>
           </div>
-          <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center font-bold">
+          <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center font-bold shrink-0">
             <CreditCard className="w-4 h-4" />
           </div>
         </div>

@@ -176,6 +176,14 @@ export const SupplierRfps: React.FC = () => {
     );
   });
 
+  const selectedBuyerEntry = uniqueBuyers.find(([id]) => id === selectedBuyer);
+  const selectedBuyerName = selectedBuyerEntry ? selectedBuyerEntry[1] : selectedBuyer;
+
+  // Opportunity summary metrics dynamically calculated from filtered events
+  const totalPipelineValue = filteredEvents.reduce((sum, e) => sum + e.estimatedValue, 0);
+  const activeEventsCount = filteredEvents.length;
+  const nextDeadline = filteredEvents.length > 0 ? filteredEvents[0].submissionDeadline : 'None';
+
   const activeEvent = filteredEvents.find(e => e.id === selectedEventId) || filteredEvents[0] || events[0];
 
   // Calculations for active event bid
@@ -365,10 +373,10 @@ export const SupplierRfps: React.FC = () => {
           <div>
             <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Pipeline Value</div>
             <div className="text-sm font-extrabold text-slate-900 mt-0.5 font-mono">
-              ${events.reduce((sum, e) => sum + e.estimatedValue, 0).toLocaleString()}
+              ${totalPipelineValue.toLocaleString()}
             </div>
           </div>
-          <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+          <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold shrink-0">
             <DollarSign className="w-4 h-4" />
           </div>
         </div>
@@ -377,10 +385,10 @@ export const SupplierRfps: React.FC = () => {
           <div>
             <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Active Events</div>
             <div className="text-sm font-extrabold text-indigo-700 mt-0.5">
-              {events.length} Opportunities
+              {activeEventsCount} {activeEventsCount === 1 ? 'Opportunity' : 'Opportunities'}
             </div>
           </div>
-          <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+          <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold shrink-0">
             <FileCheck2 className="w-4 h-4" />
           </div>
         </div>
@@ -389,22 +397,27 @@ export const SupplierRfps: React.FC = () => {
           <div>
             <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Next Deadline</div>
             <div className="text-sm font-extrabold text-amber-700 mt-0.5">
-              Nov 15, 2026
+              {nextDeadline}
             </div>
           </div>
-          <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+          <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold shrink-0">
             <Clock className="w-4 h-4" />
           </div>
         </div>
 
-        <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs flex items-center justify-between">
-          <div>
-            <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Participating Buyers</div>
-            <div className="text-sm font-extrabold text-slate-900 mt-0.5">
-              {uniqueBuyers.length} Enterprises
+        <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs flex items-center justify-between gap-2 min-w-0">
+          <div className="min-w-0 flex-1">
+            <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider truncate">
+              {selectedBuyer === 'ALL' ? 'Participating Buyers' : 'Selected Buyer'}
+            </div>
+            <div 
+              className="text-sm font-extrabold text-slate-900 mt-0.5 truncate"
+              title={selectedBuyer === 'ALL' ? `${uniqueBuyers.length} Enterprises` : selectedBuyerName}
+            >
+              {selectedBuyer === 'ALL' ? `${uniqueBuyers.length} Enterprises` : selectedBuyerName}
             </div>
           </div>
-          <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center font-bold">
+          <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center font-bold shrink-0">
             <Building2 className="w-4 h-4" />
           </div>
         </div>
