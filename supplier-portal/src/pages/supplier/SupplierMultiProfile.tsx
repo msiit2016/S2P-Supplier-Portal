@@ -193,71 +193,106 @@ export const SupplierMultiProfile: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      {/* Compact Unified Header Bar - Consistent with Catalog Vault & Doc Vault */}
-      <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3.5">
-        {/* Title, Badge & Context */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 shrink-0">
-              <Globe className="w-4 h-4" />
+      {/* 1 Smart Unified Header Strip */}
+      <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-3.5">
+        {/* Top Row: Entity Identity on Left, Controls & Actions on Right */}
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+          {/* Left: Supplier Organization Emblem, Title & Badges */}
+          <div className="flex items-start sm:items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-white shadow-xs shrink-0 font-extrabold text-sm tracking-tight">
+              {globalProfile.legalName.slice(0, 2).toUpperCase()}
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-base font-bold text-slate-900 tracking-tight">Public Profile</h1>
-                <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  Verified Enterprise
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
+                  {globalProfile.legalName}
+                </h1>
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1 shrink-0">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Verisource Certified Enterprise</span>
+                </span>
+                <span className="px-2 py-0.5 rounded-md text-[11px] font-mono font-semibold bg-slate-100 text-slate-700 border border-slate-200 shrink-0">
+                  DUNS: {globalProfile.dunsNumber}
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500">Master company profile and connected enterprise relationships</p>
             </div>
+          </div>
+
+          {/* Right: Integrated Tabs, Passport Quick Share & Connect Buyer CTA */}
+          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0 flex-wrap sm:flex-nowrap">
+            {/* Tab Switcher Pills */}
+            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200/80">
+              <button
+                onClick={() => setActiveTab('GLOBAL')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 ${
+                  activeTab === 'GLOBAL'
+                    ? 'bg-white text-slate-900 shadow-2xs font-bold'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <Globe className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Master Profile</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('BUYERS')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 ${
+                  activeTab === 'BUYERS'
+                    ? 'bg-white text-slate-900 shadow-2xs font-bold'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <Building2 className="w-3.5 h-3.5 text-blue-600" />
+                <span>Buyer Profiles ({buyerProfiles.length})</span>
+              </button>
+            </div>
+
+            {/* Compact Universal Passport Share Button */}
+            <button
+              onClick={handleCopyLink}
+              className="px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-semibold shadow-2xs transition flex items-center gap-1.5 cursor-pointer shrink-0"
+              title={globalProfile.passportUrl}
+            >
+              {copiedLink ? (
+                <>
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <span className="text-emerald-700 font-bold">Copied Link!</span>
+                </>
+              ) : (
+                <>
+                  <Share2 className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Share Passport</span>
+                </>
+              )}
+            </button>
+
+            {/* Connect Buyer Primary CTA */}
+            <button
+              onClick={() => setShowConnectModal(true)}
+              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center gap-1.5 cursor-pointer shrink-0"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Connect Buyer</span>
+            </button>
           </div>
         </div>
 
-        {/* Integrated Controls & Actions */}
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Tab Switcher Pills */}
-          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
-            <button
-              onClick={() => setActiveTab('GLOBAL')}
-              className={`px-3 py-1 rounded-md text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 ${
-                activeTab === 'GLOBAL'
-                  ? 'bg-white text-slate-900 shadow-2xs font-bold'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <Globe className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Master Profile</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('BUYERS')}
-              className={`px-3 py-1 rounded-md text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 ${
-                activeTab === 'BUYERS'
-                  ? 'bg-white text-slate-900 shadow-2xs font-bold'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <Building2 className="w-3.5 h-3.5 text-blue-600" />
-              <span>Buyer Profiles ({buyerProfiles.length})</span>
-            </button>
+        {/* Bottom Sub-Strip: Company Bio & Metadata */}
+        <div className="pt-2.5 border-t border-slate-100 flex flex-col lg:flex-row lg:items-center justify-between gap-2.5 text-xs">
+          <p className="text-slate-600 text-xs leading-relaxed max-w-3xl line-clamp-2 lg:line-clamp-1">
+            {globalProfile.description}
+          </p>
+          <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-500 shrink-0">
+            <span className="flex items-center gap-1"><MapPin className="w-3 h-3 text-slate-400" /> {globalProfile.hqAddress.split(',')[0]}</span>
+            <span>•</span>
+            <span className="flex items-center gap-1"><Calendar className="w-3 h-3 text-slate-400" /> Inc: {globalProfile.incorporationDate.slice(0, 4)}</span>
+            <span>•</span>
+            <span className="flex items-center gap-1 font-mono"><Hash className="w-3 h-3 text-slate-400" /> EIN: {globalProfile.taxIdMasked}</span>
+            <span className="hidden sm:inline">•</span>
+            <span className="hidden sm:flex items-center gap-1 text-emerald-700 font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              Zero-Keying Active
+            </span>
           </div>
-
-          {/* Quick Actions */}
-          <button
-            onClick={handleCopyLink}
-            className="px-3 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-semibold shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
-            title="Copy Public Profile URL"
-          >
-            <Copy className="w-3.5 h-3.5 text-slate-500" />
-            <span>{copiedLink ? 'Copied Link!' : 'Share Link'}</span>
-          </button>
-
-          <button
-            onClick={() => setShowConnectModal(true)}
-            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold shadow-xs transition flex items-center gap-1.5 cursor-pointer"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Connect Buyer</span>
-          </button>
         </div>
       </div>
 
@@ -278,58 +313,6 @@ export const SupplierMultiProfile: React.FC = () => {
       {/* ========================================================================= */}
       {activeTab === 'GLOBAL' && (
         <div className="space-y-4">
-          {/* Identity & Public Passport Summary Bar - FIXED ALIGNMENT */}
-          <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col lg:flex-row items-start justify-between gap-6">
-            <div className="flex-1 min-w-0 space-y-2">
-              <div className="flex flex-wrap items-center gap-2">
-                <h2 className="text-xl font-bold text-slate-900 tracking-tight">{globalProfile.legalName}</h2>
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1 shrink-0">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Verisource Certified Enterprise</span>
-                </span>
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-slate-100 text-slate-700 shrink-0">
-                  DUNS: {globalProfile.dunsNumber}
-                </span>
-              </div>
-              <p className="text-xs text-slate-600 leading-relaxed max-w-4xl">
-                {globalProfile.description}
-              </p>
-              <div className="flex flex-wrap items-center gap-3 pt-1 text-xs text-slate-500">
-                <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" /> {globalProfile.hqAddress}</span>
-                <span>•</span>
-                <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" /> Incorporated: {globalProfile.incorporationDate}</span>
-                <span>•</span>
-                <span className="flex items-center gap-1.5 font-mono"><Hash className="w-3.5 h-3.5 text-slate-400 shrink-0" /> Tax ID: {globalProfile.taxIdMasked}</span>
-              </div>
-            </div>
-
-            {/* Public Profile Share Box - Fixed standard responsive width */}
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 shrink-0 w-full lg:w-80 space-y-2.5 text-xs">
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-slate-700 flex items-center gap-1.5">
-                  <Share2 className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Universal Public Passport</span>
-                </span>
-                <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                  Network Active
-                </span>
-              </div>
-              <div className="p-2 bg-white rounded-lg border border-slate-200 text-slate-600 font-mono text-[11px] truncate flex items-center justify-between">
-                <span className="truncate">{globalProfile.passportUrl}</span>
-                <button
-                  onClick={handleCopyLink}
-                  className="ml-2 text-emerald-600 hover:text-emerald-700 font-sans font-semibold shrink-0 text-xs flex items-center gap-1 cursor-pointer"
-                >
-                  <Copy className="w-3.5 h-3.5" />
-                  <span>{copiedLink ? 'Copied' : 'Copy'}</span>
-                </button>
-              </div>
-              <div className="text-[10px] text-slate-400 flex items-center gap-1">
-                <Lock className="w-3 h-3 text-slate-400 shrink-0" />
-                <span>Zero-keying onboarding enabled for all buyers</span>
-              </div>
-            </div>
-          </div>
 
           {/* Section Navigation Pills */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
