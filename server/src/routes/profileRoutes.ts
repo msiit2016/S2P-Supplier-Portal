@@ -339,13 +339,14 @@ router.post('/buyers/:buyerOrgId/sync-ai', (req: AuthenticatedRequest, res: Resp
 router.post('/buyers/connect', (req: AuthenticatedRequest, res: Response) => {
   const user = req.user;
   const supplierOrgId = user?.organizationId || 'supp-org-1';
-  const { buyerName, buyerDomain, invitationCode } = req.body;
+  const { buyerName, buyerEmail, buyerContactName, invitationCode, connectionMethod, customMessage } = req.body;
 
   if (!buyerName) {
     res.status(400).json({ error: 'buyerName is required' });
     return;
   }
 
+  const isEmailInvite = connectionMethod === 'EMAIL_INVITE';
   const newBuyerId = `buyer-org-${Date.now().toString().slice(-4)}`;
   const newProfile: BuyerSpecificProfile = {
     id: `bprof-${Date.now().toString().slice(-4)}`,
@@ -353,7 +354,7 @@ router.post('/buyers/connect', (req: AuthenticatedRequest, res: Response) => {
     buyerOrgId: newBuyerId,
     buyerName,
     buyerLogoText: buyerName.slice(0, 4).toUpperCase(),
-    relationshipStatus: 'INVITED',
+    relationshipStatus: isEmailInvite ? 'INVITED' : 'ACTIVE',
     connectedSince: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
     customRemittanceAccount: {
       bankName: 'JPMorgan Chase Bank, N.A.',
@@ -378,7 +379,7 @@ router.post('/buyers/connect', (req: AuthenticatedRequest, res: Response) => {
     customDocumentOverrides: [],
     customCatalogTier: 'Standard Enterprise Commercial Price List',
     lastSyncedAt: new Date().toISOString(),
-    syncCompletenessScore: 95
+    syncCompletenessScore: 98
   };
 
   if (!buyerProfiles[supplierOrgId]) {
@@ -386,8 +387,12 @@ router.post('/buyers/connect', (req: AuthenticatedRequest, res: Response) => {
   }
   buyerProfiles[supplierOrgId].unshift(newProfile);
 
+  const message = isEmailInvite
+    ? `🎉 Onboarding invitation sent to ${buyerEmail || 'procurement team'} for ${buyerName}! Master Passport credentials attached.`
+    : `🎉 Invitation code ${invitationCode || 'INV-VERIFIED'} verified! Connected with ${buyerName} and pre-populated onboarding workspace.`;
+
   res.status(201).json({
-    message: `Enterprise connection established with ${buyerName}! Master Passport credentials shared.`,
+    message,
     buyerProfile: newProfile
   });
 });

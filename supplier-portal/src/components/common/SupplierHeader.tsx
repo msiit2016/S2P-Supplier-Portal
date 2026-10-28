@@ -98,6 +98,7 @@ export const SupplierHeader: React.FC<SupplierHeaderProps> = ({ onToggleAi }) =>
   }, []);
 
   const isOnboarding = currentRoute.startsWith('/onboarding');
+  const isProfilePage = currentRoute.startsWith('/public-profile') || currentRoute.startsWith('/profiles') || currentRoute.startsWith('/master-profile');
 
   const activeBuyer = selectedBuyerId === 'ALL' 
     ? (isOnboarding ? buyers[0] || null : null) 
@@ -150,6 +151,7 @@ export const SupplierHeader: React.FC<SupplierHeaderProps> = ({ onToggleAi }) =>
           </div>
 
           {/* COMPACT & INTUITIVE WORKSPACE SWITCHER */}
+          {!isProfilePage && (
           <div className="relative shrink-0" ref={workspaceRef}>
             <button
               onClick={() => setWorkspaceDropdownOpen(prev => !prev)}
@@ -274,6 +276,7 @@ export const SupplierHeader: React.FC<SupplierHeaderProps> = ({ onToggleAi }) =>
               </div>
             )}
           </div>
+          )}
 
           {/* Primary Navigation Links */}
           <nav className="hidden lg:flex items-center space-x-1">

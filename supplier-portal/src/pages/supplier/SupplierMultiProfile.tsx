@@ -40,7 +40,10 @@ import {
   CheckCheck,
   ArrowDownUp,
   UploadCloud,
-  CheckSquare
+  CheckSquare,
+  X,
+  Send,
+  KeyRound
 } from 'lucide-react';
 
 export const SupplierMultiProfile: React.FC = () => {
@@ -63,10 +66,17 @@ export const SupplierMultiProfile: React.FC = () => {
   // Active section filter in Buyer Profile
   const [activeBuyerSection, setActiveBuyerSection] = useState<string>('ALL');
 
-  // Connect New Buyer Modal
+  // Connect New Buyer Modal State
   const [showConnectModal, setShowConnectModal] = useState(false);
+  const [connectMethod, setConnectMethod] = useState<'EMAIL_INVITE' | 'ENTER_CODE'>('EMAIL_INVITE');
   const [newBuyerName, setNewBuyerName] = useState('');
+  const [buyerEmail, setBuyerEmail] = useState('');
+  const [buyerContactName, setBuyerContactName] = useState('');
   const [invitationCode, setInvitationCode] = useState('');
+  const [customMessage, setCustomMessage] = useState(
+    'We would like to share our verified Verisource Master Profile, IRS Form W-9, and banking coordinates for zero-keying onboarding.'
+  );
+  const [isSubmittingConnect, setIsSubmittingConnect] = useState(false);
 
   const loadProfileData = async () => {
     try {
@@ -144,12 +154,19 @@ export const SupplierMultiProfile: React.FC = () => {
   const handleConnectBuyer = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      setIsSubmittingConnect(true);
       const res = await ApiClient.connectNewBuyer({
         buyerName: newBuyerName,
-        invitationCode
+        buyerEmail: connectMethod === 'EMAIL_INVITE' ? buyerEmail : undefined,
+        buyerContactName: connectMethod === 'EMAIL_INVITE' ? buyerContactName : undefined,
+        invitationCode: connectMethod === 'ENTER_CODE' ? invitationCode : undefined,
+        connectionMethod: connectMethod,
+        customMessage
       });
       setShowConnectModal(false);
       setNewBuyerName('');
+      setBuyerEmail('');
+      setBuyerContactName('');
       setInvitationCode('');
       setSuccessMessage(res.message);
       await loadProfileData();
@@ -160,6 +177,8 @@ export const SupplierMultiProfile: React.FC = () => {
       setTimeout(() => setSuccessMessage(null), 6000);
     } catch (err) {
       alert('Failed to connect new buyer');
+    } finally {
+      setIsSubmittingConnect(false);
     }
   };
 
@@ -189,7 +208,7 @@ export const SupplierMultiProfile: React.FC = () => {
                   Verified Enterprise
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500">Universal master profile and buyer-specific relationship credentials</p>
+              <p className="text-[11px] text-slate-500">Master company profile and connected enterprise relationships</p>
             </div>
           </div>
         </div>
@@ -219,17 +238,6 @@ export const SupplierMultiProfile: React.FC = () => {
             >
               <Building2 className="w-3.5 h-3.5 text-blue-600" />
               <span>Buyer Profiles ({buyerProfiles.length})</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('AGENTIC_SYNC')}
-              className={`px-3 py-1 rounded-md text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 ${
-                activeTab === 'AGENTIC_SYNC'
-                  ? 'bg-white text-indigo-700 shadow-2xs font-bold'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-              <span>Agentic Sync</span>
             </button>
           </div>
 
@@ -1232,45 +1240,172 @@ export const SupplierMultiProfile: React.FC = () => {
         </div>
       )}
 
-      {/* Connect New Buyer Modal */}
+      {/* Connect New Buyer Modal - Two-Way Connection Hub */}
       {showConnectModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
-            <h3 className="text-lg font-bold text-slate-900">Connect New Enterprise Buyer</h3>
-            <p className="text-xs text-slate-500 mt-1 mb-4">
-              Enter the buyer organization name or invitation token. Your Master Public Profile will pre-populate their onboarding workspace.
-            </p>
+          <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            {/* Modal Header */}
+            <div className="p-5 border-b border-slate-200 flex items-start justify-between bg-slate-50/50">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 shrink-0">
+                  <Building2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">Connect Enterprise Buyer</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Connect your verified Master Public Profile with a buyer enterprise
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowConnectModal(false)}
+                className="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
-            <form onSubmit={handleConnectBuyer} className="space-y-3 text-xs">
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Buyer Organization Legal Name</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Lockheed Precision Systems Inc."
-                  value={newBuyerName}
-                  onChange={(e) => setNewBuyerName(e.target.value)}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                />
+            {/* Connection Mode Switcher Tabs */}
+            <div className="flex border-b border-slate-200 bg-slate-100/60 p-1.5 gap-1.5 text-xs">
+              <button
+                type="button"
+                onClick={() => setConnectMethod('EMAIL_INVITE')}
+                className={`flex-1 py-2 px-3 rounded-lg font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                  connectMethod === 'EMAIL_INVITE'
+                    ? 'bg-white text-emerald-700 shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <Mail className="w-3.5 h-3.5" />
+                <span>Invite Buyer by Email</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setConnectMethod('ENTER_CODE')}
+                className={`flex-1 py-2 px-3 rounded-lg font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                  connectMethod === 'ENTER_CODE'
+                    ? 'bg-white text-blue-700 shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <KeyRound className="w-3.5 h-3.5" />
+                <span>Enter Buyer Invite Code</span>
+              </button>
+            </div>
+
+            {/* Modal Form */}
+            <form onSubmit={handleConnectBuyer} className="p-5 space-y-4 text-xs">
+              {connectMethod === 'EMAIL_INVITE' ? (
+                <>
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">Buyer Organization Legal Name *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Lockheed Precision Systems Inc."
+                      value={newBuyerName}
+                      onChange={(e) => setNewBuyerName(e.target.value)}
+                      className="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block font-semibold text-slate-700 mb-1">Procurement Contact Email *</label>
+                      <input
+                        type="email"
+                        required
+                        placeholder="procurement@buyer.example.com"
+                        value={buyerEmail}
+                        onChange={(e) => setBuyerEmail(e.target.value)}
+                        className="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-semibold text-slate-700 mb-1">Contact Person / Title</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Sarah Miller • Sourcing Director"
+                        value={buyerContactName}
+                        onChange={(e) => setBuyerContactName(e.target.value)}
+                        className="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">Onboarding Invitation Note</label>
+                    <textarea
+                      rows={2}
+                      value={customMessage}
+                      onChange={(e) => setCustomMessage(e.target.value)}
+                      className="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none text-slate-600 resize-none text-[11px]"
+                    />
+                  </div>
+
+                  <div className="p-3 bg-emerald-50/80 rounded-xl border border-emerald-200/80 text-emerald-950 space-y-1 text-[11px]">
+                    <div className="font-bold flex items-center gap-1.5 text-emerald-900">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Zero-Keying Onboarding Invitation</span>
+                    </div>
+                    <div className="text-emerald-800">
+                      The buyer will receive an invitation containing your verified Master Public Passport link, pre-populating their vendor schema with your W-9, banking coordinates, and certifications.
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">Buyer Organization Legal Name *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Boeing Defense & Space"
+                      value={newBuyerName}
+                      onChange={(e) => setNewBuyerName(e.target.value)}
+                      className="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">Invitation Code / Token *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. INV-LOCKHEED-2026"
+                      value={invitationCode}
+                      onChange={(e) => setInvitationCode(e.target.value)}
+                      className="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono"
+                    />
+                  </div>
+
+                  <div className="p-3 bg-blue-50/80 rounded-xl border border-blue-200/80 text-blue-950 space-y-1 text-[11px]">
+                    <div className="font-bold flex items-center gap-1.5 text-blue-900">
+                      <KeyRound className="w-3.5 h-3.5 text-blue-600" />
+                      <span>Instant Buyer Activation</span>
+                    </div>
+                    <div className="text-blue-800">
+                      Verifies the token provided by the buyer and establishes a dedicated buyer workspace with isolated remittance coordinates.
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Quick Universal Link Copy Bar */}
+              <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2 text-[11px]">
+                <span className="text-slate-500 truncate">Or copy Public Passport Link:</span>
+                <button
+                  type="button"
+                  onClick={handleCopyLink}
+                  className="text-emerald-700 hover:text-emerald-800 font-bold shrink-0 flex items-center gap-1 cursor-pointer"
+                >
+                  <Copy className="w-3 h-3" />
+                  <span>{copiedLink ? 'Copied!' : 'Copy Link'}</span>
+                </button>
               </div>
 
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Invitation Code (Optional)</label>
-                <input
-                  type="text"
-                  placeholder="e.g. INV-BUYER-9921"
-                  value={invitationCode}
-                  onChange={(e) => setInvitationCode(e.target.value)}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none font-mono"
-                />
-              </div>
-
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-slate-600 space-y-1 text-[11px]">
-                <div className="font-semibold text-slate-800">What happens next?</div>
-                <div>Your verified Master Public Profile will be shared, creating a dedicated Buyer Profile with isolated remittance banking.</div>
-              </div>
-
-              <div className="flex justify-end space-x-2 pt-3">
+              {/* Action Buttons */}
+              <div className="flex items-center justify-end space-x-2 pt-2 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setShowConnectModal(false)}
@@ -1280,9 +1415,24 @@ export const SupplierMultiProfile: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold shadow-md shadow-emerald-700/20 cursor-pointer"
+                  disabled={isSubmittingConnect}
+                  className={`px-4 py-2 text-white rounded-lg font-bold shadow-md transition cursor-pointer flex items-center gap-1.5 ${
+                    connectMethod === 'EMAIL_INVITE'
+                      ? 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-700/20'
+                      : 'bg-blue-600 hover:bg-blue-500 shadow-blue-700/20'
+                  }`}
                 >
-                  Connect & Share Profile
+                  {connectMethod === 'EMAIL_INVITE' ? (
+                    <>
+                      <Send className="w-3.5 h-3.5" />
+                      <span>{isSubmittingConnect ? 'Sending...' : 'Send Onboarding Invite'}</span>
+                    </>
+                  ) : (
+                    <>
+                      <KeyRound className="w-3.5 h-3.5" />
+                      <span>{isSubmittingConnect ? 'Connecting...' : 'Connect with Code'}</span>
+                    </>
+                  )}
                 </button>
               </div>
             </form>

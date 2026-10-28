@@ -407,7 +407,14 @@ export class ApiClient {
     return res.json();
   }
 
-  public static async connectNewBuyer(data: { buyerName: string; buyerDomain?: string; invitationCode?: string }) {
+  public static async connectNewBuyer(data: { 
+    buyerName: string; 
+    buyerEmail?: string; 
+    buyerContactName?: string; 
+    invitationCode?: string; 
+    connectionMethod?: 'EMAIL_INVITE' | 'ENTER_CODE'; 
+    customMessage?: string;
+  }) {
     const res = await fetch(`${BASE_URL}/supplier-profiles/buyers/connect`, {
       method: 'POST',
       headers: this.getHeaders(),
