@@ -356,17 +356,6 @@ export const SupplierRfps: React.FC = () => {
             <Layers className="w-3.5 h-3.5 text-slate-500" />
             <span>Catalog Rates</span>
           </button>
-
-          {/* AI Sourcing Copilot Button */}
-          <button
-            onClick={handleAiDraftResponses}
-            disabled={aiDrafting}
-            className="px-3 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-lg text-xs font-bold shadow-xs transition flex items-center gap-1.5 cursor-pointer"
-            title="Auto-draft technical responses from Master Profile & Document Vault"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-            <span>{aiDrafting ? 'Drafting...' : 'AI Copilot'}</span>
-          </button>
         </div>
       </div>
 
