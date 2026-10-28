@@ -1,0 +1,40 @@
+# Dependencies & Caches
+node_modules/
+*/node_modules/
+.npm-cache/
+*/.npm-cache/
+package-lock.json
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Production Build Outputs
+dist/
+*/dist/
+build/
+*/build/
+out/
+*/out/
+
+# Environment variables & local secrets
+.env
+.env.local
+.env.*.local
+*.local
+
+# System & OS Files
+.DS_Store
+*/.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# IDE & Editor caches
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Temp & Artifacts
+.tempmediaStorage/
+*.log
+scratch/

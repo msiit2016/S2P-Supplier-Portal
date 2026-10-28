@@ -1,0 +1,17 @@
+{
+  "name": "agentic-s2p-platform",
+  "version": "2.0.0",
+  "description": "Enterprise Agentic S2P Platform: Separate Buyer Portal and Smart Supplier Collaboration Portal",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -n \"SERVER,BUYER,SUPPLIER\" -c \"blue,cyan,green\" \"npm run dev:server\" \"npm run dev:buyer\" \"npm run dev:supplier\"",
+    "dev:server": "cd server && npm run dev",
+    "dev:buyer": "cd buyer-portal && npm run dev",
+    "dev:supplier": "cd supplier-portal && npm run dev",
+    "build": "cd server && npm run build && cd ../buyer-portal && npm run build && cd ../supplier-portal && npm run build",
+    "test": "cd server && npm test"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}
