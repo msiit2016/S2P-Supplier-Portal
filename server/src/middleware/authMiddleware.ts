@@ -4,6 +4,9 @@ import { User, UserRole, UserType } from '../models/types.js';
 
 export interface AuthenticatedRequest extends Request {
   user?: User;
+  params: any;
+  body: any;
+  query: any;
 }
 
 export const authenticate = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {

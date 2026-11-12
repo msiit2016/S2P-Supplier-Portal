@@ -37,7 +37,7 @@ app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Health check endpoint
-app.get('/api/health', (req, res) => {
+app.get('/api/health', (req: express.Request, res: express.Response) => {
   res.json({
     status: 'OK',
     service: 'Agentic Supplier Onboarding & P2P API',
@@ -50,7 +50,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/v1/auth', authRoutes);
 
 // Public View-Only Supplier Profile endpoint (Unauthenticated access for shareable URL)
-app.get('/api/v1/public/supplier-profile/:slug', (req, res) => {
+app.get('/api/v1/public/supplier-profile/:slug', (req: express.Request, res: express.Response) => {
   const { slug } = req.params;
   const profile = getPublicProfileBySlug(slug);
   if (!profile) {
@@ -79,7 +79,7 @@ const buyerDist = path.resolve(__dirname, '../../buyer-portal/dist');
 // Serve buyer portal at /buyer if built
 if (fs.existsSync(buyerDist)) {
   app.use('/buyer', express.static(buyerDist));
-  app.get('/buyer*', (req, res, next) => {
+  app.get('/buyer*', (req: express.Request, res: express.Response, next: express.NextFunction) => {
     if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) return next();
     res.sendFile(path.join(buyerDist, 'index.html'));
   });
@@ -88,7 +88,7 @@ if (fs.existsSync(buyerDist)) {
 // Serve supplier portal at / if built
 if (fs.existsSync(supplierDist)) {
   app.use(express.static(supplierDist));
-  app.get('*', (req, res, next) => {
+  app.get('*', (req: express.Request, res: express.Response, next: express.NextFunction) => {
     if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) return next();
     res.sendFile(path.join(supplierDist, 'index.html'));
   });
