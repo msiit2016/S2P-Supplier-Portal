@@ -82,6 +82,39 @@ class MemoryDatabase {
     initialPurchaseOrders.forEach(p => this.purchaseOrders.set(p.id, { ...p }));
     
     // Seed initial ASNs
+    this.asns.set('asn-088', {
+      id: 'asn-088',
+      asnNumber: 'ASN-2026-088',
+      poId: 'po-101-meridian',
+      poNumber: 'PO-2026-101',
+      buyerOrgId: 'buyer-org-3',
+      supplierOrgId: 'supp-org-1',
+      carrier: 'FedEx Freight Priority',
+      trackingNumber: 'FXF-8849-2016-US',
+      shippingDate: '2026-10-30T09:00:00Z',
+      estimatedDeliveryDate: '2026-11-03T16:00:00Z',
+      status: 'IN_TRANSIT',
+      packageCount: 4,
+      shippedItems: [
+        {
+          itemNumber: 1,
+          partNumber: 'INFRA-SRV-2026-B14',
+          description: 'Enterprise Cloud Server Deployment Hardware (Bay 14 Rack Unit) [S/N: SRV-B14-9921-A, MAC: 00:1A:2B:3C:4D:5E]',
+          shippedQuantity: 1,
+          uom: 'EA'
+        },
+        {
+          itemNumber: 2,
+          partNumber: 'SEC-SOC2-CONFIG',
+          description: 'HIPAA/SOC2 Dedicated Gateway & Firewall Appliance (Cluster Unit 1 of 2) [S/N: FWAL-SOC2-401, MAC: 00:1A:2B:88:99:11]',
+          shippedQuantity: 1,
+          uom: 'SET'
+        }
+      ],
+      notes: 'Bill of Lading: BOL-2026-101-088 • Seal #: SEC-MER-99410 • Dedicated Air-Ride LTL • 348 lbs (158 kg)',
+      createdAt: '2026-10-30T09:00:00Z'
+    });
+
     this.asns.set('asn-101', {
       id: 'asn-101',
       asnNumber: 'ASN-US-99120',
@@ -375,6 +408,15 @@ class MemoryDatabase {
   public upsertCatalogItem(item: CatalogItem): CatalogItem {
     this.catalogItems.set(item.id, item);
     return item;
+  }
+
+  public deleteCatalogItem(idOrSku: string): boolean {
+    const item = Array.from(this.catalogItems.values()).find(c => c.id === idOrSku || c.sku === idOrSku);
+    if (item) {
+      this.catalogItems.delete(item.id);
+      return true;
+    }
+    return false;
   }
 
   // --- Advance Shipping Notices (ASN) ---

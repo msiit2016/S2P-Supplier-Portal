@@ -1,6 +1,7 @@
 import React from 'react';
 import { usePortal, PortalType } from '../../context/PortalContext.js';
 import { useAuth } from '../../context/AuthContext.js';
+import { VerisourceLogo } from './VerisourceLogo.js';
 import { 
   Building2, 
   Store, 
@@ -72,18 +73,10 @@ export const HeaderBar: React.FC = () => {
             onClick={() => navigate(portal === 'BUYER' ? '/dashboard' : '/')} 
             className="flex items-center space-x-3 cursor-pointer group"
           >
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-tr from-brand-600 to-sky-400 flex items-center justify-center shadow-lg shadow-brand-500/20 group-hover:scale-105 transition-transform">
-              <ShieldCheck className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <div className="text-base font-bold tracking-tight text-white flex items-center gap-1.5">
-                Supplier Steward
-                <span className="text-[10px] font-normal uppercase tracking-wider px-1.5 py-0.5 rounded bg-brand-500/20 text-brand-300 border border-brand-500/30">
-                  {portal}
-                </span>
-              </div>
-              <div className="text-[11px] text-slate-400">Autonomous S2P Onboarding & Collaboration</div>
-            </div>
+            <VerisourceLogo size="md" theme="dark" showTagline={true} taglineText="Autonomous S2P Collaboration" />
+            <span className="text-[10px] font-normal uppercase tracking-wider px-1.5 py-0.5 rounded bg-brand-500/20 text-brand-300 border border-brand-500/30">
+              {portal}
+            </span>
           </div>
 
           {/* Portal Switcher Buttons */}

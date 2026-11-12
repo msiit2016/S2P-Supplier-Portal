@@ -5,8 +5,9 @@ export class ApiClient {
     const savedUser = localStorage.getItem('active_supplier_user') || localStorage.getItem('active_user');
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
+      'x-portal-type': 'supplier'
     };
-    if (savedUser) {
+    if (savedUser && savedUser !== 'LOGGED_OUT') {
       try {
         const u = JSON.parse(savedUser);
         if (u && u.id) {
@@ -15,6 +16,9 @@ export class ApiClient {
       } catch (e) {
         // ignore
       }
+    }
+    if (!headers['x-simulated-user-id'] && savedUser !== 'LOGGED_OUT') {
+      headers['x-simulated-user-id'] = 'user-supp-acme';
     }
     return headers;
   }
@@ -340,6 +344,14 @@ export class ApiClient {
     return res.json();
   }
 
+  public static async deleteCatalogItem(idOrSku: string) {
+    const res = await fetch(`${BASE_URL}/p2p/catalog/${encodeURIComponent(idOrSku)}`, {
+      method: 'DELETE',
+      headers: this.getHeaders()
+    });
+    return res.json();
+  }
+
   public static async getTransactionComments(entityType: string, entityId: string) {
     const res = await fetch(`${BASE_URL}/p2p/comments/${entityType}/${entityId}`, {
       headers: this.getHeaders()
@@ -359,6 +371,17 @@ export class ApiClient {
   // ==========================================
   // Verisource Multi-Enterprise Profile APIs
   // ==========================================
+
+  public static async getPublicSupplierProfile(slug: string = 'acme-industrial-tech') {
+    try {
+      const res = await fetch(`${BASE_URL}/public/supplier-profile/${slug}`);
+      if (!res.ok) throw new Error('Public profile not found');
+      return await res.json();
+    } catch (err) {
+      // Fallback
+      return this.getGlobalProfile();
+    }
+  }
 
   public static async getGlobalProfile() {
     const res = await fetch(`${BASE_URL}/supplier-profiles/global`, {

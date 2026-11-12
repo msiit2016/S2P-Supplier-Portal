@@ -260,6 +260,7 @@ export interface AuditEvent {
 // ==========================================
 
 export type POStatus = 
+  | 'DRAFT'
   | 'ISSUED'
   | 'ACKNOWLEDGED'
   | 'IN_FULFILLMENT'
@@ -271,6 +272,7 @@ export interface POLineItem {
   id: string;
   itemNumber: number;
   partNumber: string;
+  itemName?: string;
   description: string;
   quantity: number;
   uom: string; // EA, BOX, HRS, MO
@@ -374,6 +376,8 @@ export interface Invoice {
   poId?: string;
   poNumber?: string;
   buyerOrgId: string;
+  companyName?: string;
+  paymentTerms?: string;
   supplierOrgId: string;
   supplierName: string;
   invoiceDate: string;
@@ -416,11 +420,11 @@ export interface CatalogItem {
 
 export interface TransactionComment {
   id: string;
-  entityType: 'PO' | 'INVOICE' | 'ONBOARDING' | 'CATALOG';
+  entityType: 'PO' | 'INVOICE' | 'ONBOARDING' | 'CATALOG' | 'ASN' | 'COI_INSURANCE' | 'TAX_W9' | 'RFP' | 'CONTRACT' | 'COMPLIANCE' | string;
   entityId: string;
   authorId: string;
   authorName: string;
-  authorRole: 'BUYER' | 'SUPPLIER' | 'AI_ASSISTANT';
+  authorRole: 'BUYER' | 'SUPPLIER' | 'AI_ASSISTANT' | string;
   text: string;
   createdAt: string;
 }
@@ -434,6 +438,7 @@ export interface GlobalSupplierProfile {
   supplierOrgId: string;
   legalName: string;
   tradeName: string;
+  logoUrl?: string;
   dunsNumber: string;
   taxIdMasked: string;
   incorporationDate: string;
@@ -467,6 +472,89 @@ export interface GlobalSupplierProfile {
   };
   defaultPaymentTerms: string;
   updatedAt: string;
+  // Extended B2B Marketplace Structured Specifications
+  entityStructure?: string;
+  stateOfIncorporation?: string;
+  primaryNaicsCode?: string;
+  keyContacts?: Array<{
+    id: string;
+    role: string;
+    name: string;
+    title: string;
+    email: string;
+    phone: string;
+    isSignatory?: boolean;
+    verificationStatus?: string;
+  }>;
+  bankingDetails?: {
+    bankName: string;
+    accountNickName: string;
+    accountEnding: string;
+    routingNumberMasked: string;
+    swiftBic: string;
+    currency: string;
+    paymentRails: string[];
+    defaultPaymentTerms: string;
+    remittanceMethod: string;
+  };
+  taxCompliance?: {
+    einMasked: string;
+    taxFormType: string;
+    taxFormYear: string;
+    stateTaxId: string;
+    sanctionsScreening: string;
+    exemptionStatus?: string;
+  };
+  insurancePolicies?: Array<{
+    id?: string;
+    type: string;
+    coverageAmount: string;
+    subLimit?: string;
+    carrier: string;
+    policyNumber?: string;
+    expiryDate: string;
+    status: string;
+  }>;
+  certifications?: Array<{
+    id?: string;
+    name: string;
+    badgeText: string;
+    certNumber: string;
+    issuer: string;
+    scope: string;
+    expiryDate?: string;
+    status: string;
+  }>;
+  productCapabilities?: Array<{
+    id: string;
+    title: string;
+    category: string;
+    leadTime: string;
+    moq: string;
+    certifications: string;
+    description: string;
+  }>;
+  // 1:1 GEP Quantum S2P Module Fields (Synchronized with Onboarding Request)
+  formerlyKnownAs?: string;
+  normalisedName?: string;
+  origination?: string;
+  partnerStatus?: string;
+  supplierManager?: string;
+  hasDuns?: boolean;
+  subcategories?: string[];
+  serviceLocations?: string[];
+  reportingCurrency?: string;
+  annualRevenue?: string;
+  totalEmployees?: string;
+  registeredAddress?: string;
+  businessUnits?: string[];
+  operatingLanguages?: string[];
+  identifications?: any[];
+  locations?: any[];
+  gepContacts?: any[];
+  gepBankAccounts?: any[];
+  gepCertificates?: any[];
+  commercialSettings?: any;
 }
 
 export interface BuyerSpecificProfile {

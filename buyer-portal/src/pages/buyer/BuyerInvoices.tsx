@@ -122,7 +122,7 @@ export const BuyerInvoices: React.FC = () => {
 
                 <div className="text-right">
                   <div className="text-xs text-slate-400">Total Billed</div>
-                  <div className="text-xl font-extrabold text-slate-900 font-mono">
+                  <div className="text-xl font-bold text-slate-900 font-mono">
                     ${selectedInvoice.totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })} {selectedInvoice.currency}
                   </div>
                 </div>

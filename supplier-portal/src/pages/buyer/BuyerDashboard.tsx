@@ -3,6 +3,7 @@ import { usePortal } from '../../context/PortalContext.js';
 import { useAuth } from '../../context/AuthContext.js';
 import { ApiClient } from '../../api/client.js';
 import { SupplierApplication } from '../../types/index.js';
+import { Sparkline } from '../../components/dashboard/Sparkline.js';
 import { 
   FileText, 
   Clock, 
@@ -98,68 +99,80 @@ export const BuyerDashboard: React.FC<BuyerDashboardProps> = ({ onCreateSupplier
         {/* Card 1: Awaiting Review */}
         <div 
           onClick={() => setFilterStatus('UNDER_REVIEW')}
-          className="bg-white p-4 rounded-xl border border-slate-200/90 shadow-xs hover:border-brand-400 cursor-pointer transition"
+          className="bg-white p-4 rounded-xl border border-slate-200/90 shadow-xs hover:border-sky-400 cursor-pointer transition group"
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Awaiting Review</span>
-            <div className="p-2 rounded-lg bg-sky-50 text-sky-600">
+            <div className="p-2 rounded-lg bg-sky-50 text-sky-600 group-hover:scale-105 transition-transform">
               <Clock className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-2 text-2xl font-bold text-slate-900">{awaitingReview}</div>
-          <div className="mt-1 text-[11px] text-slate-400 flex items-center gap-1">
-            <span>Includes 1 corporate succession</span>
+          <div className="mt-2 text-2xl font-bold text-slate-900 font-mono">{awaitingReview}</div>
+          <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between">
+            <span className="text-[11px] text-slate-400 group-hover:text-sky-700 transition">
+              1 corporate succession
+            </span>
+            <Sparkline data={[5, 4, 4, 3, 2, Math.max(1, awaitingReview)]} color="#0284c7" width={68} height={20} />
           </div>
         </div>
 
         {/* Card 2: Changes Requested */}
         <div 
           onClick={() => setFilterStatus('CHANGES_REQUESTED')}
-          className="bg-white p-4 rounded-xl border border-slate-200/90 shadow-xs hover:border-amber-400 cursor-pointer transition"
+          className="bg-white p-4 rounded-xl border border-slate-200/90 shadow-xs hover:border-amber-400 cursor-pointer transition group"
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Clarification Needed</span>
-            <div className="p-2 rounded-lg bg-amber-50 text-amber-600">
+            <div className="p-2 rounded-lg bg-amber-50 text-amber-600 group-hover:scale-105 transition-transform">
               <AlertTriangle className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-2 text-2xl font-bold text-amber-600">{changesRequested}</div>
-          <div className="mt-1 text-[11px] text-slate-400">
-            Awaiting supplier document update
+          <div className="mt-2 text-2xl font-bold text-amber-600 font-mono">{changesRequested}</div>
+          <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between">
+            <span className="text-[11px] text-slate-400 group-hover:text-amber-700 transition">
+              Pending document update
+            </span>
+            <Sparkline data={[3, 2, 2, 1, 1, Math.max(1, changesRequested)]} color="#d97706" width={68} height={20} />
           </div>
         </div>
 
         {/* Card 3: High Risk / Planted Discrepancy */}
         <div 
           onClick={() => setFilterStatus('ALL')}
-          className="bg-white p-4 rounded-xl border border-slate-200/90 shadow-xs hover:border-rose-400 cursor-pointer transition"
+          className="bg-white p-4 rounded-xl border border-slate-200/90 shadow-xs hover:border-rose-400 cursor-pointer transition group"
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">High Risk Collisions</span>
-            <div className="p-2 rounded-lg bg-rose-50 text-rose-600">
+            <div className="p-2 rounded-lg bg-rose-50 text-rose-600 group-hover:scale-105 transition-transform">
               <ShieldAlert className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-2 text-2xl font-bold text-rose-600">{highRisk}</div>
-          <div className="mt-1 text-[11px] text-rose-600 font-medium">
-            TIN mismatch flagged by Critic
+          <div className="mt-2 text-2xl font-bold text-rose-600 font-mono">{highRisk}</div>
+          <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between">
+            <span className="text-[11px] text-rose-600 font-medium">
+              TIN mismatch flagged
+            </span>
+            <Sparkline data={[0, 1, 1, 0, 1, Math.max(1, highRisk)]} color="#e11d48" width={68} height={20} />
           </div>
         </div>
 
         {/* Card 4: Approved & ERP Activated */}
         <div 
           onClick={() => setFilterStatus('APPROVED')}
-          className="bg-white p-4 rounded-xl border border-slate-200/90 shadow-xs hover:border-emerald-400 cursor-pointer transition"
+          className="bg-white p-4 rounded-xl border border-slate-200/90 shadow-xs hover:border-emerald-400 cursor-pointer transition group"
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Activated ERP Vendors</span>
-            <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600">
+            <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600 group-hover:scale-105 transition-transform">
               <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-2 text-2xl font-bold text-emerald-600">{approvedActive}</div>
-          <div className="mt-1 text-[11px] text-slate-400">
-            Downstream ERP sync confirmed
+          <div className="mt-2 text-2xl font-bold text-emerald-600 font-mono">{approvedActive}</div>
+          <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between">
+            <span className="text-[11px] text-slate-400 group-hover:text-emerald-700 transition">
+              Downstream sync verified
+            </span>
+            <Sparkline data={[42, 48, 55, 61, 68, Math.max(72, approvedActive)]} color="#10b981" width={68} height={20} />
           </div>
         </div>
       </div>

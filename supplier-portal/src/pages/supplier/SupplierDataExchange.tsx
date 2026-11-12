@@ -21,6 +21,7 @@ import {
   FolderLock
 } from 'lucide-react';
 import { usePortal } from '../../context/PortalContext.js';
+import { formatDateMMDDYYYY } from '../../utils/dateUtils.js';
 
 interface SupplierDataExchangeProps {
   defaultTab?: 'CATALOG' | 'DOCUMENTS';
@@ -122,7 +123,7 @@ export const SupplierDataExchange: React.FC<SupplierDataExchangeProps> = ({ defa
         leadTimeDays
       });
       setShowAddModal(false);
-      setActionSuccess(`Catalog item ${sku} successfully published to buyer network!`);
+      setActionSuccess(`Catalog item ${sku} successfully published to vendor network!`);
       await loadCatalog();
       setSku('');
       setName('');
@@ -142,7 +143,7 @@ export const SupplierDataExchange: React.FC<SupplierDataExchangeProps> = ({ defa
       for (const it of sampleItems) {
         await ApiClient.upsertCatalogItem(it);
       }
-      setActionSuccess('🎉 Bulk CSV Import Simulation Complete: 3 enterprise items loaded and mapped.');
+      setActionSuccess('Bulk CSV Import Simulation Complete: 3 enterprise items loaded and mapped.');
       await loadCatalog();
       setTimeout(() => setActionSuccess(null), 5000);
     } catch (err) {
@@ -179,7 +180,7 @@ export const SupplierDataExchange: React.FC<SupplierDataExchangeProps> = ({ defa
           </div>
           <h1 className="text-2xl font-bold tracking-tight">Catalog Management & Document Vault</h1>
           <p className="text-slate-300 text-sm mt-1 max-w-2xl">
-            Synchronize negotiated item catalogs, SKUs, and pricing directly with buyer procurement systems. Monitor compliance certifications with automated expiration warning agents.
+            Synchronize negotiated item catalogs, SKUs, and pricing directly with vendor procurement systems. Monitor compliance certifications with automated expiration warning agents.
           </p>
         </div>
 
@@ -229,7 +230,7 @@ export const SupplierDataExchange: React.FC<SupplierDataExchangeProps> = ({ defa
             <div>
               <h2 className="text-lg font-bold text-slate-900">Contracted Products & Services Catalog</h2>
               <p className="text-xs text-slate-500 mt-0.5">
-                These items are indexed by buyer procurement punch-outs and requisition carts.
+                These items are indexed by vendor procurement punch-outs and requisition carts.
               </p>
             </div>
             <div className="flex items-center space-x-2">
@@ -277,7 +278,7 @@ export const SupplierDataExchange: React.FC<SupplierDataExchangeProps> = ({ defa
                           {item.category}
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 text-right font-extrabold text-slate-900 font-mono">
+                      <td className="py-3.5 px-4 text-right font-bold text-slate-900 font-mono">
                         ${item.unitPrice.toFixed(2)}
                       </td>
                       <td className="py-3.5 px-4 text-center text-slate-600 font-semibold">{item.uom}</td>
@@ -344,7 +345,7 @@ export const SupplierDataExchange: React.FC<SupplierDataExchangeProps> = ({ defa
                   <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
                     <div>
                       <div className="text-[10px] text-slate-400 font-bold uppercase">Valid Until</div>
-                      <div className="font-semibold text-slate-800">{doc.expiryDate}</div>
+                      <div className="font-semibold text-slate-800">{formatDateMMDDYYYY(doc.expiryDate)}</div>
                     </div>
 
                     <div className="text-right">
@@ -385,7 +386,7 @@ export const SupplierDataExchange: React.FC<SupplierDataExchangeProps> = ({ defa
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
             <h3 className="text-lg font-bold text-slate-900">Add Catalog Product / Service</h3>
             <p className="text-xs text-slate-500 mt-1 mb-4">
-              Enter SKU details to publish directly to buyer requisition systems.
+              Enter SKU details to publish directly to vendor requisition systems.
             </p>
 
             <form onSubmit={handleAddItem} className="space-y-3 text-xs">

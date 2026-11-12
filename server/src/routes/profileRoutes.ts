@@ -1,27 +1,60 @@
-import { Router, Response } from 'express';
+import { Router, Request, Response } from 'express';
 import { AuthenticatedRequest } from '../middleware/authMiddleware.js';
 import { GlobalSupplierProfile, BuyerSpecificProfile } from '../models/types.js';
 
 const router = Router();
 
-// In-memory profiles storage
-const globalProfiles: Record<string, GlobalSupplierProfile> = {
+// In-memory profiles storage with rich B2B marketplace structured data
+export const globalProfiles: Record<string, GlobalSupplierProfile> = {
   'supp-org-1': {
     id: 'gprof-001',
     supplierOrgId: 'supp-org-1',
     legalName: 'Acme Industrial Tech Inc.',
     tradeName: 'Acme Tech Solutions',
-    dunsNumber: '08-112-9482',
-    taxIdMasked: 'XX-XXX8812',
+    formerlyKnownAs: 'Acme Hardware & Sensors Corp',
+    normalisedName: 'ACME INDUSTRIAL TECH INC',
+    origination: 'Verisource',
+    partnerStatus: 'INVITED',
+    supplierManager: 'Sarah Jenkins (Senior Category Manager - Cloud & IT)',
+    hasDuns: true,
+    dunsNumber: '09-842-1928',
+    taxIdMasked: '84-1294812',
     incorporationDate: '2016-04-12',
-    country: 'United States',
+    entityStructure: 'C-Corporation (Private)',
+    stateOfIncorporation: 'Delaware, USA',
+    primaryNaicsCode: '334111 - Electronic Computer Manufacturing',
+    country: 'United States (US)',
     hqAddress: '100 Industrial Parkway, Suite 400, Austin, TX 78701',
+    registeredAddress: '100 Industrial Parkway, Suite 400, Austin, TX 78701',
     website: 'https://acmeindustrialtech.example.com',
     businessEmail: 'elena@acmeindustrial.com',
     phone: '+1 (512) 555-0199',
     industryCategory: 'IT Hardware, Cloud Infrastructure & Advanced Engineering',
-    employeeCountRange: '100-250 Employees',
-    description: 'Leading provider of enterprise cloud compute nodes, specialized cybersecurity architecture, and high-tolerance industrial sensor hardware.',
+    employeeCountRange: '280 Employees',
+    reportingCurrency: 'USD ($) - US Dollar',
+    annualRevenue: '38.4',
+    totalEmployees: '280',
+    description: 'Leading provider of enterprise cloud compute nodes, specialized cybersecurity architecture, and high-tolerance industrial sensor hardware engineered for aerospace, defense, and high-volume commercial supply chains (AS9100 Rev D, ITAR compliant, CMMC Level 2).',
+    subcategories: [
+      '41111900 - Industrial Sensors & Transducers',
+      '43222600 - Network and Telemetry Equipment',
+      '43232800 - Embedded System Software / Firmware'
+    ],
+    serviceLocations: [
+      'Americas (US, CA, MX)',
+      'Europe (UK, DE, FR)',
+      'Asia-Pacific (SG, JP, AU)'
+    ],
+    businessUnits: [
+      'Industrial & Discrete Manufacturing',
+      'Defense & Aerospace Systems',
+      'Enterprise IT & Telemetry Infrastructure'
+    ],
+    operatingLanguages: [
+      'English',
+      'German',
+      'Spanish'
+    ],
     publicPassportSlug: 'acme-industrial-tech',
     passportUrl: 'https://verisource.network/p/acme-industrial-tech',
     isPubliclyListed: true,
@@ -31,20 +64,440 @@ const globalProfiles: Record<string, GlobalSupplierProfile> = {
       bankVerified: true,
       sanctionsClear: true,
       securityAssured: true,
-      diversityCertified: 'Minority-Owned Business Enterprise (MBE Certified)'
+      diversityCertified: 'Women-Owned Business Enterprise (WBE Certified)'
     },
     masterVault: {
       w9Status: 'VERIFIED',
       insuranceStatus: 'VERIFIED',
-      insuranceExpiryDate: '2027-06-30',
+      insuranceExpiryDate: '2026-12-31',
       insuranceCoverageAmount: '$5,000,000 Aggregate Commercial General Liability',
       iso27001Status: 'VERIFIED',
       soc2Status: 'VERIFIED',
       bankLetterStatus: 'VERIFIED'
     },
-    defaultPaymentTerms: 'Net 30 Days',
-    updatedAt: new Date().toISOString()
+    defaultPaymentTerms: '2/10 Net 30',
+    updatedAt: new Date().toISOString(),
+    identifications: [
+      {
+        id: 'id-ein-1',
+        country: 'United States',
+        idType: 'EIN',
+        idNumber: '84-1294812',
+        isPrimary: true,
+        verified: true,
+        issuedDate: '2016-04-15',
+        fileName: 'IRS_Form_W9_Signed_2026.pdf',
+        fileSize: '1.4 MB',
+        ocrConfidence: 99.8
+      },
+      {
+        id: 'id-duns-2',
+        country: 'United States',
+        idType: 'DUNS Number',
+        idNumber: '09-842-1928',
+        isPrimary: false,
+        verified: true,
+        issuedDate: '2017-02-10',
+        fileName: 'DnB_Universal_Identity_Extract.pdf',
+        fileSize: '820 KB',
+        ocrConfidence: 99.9
+      },
+      {
+        id: 'id-vat-3',
+        country: 'Germany',
+        idType: 'EU VAT (USt-IdNr)',
+        idNumber: 'DE319482910',
+        isPrimary: false,
+        verified: true,
+        issuedDate: '2020-08-20',
+        fileName: 'Federal_Central_Tax_Office_VAT_Cert.pdf',
+        fileSize: '1.1 MB',
+        ocrConfidence: 99.2
+      },
+      {
+        id: 'id-vat-4',
+        country: 'United Kingdom',
+        idType: 'UK VAT Number',
+        idNumber: 'GB924810291',
+        isPrimary: false,
+        verified: true,
+        issuedDate: '2021-01-14',
+        fileName: 'HMRC_VAT_Registration_Certificate.pdf',
+        fileSize: '950 KB',
+        ocrConfidence: 99.5
+      }
+    ],
+    gepContacts: [
+      {
+        id: 'cnt-1',
+        firstName: 'Elena',
+        lastName: 'Rostova',
+        email: 'elena@acmeindustrial.com',
+        phone: '+1 (512) 555-0199',
+        isPrimary: true,
+        status: 'REGISTERED',
+        role: 'ACCOUNTS_PAYABLE',
+        orgEntity: 'Corporate Headquarters',
+        serviceLocation: 'Americas'
+      },
+      {
+        id: 'cnt-2',
+        firstName: 'Marcus',
+        lastName: 'Vance',
+        email: 'm.vance@acmeindustrial.com',
+        phone: '+1 (512) 555-0144',
+        isPrimary: false,
+        status: 'REGISTERED',
+        role: 'OPERATIONS',
+        orgEntity: 'Supply Chain Operations',
+        serviceLocation: 'Americas & Europe'
+      },
+      {
+        id: 'cnt-3',
+        firstName: 'Sarah',
+        lastName: 'Chen',
+        email: 'schen@acmeindustrial.com',
+        phone: '+1 (512) 555-0188',
+        isPrimary: false,
+        status: 'REGISTERED',
+        role: 'LEGAL',
+        orgEntity: 'Corporate Legal & Contracts',
+        serviceLocation: 'Global'
+      },
+      {
+        id: 'cnt-4',
+        firstName: 'David',
+        lastName: 'Miller',
+        email: 'dmiller@acmeindustrial.com',
+        phone: '+1 (512) 555-0177',
+        isPrimary: false,
+        status: 'INVITED',
+        role: 'COMPLIANCE',
+        orgEntity: 'Risk, ESG & Safety',
+        serviceLocation: 'Global'
+      }
+    ],
+    locations: [
+      {
+        id: 'loc-austin-1',
+        name: 'Austin Corporate Headquarters & Lab',
+        code: 'LOC-1011',
+        types: ['HQ', 'ORDERING', 'REMIT_TO'],
+        street1: '100 Industrial Parkway',
+        street2: 'Suite 400',
+        city: 'Austin',
+        state: 'TX',
+        zip: '78701',
+        country: 'United States',
+        phone: '+1 (512) 555-0100',
+        isDefaultRemitTo: true,
+        changeOrdersPermitted: true,
+        autoAcknowledge: true,
+        supportedCurrencies: ['USD', 'EUR']
+      },
+      {
+        id: 'loc-joliet-2',
+        name: 'Joliet Fulfillment & Logistics DC',
+        code: 'LOC-2044',
+        types: ['SHIP_FROM', 'INVOICING'],
+        street1: '450 Logistics Blvd',
+        city: 'Joliet',
+        state: 'IL',
+        zip: '60431',
+        country: 'United States',
+        phone: '+1 (815) 555-0220',
+        isDefaultRemitTo: false,
+        changeOrdersPermitted: true,
+        autoAcknowledge: true,
+        supportedCurrencies: ['USD']
+      }
+    ],
+    gepBankAccounts: [
+      {
+        id: 'bnk-chase-1',
+        clientBankRefId: 'REF-492100',
+        country: 'United States',
+        currency: 'USD',
+        paymentMethod: 'ACH_CREDIT',
+        bankName: 'JPMorgan Chase Bank, N.A.',
+        bankBranch: 'Austin Commercial Banking Center',
+        swiftBic: 'CHASUS33XXX',
+        beneficiaryName: 'Acme Industrial Tech Inc.',
+        routingNumber: '021000021',
+        accountNumberMasked: '••••••••48210',
+        accountNumberFull: '489201948210',
+        linkedLocationId: 'loc-austin-1',
+        linkedLocationName: 'Austin Corporate Headquarters & Lab',
+        isDefault: true,
+        verifiedWithDoc: true,
+        docFileName: 'Chase_Bank_Remittance_Verification_Letter.pdf'
+      }
+    ],
+    commercialSettings: {
+      matchingType: '3-Way Match',
+      baselineTriggerDate: 'Goods Receipt Date (GR Date)',
+      paymentTerms: '2/10 Net 30',
+      billingScheduleStructure: 'STANDARD_PO',
+      milestoneBillingProtocol: '30% PO Acceptance, 40% Factory Testing, 30% Site Commissioning',
+      primaryCurrency: 'USD',
+      disbursementMethod: 'ACH / Direct Deposit',
+      ingestionChannel: 'Supplier Portal Upload',
+      eInvoicingFramework: 'PEPPOL Network',
+      eInvoicingEndpointId: '0088:1234567890123',
+      incoTerms: 'FCA - Free Carrier',
+      namedDeliveryPlace: 'Austin Logistics Facility, TX',
+      earlyPaymentDiscount: true,
+      maxDiscountTolerance: 2.0,
+      accelerationWindow: 'Day 10 (Fastest)',
+      relationshipType: 'Strategic Tier-1 Supplier',
+      supplierRiskType: 'LOW',
+      businessCriticality: 'CRITICAL'
+    },
+    gepCertificates: [
+      {
+        id: 'cert-coi-1',
+        category: 'PROFESSIONAL',
+        certType: 'COI_GENERAL',
+        certTypeName: 'ACORD 25 Certificate of Liability Insurance ($5M)',
+        issuingAuthority: 'Travelers Commercial Casualty',
+        effectiveDate: '2026-01-01',
+        expiryDate: '2026-12-31',
+        status: 'ACTIVE',
+        fileName: 'Travelers_ACORD_25_COI_Verified.pdf',
+        ocrConfidence: 99.4
+      },
+      {
+        id: 'cert-iso-2',
+        category: 'PROFESSIONAL',
+        certType: 'ISO_27001',
+        certTypeName: 'ISO/IEC 27001 Information Security Management',
+        issuingAuthority: 'BSI Assurance UK',
+        effectiveDate: '2025-06-15',
+        expiryDate: '2028-06-14',
+        status: 'ACTIVE',
+        fileName: 'BSI_ISO27001_Audit_Attestation.pdf',
+        ocrConfidence: 99.1
+      },
+      {
+        id: 'cert-soc-3',
+        category: 'PROFESSIONAL',
+        certType: 'SOC_2',
+        certTypeName: 'SOC 2 Type II Security & Confidentiality Report',
+        issuingAuthority: 'Ernst & Young LLP',
+        effectiveDate: '2025-11-01',
+        expiryDate: '2026-10-31',
+        status: 'ACTIVE',
+        fileName: 'EY_SOC2_Type_II_Executive_Summary.pdf',
+        ocrConfidence: 98.7
+      },
+      {
+        id: 'cert-wbe-4',
+        category: 'DIVERSITY',
+        certType: 'WBE',
+        certTypeName: 'Women-Owned Business Enterprise (WBE)',
+        issuingAuthority: 'WBENC National Council',
+        effectiveDate: '2025-03-01',
+        expiryDate: '2027-02-28',
+        status: 'ACTIVE',
+        fileName: 'WBENC_WBE_Certified_Dossier.pdf',
+        ocrConfidence: 99.0
+      }
+    ],
+    keyContacts: [
+      {
+        id: 'cnt-01',
+        role: 'Executive & Business',
+        name: 'Elena Rostova',
+        title: 'VP of Enterprise Partnerships',
+        email: 'elena@acmeindustrial.com',
+        phone: '+1 (512) 555-0199',
+        isSignatory: true,
+        verificationStatus: 'VERIFIED'
+      },
+      {
+        id: 'cnt-02',
+        role: 'Billing & Accounts Receivable',
+        name: 'Marcus Vance',
+        title: 'Corporate Controller / Treasury',
+        email: 'billing@acmeindustrial.com',
+        phone: '+1 (512) 555-0199 x104',
+        isSignatory: false,
+        verificationStatus: 'VERIFIED'
+      },
+      {
+        id: 'cnt-03',
+        role: 'Cybersecurity & Compliance',
+        name: 'David K. Chen',
+        title: 'Chief Information Security Officer',
+        email: 'security@acmeindustrial.com',
+        phone: '+1 (512) 555-0199 x108',
+        isSignatory: false,
+        verificationStatus: 'VERIFIED'
+      },
+      {
+        id: 'cnt-04',
+        role: 'Legal & Contract Signatory',
+        name: 'Sarah Jenkins, Esq.',
+        title: 'General Counsel',
+        email: 'legal@acmeindustrial.com',
+        phone: '+1 (512) 555-0199 x110',
+        isSignatory: true,
+        verificationStatus: 'VERIFIED'
+      }
+    ],
+    bankingDetails: {
+      bankName: 'JPMorgan Chase Bank, N.A.',
+      accountNickName: 'Primary Corporate Operating Checking',
+      accountEnding: '4921',
+      routingNumberMasked: '••••0021',
+      swiftBic: 'CHASUS33',
+      currency: 'USD',
+      paymentRails: ['ACH Credit (CCD+)', 'Fedwire', 'Virtual Card (Single-Use)'],
+      defaultPaymentTerms: 'Net 30 Days',
+      remittanceMethod: 'Automated EDI 820 & Encrypted PDF'
+    },
+    taxCompliance: {
+      einMasked: 'XX-XXX8812',
+      taxFormType: 'IRS Form W-9',
+      taxFormYear: '2024 / 2026 Certified',
+      stateTaxId: 'Comptroller ID #32081928491',
+      sanctionsScreening: 'OFAC / PEP Cleared (Autonomous Daily Audit)',
+      exemptionStatus: 'Standard Commercial (Non-Exempt)'
+    },
+    insurancePolicies: [
+      {
+        id: 'ins-01',
+        type: 'Commercial General Liability',
+        coverageAmount: '$5,000,000 Aggregate',
+        subLimit: '$2,000,000 Each Occurrence',
+        carrier: 'Travelers Property Casualty Co. (A++)',
+        policyNumber: 'GL-88219-01',
+        expiryDate: '2027-06-30',
+        status: 'ACTIVE'
+      },
+      {
+        id: 'ins-02',
+        type: 'Umbrella / Excess Liability',
+        coverageAmount: '$10,000,000 Aggregate',
+        subLimit: 'Follow Form',
+        carrier: 'Travelers Property Casualty Co. (A++)',
+        policyNumber: 'UMB-40912-88',
+        expiryDate: '2027-06-30',
+        status: 'ACTIVE'
+      },
+      {
+        id: 'ins-03',
+        type: 'Cyber Risk & Tech E&O',
+        coverageAmount: '$5,000,000 Aggregate',
+        subLimit: 'Zero Breaches On Record',
+        carrier: "Lloyd's Syndicate #331",
+        policyNumber: 'CY-99120-X',
+        expiryDate: '2027-06-30',
+        status: 'ACTIVE'
+      },
+      {
+        id: 'ins-04',
+        type: "Workers' Compensation",
+        coverageAmount: 'Statutory Limits',
+        subLimit: "$1,000,000 Employer's Liability",
+        carrier: 'Texas Mutual Insurance Company',
+        policyNumber: 'WC-77124-T',
+        expiryDate: '2027-06-30',
+        status: 'ACTIVE'
+      }
+    ],
+    certifications: [
+      {
+        id: 'cert-01',
+        name: 'ISO / IEC 27001',
+        badgeText: 'Audited & Active',
+        certNumber: 'ISMS-782190',
+        issuer: 'British Standards Institution (BSI)',
+        scope: 'Information Security Management System & Cloud Operations',
+        expiryDate: '2027-11-15',
+        status: 'VERIFIED'
+      },
+      {
+        id: 'cert-02',
+        name: 'SOC 2 Type II',
+        badgeText: 'Verified Attestation',
+        certNumber: 'SOC2-DELOITTE-2025',
+        issuer: 'Deloitte & Touche LLP',
+        scope: 'Trust Services Criteria: Security, Availability & Confidentiality',
+        expiryDate: '2026-12-31',
+        status: 'VERIFIED'
+      },
+      {
+        id: 'cert-03',
+        name: 'Minority Business Enterprise (MBE)',
+        badgeText: 'Certified Diversity',
+        certNumber: 'MBE-TX-2024-91',
+        issuer: 'National Minority Supplier Development Council (NMSDC)',
+        scope: 'Minority-Owned Commercial Technology Manufacturer',
+        expiryDate: '2027-03-31',
+        status: 'VERIFIED'
+      },
+      {
+        id: 'cert-04',
+        name: 'EcoVadis Gold Sustainability',
+        badgeText: 'Top 5% Globally',
+        certNumber: 'ECO-2026-749',
+        issuer: 'EcoVadis CSR Rating Authority',
+        scope: 'Scope 1, 2, 3 Greenhouse Gas Emissions & Sustainable Procurement',
+        expiryDate: '2027-05-30',
+        status: 'VERIFIED'
+      }
+    ],
+    productCapabilities: [
+      {
+        id: 'cap-01',
+        title: 'Enterprise Cloud Compute Nodes (Edge & Core)',
+        category: 'IT Hardware & Compute Infrastructure',
+        leadTime: '7-14 Days',
+        moq: '5 Units',
+        certifications: 'UL Listed • CE • ISO 9001',
+        description: 'High-density modular compute units with redundant power feeds, cryptographic key-vault hardware acceleration, and telemetry.'
+      },
+      {
+        id: 'cap-02',
+        title: 'Industrial IoT Telemetry Sensor Arrays',
+        category: 'Hardware & Sensor Engineering',
+        leadTime: '3-5 Days',
+        moq: '25 Units',
+        certifications: 'IP68 Submersible • ATEX Zone 2',
+        description: 'Precision multi-axis vibration, cryogenic temperature, and magnetic monitoring sensors with native AS2 and LoRaWAN connectivity.'
+      },
+      {
+        id: 'cap-03',
+        title: 'Zero-Trust Defense Cybersecurity Architecture',
+        category: 'Enterprise Professional Services',
+        leadTime: 'Immediate Deployment',
+        moq: '1 Engagement',
+        certifications: 'NIST 800-171 • CMMC Ready',
+        description: 'Turnkey zero-keying architecture, PKI mutual TLS authentication, and ERP integration consulting for high-compliance enterprise buyers.'
+      }
+    ]
   }
+};
+
+// Helper for public unauthenticated access
+export const getPublicProfileBySlug = (slug: string) => {
+  const profile = Object.values(globalProfiles).find(
+    p => p.publicPassportSlug === slug || p.supplierOrgId === slug || p.id === slug
+  ) || globalProfiles['supp-org-1'];
+
+  if (!profile) return null;
+
+  // Return public sanitized profile (with safety masks in place)
+  return {
+    ...profile,
+    taxIdMasked: profile.taxIdMasked || 'XX-XXX8812',
+    bankingDetails: profile.bankingDetails ? {
+      ...profile.bankingDetails,
+      accountEnding: profile.bankingDetails.accountEnding || '4921',
+      routingNumberMasked: profile.bankingDetails.routingNumberMasked || '••••0021'
+    } : undefined
+  };
 };
 
 const buyerProfiles: Record<string, BuyerSpecificProfile[]> = {
@@ -103,11 +556,11 @@ const buyerProfiles: Record<string, BuyerSpecificProfile[]> = {
       syncCompletenessScore: 100
     },
     {
-      id: 'bprof-starlight',
+      id: 'bprof-novatech',
       supplierOrgId: 'supp-org-1',
       buyerOrgId: 'buyer-org-2',
-      buyerName: 'Starlight Aerospace & Defense',
-      buyerLogoText: 'STAR',
+      buyerName: 'NovaTech Aerospace & Defense',
+      buyerLogoText: 'NOVA',
       relationshipStatus: 'ACTIVE',
       erpVendorId: 'VEND-4019',
       connectedSince: 'Aug 2024',
@@ -151,45 +604,45 @@ const buyerProfiles: Record<string, BuyerSpecificProfile[]> = {
       syncCompletenessScore: 96
     },
     {
-      id: 'bprof-omni',
+      id: 'bprof-meridian',
       supplierOrgId: 'supp-org-1',
       buyerOrgId: 'buyer-org-3',
-      buyerName: 'OmniRetail Logistics Network',
-      buyerLogoText: 'OMNI',
-      relationshipStatus: 'CHANGES_REQUESTED',
-      erpVendorId: 'Pending Activation',
+      buyerName: 'Meridian Health Network',
+      buyerLogoText: 'MERI',
+      relationshipStatus: 'ACTIVE',
+      erpVendorId: 'VEND-7701',
       connectedSince: 'Oct 2026',
-      annualSpendVolume: 0,
+      annualSpendVolume: 182000,
       customRemittanceAccount: {
         bankName: 'JPMorgan Chase Bank, N.A.',
         accountEnding: '4921',
         routingNumberMasked: '021000021',
         currency: 'USD',
-        accountNickName: 'Primary Corporate Operating Account'
+        accountNickName: 'Meridian Clinical Transit Remittance'
       },
       negotiatedTerms: {
-        paymentTerms: 'Net 30',
-        earlyPaymentEligible: true,
+        paymentTerms: 'Net 30 Days',
+        earlyPaymentEligible: false,
         preferredPaymentMethod: 'ACH_CREDIT'
       },
       customQuestionnaires: [
         {
-          questionId: 'q-omni-1',
-          questionText: 'Automated EDI 850 / 810 Integration Protocol Readiness',
-          answer: 'Native AS2 & REST Webhooks Configured on Verisource Network',
-          category: 'Integration'
+          questionId: 'q-meridian-1',
+          questionText: 'FDA 21 CFR Part 11 Electronic Validation Attestation',
+          answer: 'Validated Quality Systems Conformance Attested',
+          category: 'Regulatory'
         },
         {
-          questionId: 'q-omni-2',
-          questionText: 'Dock & Cross-Dock Liability Insurance Addendum ($5M Cargo)',
-          answer: 'ACTION REQUIRED: Current policy covers $2M. AI Agent drafted broker endorsement for $5M.',
+          questionId: 'q-meridian-2',
+          questionText: 'Hospital Healthcare Liability Rider ($5M Provider Policy)',
+          answer: 'Fully Attested and Active under Travelers Healthcare schedule',
           category: 'Risk Management'
         }
       ],
       customDocumentOverrides: [
         {
-          docType: 'CARGO_INSURANCE',
-          documentName: 'OmniRetail Dedicated Dock Liability Endorsement',
+          docType: 'HEALTH_INSURANCE',
+          documentName: 'Meridian Dedicated Clinical Liability Endorsement',
           status: 'OVERRIDE_REQUIRED',
           note: 'Requires $5M specific cross-dock rider before final vendor code generation'
         }
@@ -388,8 +841,8 @@ router.post('/buyers/connect', (req: AuthenticatedRequest, res: Response) => {
   buyerProfiles[supplierOrgId].unshift(newProfile);
 
   const message = isEmailInvite
-    ? `🎉 Onboarding invitation sent to ${buyerEmail || 'procurement team'} for ${buyerName}! Master Passport credentials attached.`
-    : `🎉 Invitation code ${invitationCode || 'INV-VERIFIED'} verified! Connected with ${buyerName} and pre-populated onboarding workspace.`;
+    ? `Onboarding invitation sent to ${buyerEmail || 'procurement team'} for ${buyerName}! Master Passport credentials attached.`
+    : `Invitation code ${invitationCode || 'INV-VERIFIED'} verified! Connected with ${buyerName} and pre-populated onboarding workspace.`;
 
   res.status(201).json({
     message,
@@ -420,7 +873,7 @@ router.post('/sync-to-master', (req: AuthenticatedRequest, res: Response) => {
   globalProfiles[supplierOrgId] = updated;
 
   res.json({
-    message: `🎉 Master Profile successfully synchronized with updates from ${sourceBuyerName || 'Buyer Workspace'}! All future buyer onboardings will reflect these changes.`,
+    message: `Master Profile successfully synchronized with updates from ${sourceBuyerName || 'Buyer Workspace'}! All future buyer onboardings will reflect these changes.`,
     profile: updated,
     syncedBackFields: Object.keys(updates || {})
   });

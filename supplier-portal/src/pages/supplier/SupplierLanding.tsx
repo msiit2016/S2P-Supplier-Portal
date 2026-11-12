@@ -1,6 +1,7 @@
 import React from 'react';
 import { usePortal } from '../../context/PortalContext.js';
 import { useAuth } from '../../context/AuthContext.js';
+import { VerisourceLogo } from '../../components/common/VerisourceLogo.js';
 import { 
   ShieldCheck, 
   ArrowRight, 
@@ -31,20 +32,7 @@ export const SupplierLanding: React.FC = () => {
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       {/* Public Navbar */}
       <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
-        <div className="flex items-center space-x-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 via-teal-500 to-indigo-600 flex items-center justify-center text-white shadow-md">
-            <ShieldCheck className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="text-base font-bold text-slate-900 leading-tight flex items-center gap-2">
-              Verisource
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
-                SUPPLIER OS
-              </span>
-            </div>
-            <div className="text-[11px] text-slate-500">Autonomous Multi-Enterprise B2B Supplier Network</div>
-          </div>
-        </div>
+        <VerisourceLogo size="md" theme="light" showTagline={true} taglineText="Autonomous Multi-Enterprise B2B Supplier Network" />
 
         <div className="flex items-center space-x-3">
           <button
@@ -69,7 +57,7 @@ export const SupplierLanding: React.FC = () => {
           <span>Independent B2B Supplier Identity • One Master Public Profile, Infinite Enterprise Connections</span>
         </div>
 
-        <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
+        <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 tracking-tight leading-tight">
           Manage Your Global Profile Once. <br className="hidden sm:inline" />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600">
             Connect Tailored Workspaces to Every Buyer.
@@ -88,12 +76,12 @@ export const SupplierLanding: React.FC = () => {
             className="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm hover:border-emerald-500 hover:shadow-md cursor-pointer transition group"
           >
             <div className="text-xs font-bold text-emerald-700 uppercase tracking-wider mb-1 flex items-center justify-between">
-              <span>Active Multi-Buyer Partner</span>
+              <span>Active Multi-Vendor Partner</span>
               <ArrowRight className="w-4 h-4 text-emerald-600 group-hover:translate-x-1 transition-transform" />
             </div>
             <div className="font-bold text-sm text-slate-900">Acme Industrial Tech Inc.</div>
             <p className="text-xs text-slate-500 mt-1">
-              Active in 3 enterprise buyer workspaces (Apex Global, Starlight, OmniRetail).
+              Active in 3 enterprise vendor workspaces (Apex Global, Starlight, OmniRetail).
             </p>
           </div>
 
@@ -138,7 +126,7 @@ export const SupplierLanding: React.FC = () => {
             </div>
             <h3 className="text-sm font-bold text-slate-900">Master Public Profile</h3>
             <p className="text-xs text-slate-600 leading-relaxed">
-              Verify your IRS TIN, D-U-N-S, banking tokens, and certifications once. Share your verified public profile with any prospective buyer.
+              Verify your IRS TIN, D-U-N-S, banking tokens, and certifications once. Share your verified public profile with any prospective vendor.
             </p>
           </div>
 
@@ -146,9 +134,9 @@ export const SupplierLanding: React.FC = () => {
             <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
               <Building2 className="w-5 h-5" />
             </div>
-            <h3 className="text-sm font-bold text-slate-900">Isolated Buyer Workspaces</h3>
+            <h3 className="text-sm font-bold text-slate-900">Isolated Vendor Workspaces</h3>
             <p className="text-xs text-slate-600 leading-relaxed">
-              Maintain tailored remittance bank accounts, buyer-specific insurance riders, and negotiated payment terms for each customer enterprise.
+              Maintain tailored remittance bank accounts, vendor-specific insurance riders, and negotiated payment terms for each customer enterprise.
             </p>
           </div>
 

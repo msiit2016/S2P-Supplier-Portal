@@ -209,7 +209,7 @@ export const ApplicationDetail: React.FC<ApplicationDetailProps> = ({ applicatio
               </h3>
               <div className="flex items-center justify-between">
                 <div>
-                  <div className={`text-3xl font-extrabold ${
+                  <div className={`text-3xl font-bold ${
                     app.riskLevel === 'HIGH' || app.riskLevel === 'CRITICAL' ? 'text-rose-600' : 'text-emerald-600'
                   }`}>
                     {app.riskScore}/100

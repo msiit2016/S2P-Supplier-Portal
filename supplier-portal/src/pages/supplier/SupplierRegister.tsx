@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { usePortal } from '../../context/PortalContext.js';
 import { useAuth } from '../../context/AuthContext.js';
 import { ApiClient } from '../../api/client.js';
+import { VerisourceLogo } from '../../components/common/VerisourceLogo.js';
 import { ShieldCheck, ArrowRight, UserPlus, AlertTriangle } from 'lucide-react';
 
 export const SupplierRegister: React.FC = () => {
@@ -46,11 +47,11 @@ export const SupplierRegister: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center space-y-2">
-        <div className="w-10 h-10 rounded-xl bg-emerald-600 mx-auto flex items-center justify-center text-white shadow-md">
-          <ShieldCheck className="w-6 h-6" />
+        <div className="flex justify-center mb-4">
+          <VerisourceLogo size="lg" theme="light" variant="stacked" showTagline={true} taglineText="Autonomous Supplier Network" />
         </div>
-        <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Create Supplier Account</h2>
-        <p className="text-xs text-slate-500">Register your organization on the Apex Global Procurement Network</p>
+        <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Create Supplier Account</h2>
+        <p className="text-xs text-slate-500">Register your organization on the Verisource Multi-Enterprise Network</p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">

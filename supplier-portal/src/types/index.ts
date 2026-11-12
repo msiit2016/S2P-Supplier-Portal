@@ -236,6 +236,7 @@ export interface SupplierOrganization {
 // ==========================================
 
 export type POStatus = 
+  | 'DRAFT'
   | 'ISSUED'
   | 'ACKNOWLEDGED'
   | 'IN_FULFILLMENT'
@@ -247,11 +248,21 @@ export interface POLineItem {
   id: string;
   itemNumber: number;
   partNumber: string;
+  itemName?: string;
   description: string;
+  contract?: string;
   quantity: number;
   uom: string;
   unitPrice: number;
   totalPrice: number;
+  taxCode?: string;
+  taxRate?: number;
+  taxAmount?: number;
+  exchangeRate?: number;
+  priceInBaseCurrency?: number;
+  supplierInstructions?: string;
+  internalComments?: string;
+  attachments?: string[];
   deliveryDate: string;
   invoicedQuantity?: number;
 }
@@ -259,14 +270,32 @@ export interface POLineItem {
 export interface PurchaseOrder {
   id: string;
   poNumber: string;
+  poName?: string;
   buyerOrgId: string;
+  companyName?: string;
   supplierOrgId: string;
   supplierName: string;
+  supplierContactName?: string;
+  supplierContactEmail?: string;
+  supplierContactPhone?: string;
+  supplierAddress?: string;
+  supplierPan?: string;
+  supplierGst?: string;
   status: POStatus;
   orderDate: string;
   promisedDate: string;
+  deliveryDate?: string;
+  requestDate?: string;
+  eventReference?: string;
+  linkedPrs?: string;
+  isUrgent?: boolean;
+  reasonForOrdering?: string;
+  projectName?: string;
+  termsAndConditions?: string;
+  attachments?: string[];
   paymentTerms: string;
   currency: string;
+  exchangeRate?: number;
   subtotal: number;
   taxAmount: number;
   totalAmount: number;
@@ -347,11 +376,25 @@ export interface EarlyPaymentOffer {
 export interface Invoice {
   id: string;
   invoiceNumber: string;
+  invoiceName?: string;
+  invoiceUid?: string;
   poId?: string;
   poNumber?: string;
+  poName?: string;
   buyerOrgId: string;
+  companyName?: string;
   supplierOrgId: string;
   supplierName: string;
+  supplierContactName?: string;
+  supplierContactEmail?: string;
+  supplierContactPhone?: string;
+  supplierAddress?: string;
+  supplierPan?: string;
+  supplierGst?: string;
+  deliveryAddress?: string;
+  billingAddress?: string;
+  paymentTerms?: string;
+  attachments?: string[];
   invoiceDate: string;
   dueDate: string;
   currency: string;
@@ -371,7 +414,7 @@ export interface Invoice {
     bankTraceNumber: string;
   };
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
 }
 
 export interface CatalogItem {
@@ -388,15 +431,18 @@ export interface CatalogItem {
   minOrderQty: number;
   status: 'PUBLISHED' | 'PENDING_APPROVAL' | 'ARCHIVED';
   lastUpdated: string;
+  attachmentFileName?: string;
+  attachmentSize?: string;
+  attachmentUrl?: string;
 }
 
 export interface TransactionComment {
   id: string;
-  entityType: 'PO' | 'INVOICE' | 'ONBOARDING' | 'CATALOG';
+  entityType: 'PO' | 'INVOICE' | 'ONBOARDING' | 'CATALOG' | 'ASN' | 'COI_INSURANCE' | 'TAX_W9' | 'RFP' | 'CONTRACT' | 'COMPLIANCE' | string;
   entityId: string;
   authorId: string;
   authorName: string;
-  authorRole: 'BUYER' | 'SUPPLIER' | 'AI_ASSISTANT';
+  authorRole: 'BUYER' | 'SUPPLIER' | 'AI_ASSISTANT' | string;
   text: string;
   createdAt: string;
 }
@@ -410,6 +456,7 @@ export interface GlobalSupplierProfile {
   supplierOrgId: string;
   legalName: string;
   tradeName: string;
+  logoUrl?: string;
   dunsNumber: string;
   taxIdMasked: string;
   incorporationDate: string;
@@ -443,6 +490,89 @@ export interface GlobalSupplierProfile {
   };
   defaultPaymentTerms: string;
   updatedAt: string;
+  // Extended B2B Marketplace Structured Specifications
+  entityStructure?: string;
+  stateOfIncorporation?: string;
+  primaryNaicsCode?: string;
+  keyContacts?: Array<{
+    id: string;
+    role: string;
+    name: string;
+    title: string;
+    email: string;
+    phone: string;
+    isSignatory?: boolean;
+    verificationStatus?: string;
+  }>;
+  bankingDetails?: {
+    bankName: string;
+    accountNickName: string;
+    accountEnding: string;
+    routingNumberMasked: string;
+    swiftBic: string;
+    currency: string;
+    paymentRails: string[];
+    defaultPaymentTerms: string;
+    remittanceMethod: string;
+  };
+  taxCompliance?: {
+    einMasked: string;
+    taxFormType: string;
+    taxFormYear: string;
+    stateTaxId: string;
+    sanctionsScreening: string;
+    exemptionStatus?: string;
+  };
+  insurancePolicies?: Array<{
+    id?: string;
+    type: string;
+    coverageAmount: string;
+    subLimit?: string;
+    carrier: string;
+    policyNumber?: string;
+    expiryDate: string;
+    status: string;
+  }>;
+  certifications?: Array<{
+    id?: string;
+    name: string;
+    badgeText: string;
+    certNumber: string;
+    issuer: string;
+    scope: string;
+    expiryDate?: string;
+    status: string;
+  }>;
+  productCapabilities?: Array<{
+    id: string;
+    title: string;
+    category: string;
+    leadTime: string;
+    moq: string;
+    certifications: string;
+    description: string;
+  }>;
+  // 1:1 GEP Quantum S2P Module Fields (Synchronized with Onboarding Request)
+  formerlyKnownAs?: string;
+  normalisedName?: string;
+  origination?: string;
+  partnerStatus?: string;
+  supplierManager?: string;
+  hasDuns?: boolean;
+  subcategories?: string[];
+  serviceLocations?: string[];
+  reportingCurrency?: string;
+  annualRevenue?: string;
+  totalEmployees?: string;
+  registeredAddress?: string;
+  businessUnits?: string[];
+  operatingLanguages?: string[];
+  identifications?: GepIdentificationItem[];
+  locations?: GepLocationItem[];
+  gepContacts?: GepContactItem[];
+  gepBankAccounts?: GepBankItem[];
+  gepCertificates?: GepCertificateItem[];
+  commercialSettings?: GepCommercialSettings;
 }
 
 export interface BuyerSpecificProfile {
@@ -484,5 +614,149 @@ export interface BuyerSpecificProfile {
   lastSyncedAt: string;
   syncCompletenessScore: number;
 }
+
+// ============================================================================
+// GEP QUANTUM ENTERPRISE P2P ONBOARDING DATA MODEL
+// ============================================================================
+
+export interface GepIdentificationItem {
+  id: string;
+  country: string;
+  idType: string; // 'EIN' | 'VAT' | 'GSTIN' | 'PAN' | 'DUNS' | 'SIRET' | 'OTHER'
+  idNumber: string;
+  isPrimary?: boolean;
+  verified: boolean;
+  issuedDate?: string;
+  fileName?: string;
+  fileSize?: string;
+  ocrConfidence?: number;
+  uploadedAt?: string;
+  isReplaced?: boolean;
+  previewUrl?: string;
+}
+
+export type GepLocationType = 'HQ' | 'REMIT_TO' | 'ORDERING' | 'INVOICING' | 'SHIP_FROM';
+
+export interface GepLocationItem {
+  id: string;
+  name: string;
+  code: string;
+  types: GepLocationType[];
+  street1: string;
+  street2?: string;
+  city: string;
+  state: string;
+  zip: string;
+  country: string;
+  phone?: string;
+  isDefaultRemitTo?: boolean;
+  changeOrdersPermitted: boolean;
+  autoAcknowledge: boolean;
+  supportedCurrencies: string[];
+  docFileName?: string;
+  docFileSize?: string;
+  isReplaced?: boolean;
+  previewUrl?: string;
+}
+
+export type GepContactRole = 
+  | 'ACCOUNTS_PAYABLE' 
+  | 'ACCOUNTS_RECEIVABLE' 
+  | 'LEGAL' 
+  | 'OPERATIONS' 
+  | 'COMPLIANCE' 
+  | 'GENERAL';
+
+export interface GepContactItem {
+  id: string;
+  firstName: string;
+  lastName: string;
+  jobTitle?: string;
+  email: string;
+  phone: string;
+  isPrimary: boolean;
+  status: 'REGISTERED' | 'INVITED';
+  role: GepContactRole;
+  orgEntity?: string;
+  serviceLocation?: string;
+  responsibilities?: string;
+  docFileName?: string;
+  docFileSize?: string;
+  isReplaced?: boolean;
+  previewUrl?: string;
+}
+
+export interface GepBankItem {
+  id: string;
+  clientBankRefId: string;
+  country: string;
+  currency: string;
+  paymentMethod: 'ACH_CREDIT' | 'WIRE' | 'CREDIT_CARD' | 'VIRTUAL_CARD';
+  bankName: string;
+  bankBranch?: string;
+  swiftBic?: string;
+  beneficiaryName: string;
+  routingNumber: string;
+  accountNumberMasked: string;
+  accountNumberFull?: string;
+  linkedLocationId?: string;
+  linkedLocationName?: string;
+  isDefault: boolean;
+  verifiedWithDoc: boolean;
+  docFileName?: string;
+  docFileSize?: string;
+  ocrConfidence?: number;
+  uploadedAt?: string;
+  isReplaced?: boolean;
+  previewUrl?: string;
+}
+
+export interface GepCertificateItem {
+  id: string;
+  category: 'PROFESSIONAL' | 'DIVERSITY';
+  certType: string;
+  certTypeName: string;
+  issuingAuthority: string;
+  effectiveDate: string;
+  expiryDate: string;
+  status: 'ACTIVE' | 'EXPIRING_SOON' | 'EXPIRED';
+  fileName?: string;
+  fileSize?: string;
+  ocrConfidence?: number;
+  uploadedAt?: string;
+  isReplaced?: boolean;
+  previewUrl?: string;
+}
+
+export interface GepCommercialSettings {
+  // Subsection 1: Invoicing & Baseline Terms
+  matchingType: string;
+  baselineTriggerDate?: string;
+  paymentTerms: string;
+  billingScheduleStructure?: 'STANDARD_PO' | 'MILESTONE_PROGRESS' | string;
+  milestoneBillingProtocol?: string;
+  primaryCurrency: string;
+  disbursementMethod?: string;
+
+  // Subsection 2: E-Invoicing & Cross-Border Compliance
+  ingestionChannel?: string;
+  eInvoicingFramework?: string;
+  eInvoicingEndpointId?: string;
+
+  // Subsection 3: Shipping & Delivery Terms (Incoterms 2020)
+  incoTerms: string;
+  namedDeliveryPlace?: string;
+
+  // Subsection 4: Early Payment Program (Dynamic Discounting & Treasury)
+  earlyPaymentDiscount: boolean;
+  maxDiscountTolerance?: number;
+  accelerationWindow?: string;
+
+  // Governance & Metadata
+  relationshipType?: string;
+  supplierRiskType?: 'LOW' | 'MEDIUM' | 'HIGH' | 'EXTREME';
+  businessCriticality?: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'ROUTINE';
+}
+
 
 

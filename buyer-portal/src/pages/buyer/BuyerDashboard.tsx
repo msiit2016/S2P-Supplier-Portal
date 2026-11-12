@@ -3,6 +3,7 @@ import { usePortal } from '../../context/PortalContext.js';
 import { useAuth } from '../../context/AuthContext.js';
 import { ApiClient } from '../../api/client.js';
 import { SupplierApplication } from '../../types/index.js';
+import { FilterSelect } from '../../components/common/FilterSelect.js';
 import { 
   FileText, 
   Clock, 
@@ -212,22 +213,22 @@ export const BuyerDashboard: React.FC<BuyerDashboardProps> = ({ onCreateSupplier
 
           <div className="flex flex-wrap items-center gap-2">
             {/* Channel filter */}
-            <select
+            <FilterSelect
               value={filterChannel}
               onChange={(e) => setFilterChannel(e.target.value)}
-              className="text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white text-slate-700"
+              title="Filter by intake channel"
             >
               <option value="ALL">All Intake Channels</option>
               <option value="SUPPLIER_SELF_SERVICE">Self-Service</option>
               <option value="EMAIL_ASSISTED">Email Assisted</option>
               <option value="BUYER_ASSISTED">Buyer Assisted</option>
-            </select>
+            </FilterSelect>
 
             {/* Status filter */}
-            <select
+            <FilterSelect
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white text-slate-700"
+              title="Filter by application status"
             >
               <option value="ALL">All Application States</option>
               <option value="DRAFT">Draft</option>
@@ -235,7 +236,7 @@ export const BuyerDashboard: React.FC<BuyerDashboardProps> = ({ onCreateSupplier
               <option value="UNDER_REVIEW">Under Review</option>
               <option value="CHANGES_REQUESTED">Changes Requested</option>
               <option value="APPROVED">Approved (Active)</option>
-            </select>
+            </FilterSelect>
           </div>
         </div>
 

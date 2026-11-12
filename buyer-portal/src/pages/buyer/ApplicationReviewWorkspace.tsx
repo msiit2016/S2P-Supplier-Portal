@@ -273,7 +273,7 @@ export const ApplicationReviewWorkspace: React.FC<ApplicationReviewWorkspaceProp
                 {/* Simulated Real Document Certificate Preview */}
                 <div className="border-b-2 border-slate-900 pb-3 mb-6 flex justify-between items-start">
                   <div>
-                    <h3 className="text-base font-extrabold uppercase tracking-tight">{activeDoc.title}</h3>
+                    <h3 className="text-base font-bold uppercase tracking-tight">{activeDoc.title}</h3>
                     <p className="text-[11px] text-slate-500 font-mono">Verified OCR Stream • Page 1 of 1</p>
                   </div>
                   <span className="text-[10px] bg-slate-100 font-mono px-2 py-0.5 rounded border border-slate-200">

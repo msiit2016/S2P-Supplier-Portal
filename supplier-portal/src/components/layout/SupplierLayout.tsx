@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { usePortal } from '../../context/PortalContext.js';
 import { SupplierHeader } from '../common/SupplierHeader.js';
 import { AIAssistantDrawer } from '../ai/AIAssistantDrawer.js';
@@ -7,9 +7,12 @@ import {
   Globe, 
   Layers, 
   Sparkles, 
-  ShieldCheck,
-  LayoutDashboard,
-  ChevronRight
+  LayoutDashboard, 
+  ChevronRight, 
+  ClipboardList,
+  FileCheck2,
+  Package,
+  FolderLock
 } from 'lucide-react';
 
 interface SupplierLayoutProps {
@@ -17,30 +20,60 @@ interface SupplierLayoutProps {
 }
 
 export const SupplierLayout: React.FC<SupplierLayoutProps> = ({ children }) => {
-  const { currentRoute, navigate, toggleAiDrawer, selectedBuyerId } = usePortal();
+  const { 
+    currentRoute, 
+    navigate, 
+    toggleAiDrawer, 
+    selectedBuyerId,
+    aiDrawerOpen,
+    copilotViewMode,
+    routeState
+  } = usePortal();
 
-  // Mobile navigation tabs
+  const mainRef = useRef<HTMLElement>(null);
+
+  // Automatically reset scroll position to top on every route change
+  useEffect(() => {
+    if (mainRef.current) {
+      mainRef.current.scrollTop = 0;
+    }
+    window.scrollTo(0, 0);
+
+    const frameId = requestAnimationFrame(() => {
+      if (mainRef.current) {
+        mainRef.current.scrollTop = 0;
+      }
+      window.scrollTo(0, 0);
+    });
+
+    return () => cancelAnimationFrame(frameId);
+  }, [currentRoute, routeState]);
+
+  // Mobile navigation tabs (Canonical S2P Flow: Catalog & Doc Vault together)
   const navItems = [
     { label: 'Dashboard', icon: LayoutDashboard, route: '/dashboard' },
-    { label: 'Public Profile', icon: Globe, route: '/public-profile' },
-    { label: 'Workspaces', icon: Building2, route: '/workspaces' },
-    { label: 'All Transactions', icon: Layers, route: '/transactions' },
+    { label: 'RFPs & Bids', icon: FileCheck2, route: '/rfps' },
+    { label: 'Catalog Items', icon: Package, route: '/catalog' },
+    { label: 'Document Vault', icon: FolderLock, route: '/documents' },
+    { label: 'Transactions', icon: Layers, route: '/transactions' },
   ];
 
   const isCurrentActive = (itemRoute: string) => {
     if (itemRoute === '/dashboard' && (currentRoute === '/' || currentRoute === '/dashboard')) return true;
-    if (itemRoute === '/public-profile' && (currentRoute.startsWith('/public-profile') || currentRoute.startsWith('/profiles') || currentRoute.startsWith('/master-profile'))) return true;
-    if (itemRoute === '/workspaces' && currentRoute.startsWith('/workspaces')) return true;
+    if (itemRoute === '/rfps' && (currentRoute.startsWith('/rfps') || currentRoute.startsWith('/sourcing') || currentRoute.startsWith('/bids'))) return true;
+    if (itemRoute === '/catalog' && (currentRoute.startsWith('/catalog') || currentRoute.startsWith('/catalog-vault'))) return true;
+    if (itemRoute === '/documents' && (currentRoute.startsWith('/documents') || currentRoute.startsWith('/vault') || currentRoute.startsWith('/doc-vault'))) return true;
     if (itemRoute === '/transactions' && currentRoute.startsWith('/transactions')) return true;
+    if (itemRoute === '/tasks' && currentRoute.startsWith('/tasks')) return true;
     return false;
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+    <div className="h-screen bg-slate-50 flex flex-col font-sans overflow-hidden">
       <SupplierHeader onToggleAi={toggleAiDrawer} />
 
       {/* Mobile-only quick navigation bar */}
-      <div className="md:hidden bg-white border-b border-slate-200 px-4 py-2 flex items-center justify-between overflow-x-auto scrollbar-none">
+      <div className="md:hidden bg-white border-b border-slate-200 px-4 py-2 flex items-center justify-between overflow-x-auto scrollbar-none shrink-0">
         <div className="flex space-x-1">
           {navItems.map((item) => {
             const active = isCurrentActive(item.route);
@@ -63,36 +96,27 @@ export const SupplierLayout: React.FC<SupplierLayoutProps> = ({ children }) => {
         </div>
       </div>
 
-      {/* Main Content Area */}
-      <main className={`flex-1 w-full mx-auto ${
-        currentRoute.startsWith('/onboarding') 
-          ? 'max-w-[1750px] px-2 sm:px-4 py-2' 
-          : 'max-w-7xl px-4 sm:px-6 py-6'
-      }`}>
-        {children}
-      </main>
-
-      {/* AI Assistant Drawer */}
-      <AIAssistantDrawer />
-
-      {/* Footer */}
-      <footer className={`bg-white border-t border-slate-200 text-slate-500 ${
-        currentRoute.startsWith('/onboarding') ? 'py-2.5 text-[11px]' : 'py-6 text-xs'
-      }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center space-x-2">
-            <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>Verisource Autonomous Multi-Enterprise B2B Supplier Network • One Master Public Profile, Infinite Enterprise Connections</span>
+      {/* Workbench & Content Row (Side-by-side push layout) */}
+      <div className="flex-1 flex w-full relative min-h-0 overflow-hidden">
+        <main 
+          ref={mainRef}
+          id="main-scroll-container"
+          className="flex-1 min-w-0 h-full overflow-y-auto flex flex-col transition-all duration-200"
+        >
+          <div className={`flex-1 ${
+            currentRoute.startsWith('/onboarding/detail') || currentRoute.startsWith('/onboarding-request')
+              ? 'max-w-[1750px] mx-auto px-2 sm:px-4 py-2 w-full pb-10' 
+              : aiDrawerOpen && copilotViewMode === 'DOCK'
+              ? 'w-full px-3 sm:px-5 py-5 pb-16'
+              : 'max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 pb-16'
+          }`}>
+            {children}
           </div>
-          <div className="flex items-center space-x-3">
-            <span className="text-slate-400">Verisource Portal Port: <code className="text-emerald-600 font-bold">3003</code></span>
-            <span>•</span>
-            <a href="http://localhost:3002/" target="_blank" rel="noreferrer" className="text-sky-600 hover:underline flex items-center gap-1 font-medium">
-              <span>Switch to Buyer Operations Cockpit (Port 3002)</span>
-            </a>
-          </div>
-        </div>
-      </footer>
+        </main>
+
+        {/* AI Assistant Drawer */}
+        <AIAssistantDrawer />
+      </div>
     </div>
   );
 };

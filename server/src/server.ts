@@ -1,3 +1,4 @@
+import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
@@ -11,11 +12,17 @@ import communicationRoutes from './routes/communicationRoutes.js';
 import auditRoutes from './routes/auditRoutes.js';
 import supplierDirectoryRoutes from './routes/supplierDirectoryRoutes.js';
 import transactionRoutes from './routes/transactionRoutes.js';
-import profileRoutes from './routes/profileRoutes.js';
+import profileRoutes, { getPublicProfileBySlug } from './routes/profileRoutes.js';
 import { authenticate } from './middleware/authMiddleware.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Multi-path robust .env loading (supports running from root or /server)
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+dotenv.config({ path: path.resolve(process.cwd(), 'server/.env') });
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -38,8 +45,20 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Mount Routes
+// Mount Public Unauthenticated Routes
 app.use('/api/v1/auth', authRoutes);
+
+// Public View-Only Supplier Profile endpoint (Unauthenticated access for shareable URL)
+app.get('/api/v1/public/supplier-profile/:slug', (req, res) => {
+  const { slug } = req.params;
+  const profile = getPublicProfileBySlug(slug);
+  if (!profile) {
+    res.status(404).json({ error: 'Public profile not found' });
+    return;
+  }
+  res.json({ profile, isPublicView: true });
+});
+
 app.use('/api/v1/applications', authenticate, applicationRoutes);
 app.use('/api/v1/documents', authenticate, documentRoutes);
 app.use('/api/v1/email-intake', authenticate, emailIntakeRoutes);

@@ -28,27 +28,53 @@ export const initialBuyerOrgs: BuyerOrganization[] = [
       autoApprovalRiskThreshold: 15,
       mandatoryCategories: ['IT_HARDWARE_SERVICES', 'LOGISTICS_FREIGHT', 'DIRECT_RAW_MATERIALS']
     }
+  },
+  {
+    id: 'buyer-org-2',
+    name: 'NovaTech Aerospace & Defense',
+    domain: 'novatechaerospace.com',
+    legalTaxId: 'US-88-2910482',
+    defaultCurrency: 'USD',
+    onboardingPolicies: {
+      requiresSupplierConfirmation: true,
+      allowBuyerSubmitOnBehalf: false,
+      autoApprovalRiskThreshold: 10,
+      mandatoryCategories: ['DEFENSE_AVIONICS', 'IT_HARDWARE_SERVICES', 'CRYOGENIC_SENSORS']
+    }
+  },
+  {
+    id: 'buyer-org-3',
+    name: 'Meridian Health Network',
+    domain: 'meridianhealth.org',
+    legalTaxId: 'US-36-4491028',
+    defaultCurrency: 'USD',
+    onboardingPolicies: {
+      requiresSupplierConfirmation: true,
+      allowBuyerSubmitOnBehalf: true,
+      autoApprovalRiskThreshold: 20,
+      mandatoryCategories: ['HEALTHCARE_CLOUD', 'IT_HARDWARE_SERVICES', 'CLINICAL_TELEMETRY']
+    }
   }
 ];
 
 export const initialSupplierOrgs: SupplierOrganization[] = [
   {
     id: 'supp-org-1',
-    legalName: 'Nexura Global Analytics Inc.',
-    tradeName: 'Nexura Data AI',
+    legalName: 'Acme Industrial Tech Inc.',
+    tradeName: 'Acme Tech Solutions',
     country: 'United States',
-    taxId: '84-1294821',
-    businessEmail: 'j.miller@nexuraglobal.com',
-    phone: '+1 (415) 890-2100',
-    website: 'https://nexuraglobal.com',
+    taxId: 'XX-XXX8812',
+    businessEmail: 'elena@acmeindustrial.com',
+    phone: '+1 (512) 555-0199',
+    website: 'https://acmeindustrialtech.example.com',
     address: {
-      line1: '500 Howard Street, Suite 400',
-      city: 'San Francisco',
-      state: 'CA',
-      postalCode: '94105',
+      line1: '100 Industrial Parkway, Suite 400',
+      city: 'Austin',
+      state: 'TX',
+      postalCode: '78701',
       country: 'USA'
     },
-    status: 'ONBOARDING',
+    status: 'ACTIVE',
     createdAt: '2026-10-10T09:00:00Z'
   },
   {
@@ -108,6 +134,17 @@ export const initialSupplierOrgs: SupplierOrganization[] = [
 
 export const initialUsers: User[] = [
   {
+    id: 'user-supp-acme',
+    email: 'elena@acmeindustrial.com',
+    name: 'Elena Rostova',
+    role: 'SUPPLIER_ADMIN',
+    userType: 'SUPPLIER',
+    organizationId: 'supp-org-1',
+    organizationName: 'Acme Industrial Tech Inc.',
+    isEmailVerified: true,
+    createdAt: '2026-01-01T00:00:00Z'
+  },
+  {
     id: 'user-buyer-1',
     email: 'sarah.chen@apexglobal.com',
     name: 'Sarah Chen',
@@ -142,12 +179,12 @@ export const initialUsers: User[] = [
   },
   {
     id: 'user-supp-1',
-    email: 'j.miller@nexuraglobal.com',
+    email: 'j.miller@acmeindustrial.com',
     name: 'Jason Miller',
     role: 'SUPPLIER_ADMIN',
     userType: 'SUPPLIER',
     organizationId: 'supp-org-1',
-    organizationName: 'Nexura Global Analytics Inc.',
+    organizationName: 'Acme Industrial Tech Inc.',
     isEmailVerified: true,
     createdAt: '2026-10-10T09:05:00Z'
   },
@@ -809,11 +846,71 @@ export const initialAuditEvents: AuditEvent[] = [
 
 export const initialPurchaseOrders: PurchaseOrder[] = [
   {
+    id: 'po-101-meridian',
+    poNumber: 'PO-2026-101',
+    buyerOrgId: 'buyer-org-3',
+    supplierOrgId: 'supp-org-1',
+    supplierName: 'CloudBridge Solutions LLC',
+    status: 'ACKNOWLEDGED',
+    orderDate: '2026-10-28T09:00:00Z',
+    promisedDate: '2026-11-12T16:00:00Z',
+    paymentTerms: 'Net 30 Days',
+    currency: 'USD',
+    subtotal: 45000.00,
+    taxAmount: 0.00,
+    totalAmount: 45000.00,
+    shippingAddress: 'Meridian Data Center — Bay 14, Attn: IT Infrastructure Operations, 7800 Technology Boulevard, Dock B, Naperville, IL 60563',
+    billingAddress: 'Meridian Health Network AP Division, 4200 Medical Center Way, Suite 800, Chicago, IL 60611',
+    buyerContactName: 'Sarah Chen (Lead Procurement Specialist)',
+    acknowledgedAt: '2026-10-28T14:20:00Z',
+    acknowledgedBy: 'Authorized Representative (CloudBridge)',
+    asnNumber: 'ASN-2026-088',
+    notes: 'Enterprise Cloud Server Deployment (Bay 14 Rack Infrastructure Provisioning & Hypervisor Setup)',
+    lineItems: [
+      {
+        id: 'poli-101-m1',
+        itemNumber: 1,
+        partNumber: 'INFRA-SRV-2026-B14',
+        description: 'Enterprise Cloud Server Deployment (Bay 14 Rack Infrastructure Provisioning & Hypervisor Setup)',
+        quantity: 1,
+        uom: 'EA',
+        unitPrice: 28500.00,
+        totalPrice: 28500.00,
+        deliveryDate: '2026-11-12',
+        invoicedQuantity: 1
+      },
+      {
+        id: 'poli-101-m2',
+        itemNumber: 2,
+        partNumber: 'SEC-SOC2-CONFIG',
+        description: 'HIPAA & SOC 2 Type II Compliant Dedicated Gateway & Firewall Cluster Configuration',
+        quantity: 2,
+        uom: 'SET',
+        unitPrice: 6250.00,
+        totalPrice: 12500.00,
+        deliveryDate: '2026-11-12',
+        invoicedQuantity: 1
+      },
+      {
+        id: 'poli-101-m3',
+        itemNumber: 3,
+        partNumber: 'SVC-VAL-MIG',
+        description: 'Data Validation, Backup Redundancy Testing & Production Handover Services',
+        quantity: 1,
+        uom: 'JOB',
+        unitPrice: 4000.00,
+        totalPrice: 4000.00,
+        deliveryDate: '2026-11-12',
+        invoicedQuantity: 0
+      }
+    ]
+  },
+  {
     id: 'po-101',
     poNumber: 'PO-2026-8891',
     buyerOrgId: 'buyer-org-1',
     supplierOrgId: 'supp-org-1',
-    supplierName: 'Nexura Global Analytics Inc.',
+    supplierName: 'Acme Industrial Tech Inc.',
     status: 'ACKNOWLEDGED',
     orderDate: '2026-10-18T14:00:00Z',
     promisedDate: '2026-11-15T18:00:00Z',
@@ -826,13 +923,13 @@ export const initialPurchaseOrders: PurchaseOrder[] = [
     billingAddress: 'Apex Global Accounts Payable, PO Box 8802, New York, NY 10001',
     buyerContactName: 'Sarah Chen (Lead Procurement Architect)',
     acknowledgedAt: '2026-10-19T09:15:00Z',
-    acknowledgedBy: 'Jason Miller (Nexura CFO)',
+    acknowledgedBy: 'Elena Rostova (Acme Industrial)',
     notes: 'Q4 Enterprise Data Pipeline Telemetry Nodes for Enterprise S2P Analytics Integration',
     lineItems: [
       {
         id: 'poli-101-1',
         itemNumber: 1,
-        partNumber: 'NEX-AI-800',
+        partNumber: 'ACM-NODE-800',
         description: 'Enterprise AI Telemetry Streaming Ingestion Node (Dual Redundant)',
         quantity: 2,
         uom: 'EA',
@@ -844,13 +941,185 @@ export const initialPurchaseOrders: PurchaseOrder[] = [
       {
         id: 'poli-101-2',
         itemNumber: 2,
-        partNumber: 'NEX-VEC-100',
+        partNumber: 'ACM-VEC-100',
         description: 'Managed Vector Knowledge Retrieval Cluster License (12 Months)',
         quantity: 1,
         uom: 'YR',
         unitPrice: 11500.00,
         totalPrice: 11500.00,
         deliveryDate: '2026-11-15',
+        invoicedQuantity: 0
+      }
+    ]
+  },
+  {
+    id: 'po-104',
+    poNumber: 'PO-2026-9104',
+    buyerOrgId: 'buyer-org-2',
+    supplierOrgId: 'supp-org-1',
+    supplierName: 'Acme Industrial Tech Inc.',
+    status: 'IN_FULFILLMENT',
+    orderDate: '2026-10-21T10:30:00Z',
+    promisedDate: '2026-11-10T17:00:00Z',
+    paymentTerms: 'Net 45 Standard',
+    currency: 'USD',
+    subtotal: 118000.00,
+    taxAmount: 9440.00,
+    totalAmount: 127440.00,
+    shippingAddress: 'Starlight Aerospace Defense Facility 4, Huntsville, AL 35805',
+    billingAddress: 'Starlight AP Invoicing Desk, PO Box 4010, Los Angeles, CA 90012',
+    buyerContactName: 'Col. Jonathan Vance (Procurement Officer)',
+    notes: 'ITAR Certified Cryogenic Multi-Axis Telemetry Sensors and Redundant Edge Controllers',
+    lineItems: [
+      {
+        id: 'poli-104-1',
+        itemNumber: 1,
+        partNumber: 'ACM-SENSOR-40',
+        description: 'Precision Multi-Axis Industrial IoT Sensor Array (Mil-Spec)',
+        quantity: 100,
+        uom: 'EA',
+        unitPrice: 640.00,
+        totalPrice: 64000.00,
+        deliveryDate: '2026-11-05',
+        invoicedQuantity: 50
+      },
+      {
+        id: 'poli-104-2',
+        itemNumber: 2,
+        partNumber: 'ACM-EDGE-200',
+        description: 'High-Tolerance Modular Compute Unit (Edge Defense Spec)',
+        quantity: 6,
+        uom: 'EA',
+        unitPrice: 9000.00,
+        totalPrice: 54000.00,
+        deliveryDate: '2026-11-10',
+        invoicedQuantity: 0
+      }
+    ]
+  },
+  {
+    id: 'po-105',
+    poNumber: 'PO-2026-9280',
+    buyerOrgId: 'buyer-org-3',
+    supplierOrgId: 'supp-org-1',
+    supplierName: 'Acme Industrial Tech Inc.',
+    status: 'COMPLETED',
+    orderDate: '2026-09-28T09:00:00Z',
+    promisedDate: '2026-10-15T16:00:00Z',
+    paymentTerms: 'Net 30 Days',
+    currency: 'USD',
+    subtotal: 32000.00,
+    taxAmount: 2560.00,
+    totalAmount: 34560.00,
+    shippingAddress: 'OmniRetail National Logistics HQ, Chicago, IL 60601',
+    billingAddress: 'OmniRetail Accounts Payable, Atlanta, GA 30303',
+    buyerContactName: 'Clara Oswald (Supply Chain VP)',
+    notes: 'S2P PunchOut API Connectors & Automated Electronic Data Interchange Deployment',
+    lineItems: [
+      {
+        id: 'poli-105-1',
+        itemNumber: 1,
+        partNumber: 'ACM-SVC-01',
+        description: 'S2P Pipeline Integration & Custom Connectors (Engineering Services)',
+        quantity: 140,
+        uom: 'HRS',
+        unitPrice: 228.57,
+        totalPrice: 32000.00,
+        deliveryDate: '2026-10-12',
+        invoicedQuantity: 140
+      }
+    ]
+  },
+  {
+    id: 'po-106',
+    poNumber: 'PO-2026-9450',
+    buyerOrgId: 'buyer-org-1',
+    supplierOrgId: 'supp-org-1',
+    supplierName: 'Acme Industrial Tech Inc.',
+    status: 'ISSUED',
+    orderDate: '2026-11-04T09:00:00Z',
+    promisedDate: '2026-11-25T18:00:00Z',
+    paymentTerms: '2/10 Net 30',
+    currency: 'USD',
+    subtotal: 74000.00,
+    taxAmount: 5920.00,
+    totalAmount: 79920.00,
+    shippingAddress: 'Apex Global Logistics Center - Receiving Bay 14, 1020 Logistics Blvd, Austin, TX 78728',
+    billingAddress: 'Apex Global AP Shared Services, PO Box 8802, New York, NY 10001',
+    buyerContactName: 'Sarah Chen (Lead Procurement Architect)',
+    notes: 'Urgent: Expedited telemetry nodes for Bay 14 cloud expansion. Please acknowledge slot within 24h.',
+    lineItems: [
+      {
+        id: 'poli-106-1',
+        itemNumber: 1,
+        partNumber: 'ACM-NODE-64GB',
+        description: 'Enterprise Compute Node 64GB DDR5 / 32-Core Xeon Scalable Processor',
+        quantity: 8,
+        uom: 'EA',
+        unitPrice: 8200.00,
+        totalPrice: 65600.00,
+        deliveryDate: '2026-11-20',
+        invoicedQuantity: 0
+      },
+      {
+        id: 'poli-106-2',
+        itemNumber: 2,
+        partNumber: 'ACM-SLA-PREM',
+        description: 'Platinum 24/7 Mission-Critical Hardware Maintenance & Remote SRE SLA (1 Yr)',
+        quantity: 1,
+        uom: 'YR',
+        unitPrice: 8400.00,
+        totalPrice: 8400.00,
+        deliveryDate: '2026-11-25',
+        invoicedQuantity: 0
+      }
+    ]
+  },
+  {
+    id: 'po-107',
+    poNumber: 'PO-2026-9520',
+    buyerOrgId: 'buyer-org-2',
+    supplierOrgId: 'supp-org-1',
+    supplierName: 'Acme Industrial Tech Inc.',
+    status: 'SHIPPED',
+    orderDate: '2026-10-25T11:00:00Z',
+    promisedDate: '2026-11-12T16:00:00Z',
+    paymentTerms: 'Net 30 Days',
+    currency: 'USD',
+    subtotal: 42000.00,
+    taxAmount: 3360.00,
+    totalAmount: 45360.00,
+    shippingAddress: 'NovaTech Flight Systems Facility B - Receiving Dock 3, 4800 Aerospace Parkway, Huntsville, AL 35806',
+    billingAddress: 'NovaTech Electronic Invoicing AP Desk, PO Box 3310, Seattle, WA 98101',
+    buyerContactName: 'David Miller (Senior Subcontract Specialist)',
+    acknowledgedAt: '2026-10-26T08:30:00Z',
+    acknowledgedBy: 'Elena Rostova (Acme Industrial)',
+    asnNumber: 'ASN-US-99144',
+    shippedAt: '2026-10-29T14:15:00Z',
+    notes: 'Mil-Spec radiation hardened transceivers. Secure chain of custody manifest required.',
+    lineItems: [
+      {
+        id: 'poli-107-1',
+        itemNumber: 1,
+        partNumber: 'ACM-RAD-900',
+        description: 'Radiation-Hardened Edge Telemetry Array (-40C to +125C Operating Envelope)',
+        quantity: 6,
+        uom: 'EA',
+        unitPrice: 4500.00,
+        totalPrice: 27000.00,
+        deliveryDate: '2026-11-10',
+        invoicedQuantity: 0
+      },
+      {
+        id: 'poli-107-2',
+        itemNumber: 2,
+        partNumber: 'ACM-NVME-SAN',
+        description: 'Ruggedized NVMe Solid State Storage Bank (Mil-Std 810H Shock & Vibe)',
+        quantity: 1,
+        uom: 'EA',
+        unitPrice: 15000.00,
+        totalPrice: 15000.00,
+        deliveryDate: '2026-11-12',
         invoicedQuantity: 0
       }
     ]
@@ -928,6 +1197,64 @@ export const initialPurchaseOrders: PurchaseOrder[] = [
 
 export const initialInvoices: Invoice[] = [
   {
+    id: 'inv-201-meridian',
+    invoiceNumber: 'INV-2026-201',
+    poId: 'po-101-meridian',
+    poNumber: 'PO-2026-101',
+    buyerOrgId: 'buyer-org-3',
+    supplierOrgId: 'supp-org-1',
+    supplierName: 'CloudBridge Solutions LLC',
+    invoiceDate: '2026-11-02T09:00:00Z',
+    dueDate: '2026-12-02T17:00:00Z',
+    currency: 'USD',
+    subtotal: 34560.00,
+    taxRate: 0.08,
+    taxAmount: 2764.80,
+    totalAmount: 37324.80,
+    paymentStatus: 'APPROVED_FOR_PAYMENT',
+    matchStatus: '3_WAY_MATCHED',
+    matchNotes: 'Touchless 3-Way Match Verified: PO-2026-101 vs ASN-2026-088 vs E-Invoice. Zero discrepancy.',
+    lineItems: [
+      {
+        id: 'inli-201-1',
+        poLineItemId: 'poli-101-m1',
+        itemNumber: 1,
+        description: 'Enterprise Cloud Server Deployment (Bay 14 Rack Infrastructure) - Milestone 1 Deliverable • Infrastructure Provisioned & Verified',
+        quantity: 1,
+        unitPrice: 28500.00,
+        total: 28500.00
+      },
+      {
+        id: 'inli-201-2',
+        poLineItemId: 'poli-101-m2',
+        itemNumber: 2,
+        description: 'Dedicated Gateway & Firewall Cluster Configuration (HIPAA/SOC2) - Partial Milestone Completed • Gateway Cluster 1 Active',
+        quantity: 1,
+        unitPrice: 6060.00,
+        total: 6060.00
+      }
+    ],
+    remittanceAdvice: {
+      paymentReference: 'REM-3WAY-OK-9921',
+      settlementDate: '2026-12-02',
+      paymentMethod: 'ACH_CREDIT',
+      bankTraceNumber: 'TRC-JPMC-4921-9921'
+    },
+    earlyPaymentOffer: {
+      eligible: true,
+      standardDueDate: '2026-12-02',
+      standardAmount: 37324.80,
+      acceleratedDays: 20,
+      discountPercent: 1.5,
+      discountAmount: 559.87,
+      acceleratedPayoutAmount: 36764.93,
+      acceleratedDueDate: '2026-11-13',
+      status: 'AVAILABLE'
+    },
+    createdAt: '2026-11-02T09:15:00Z',
+    updatedAt: '2026-11-03T11:00:00Z'
+  },
+  {
     id: 'inv-201',
     invoiceNumber: 'INV-2026-004',
     poId: 'po-103',
@@ -947,7 +1274,7 @@ export const initialInvoices: Invoice[] = [
     matchNotes: 'Touchless 3-Way Match Verified: PO-2026-7810 vs Electronic Receipt GR-88201 vs E-Invoice.',
     lineItems: [
       {
-        id: 'inli-201-1',
+        id: 'inli-201-1-cs',
         poLineItemId: 'poli-103-1',
         itemNumber: 1,
         description: 'Global Edge CDN Transit (1,000 TB Bandwidth Commit)',
@@ -975,7 +1302,7 @@ export const initialInvoices: Invoice[] = [
     invoiceNumber: 'INV-2026-009',
     buyerOrgId: 'buyer-org-1',
     supplierOrgId: 'supp-org-1',
-    supplierName: 'Nexura Global Analytics Inc.',
+    supplierName: 'Acme Industrial Tech Inc.',
     invoiceDate: '2026-10-19T16:00:00Z',
     dueDate: '2026-11-18T17:00:00Z',
     currency: 'USD',
@@ -1000,10 +1327,102 @@ export const initialInvoices: Invoice[] = [
       paymentReference: 'REM-ACH-889021',
       settlementDate: '2026-10-29',
       paymentMethod: 'ACH_CREDIT',
-      bankTraceNumber: 'TRC-SVB-94821035'
+      bankTraceNumber: 'TRC-JPMC-94821035'
     },
     createdAt: '2026-10-19T16:10:00Z',
     updatedAt: '2026-10-24T11:00:00Z'
+  },
+  {
+    id: 'inv-204',
+    invoiceNumber: 'INV-2026-022',
+    poId: 'po-101',
+    poNumber: 'PO-2026-8891',
+    buyerOrgId: 'buyer-org-2',
+    companyName: 'Starlight Aerospace & Defense',
+    supplierOrgId: 'supp-org-1',
+    supplierName: 'Acme Industrial Tech Inc.',
+    invoiceDate: '2026-11-02T09:00:00Z',
+    dueDate: '2026-12-02T17:00:00Z',
+    paymentTerms: '2/10 Net 30',
+    currency: 'USD',
+    subtotal: 28583.33,
+    taxRate: 0.08,
+    taxAmount: 2286.67,
+    totalAmount: 30870.00,
+    paymentStatus: 'APPROVED_FOR_PAYMENT',
+    matchStatus: '3_WAY_MATCHED',
+    matchNotes: 'Touchless 3-Way Match Verified: PO-2026-8891 vs Goods Receipt GR-9011 vs E-Invoice.',
+    lineItems: [
+      {
+        id: 'inli-204-1',
+        poLineItemId: 'poli-101-1',
+        itemNumber: 1,
+        description: 'Enterprise AI Telemetry Streaming Ingestion Node (Dual Redundant)',
+        quantity: 1,
+        unitPrice: 20000.00,
+        total: 20000.00
+      },
+      {
+        id: 'inli-204-2',
+        poLineItemId: 'poli-101-2',
+        itemNumber: 2,
+        description: 'Managed Vector Knowledge Retrieval Hardware & Aerospace Sensor Array',
+        quantity: 1,
+        unitPrice: 8583.33,
+        total: 8583.33
+      }
+    ],
+    earlyPaymentOffer: {
+      eligible: true,
+      standardDueDate: '2026-12-02',
+      standardAmount: 30870.00,
+      acceleratedDays: 20,
+      discountPercent: 1.5,
+      discountAmount: 463.05,
+      acceleratedPayoutAmount: 30406.95,
+      acceleratedDueDate: '2026-11-13',
+      status: 'AVAILABLE'
+    },
+    createdAt: '2026-11-02T09:15:00Z',
+    updatedAt: '2026-11-03T10:00:00Z'
+  },
+  {
+    id: 'inv-205',
+    invoiceNumber: 'INV-2026-031',
+    poId: 'po-105',
+    poNumber: 'PO-2026-9280',
+    buyerOrgId: 'buyer-org-3',
+    supplierOrgId: 'supp-org-1',
+    supplierName: 'Acme Industrial Tech Inc.',
+    invoiceDate: '2026-10-12T08:00:00Z',
+    dueDate: '2026-10-25T17:00:00Z',
+    currency: 'USD',
+    subtotal: 32000.00,
+    taxRate: 0.08,
+    taxAmount: 2560.00,
+    totalAmount: 34560.00,
+    paymentStatus: 'PAID',
+    matchStatus: '3_WAY_MATCHED',
+    matchNotes: 'Settled via Fedwire Direct Electronic Funds Transfer.',
+    lineItems: [
+      {
+        id: 'inli-205-1',
+        poLineItemId: 'poli-105-1',
+        itemNumber: 1,
+        description: 'S2P Pipeline Integration & Custom Connectors (Engineering Services)',
+        quantity: 140,
+        unitPrice: 228.57,
+        total: 32000.00
+      }
+    ],
+    remittanceAdvice: {
+      paymentReference: 'REM-WIRE-449102',
+      settlementDate: '2026-10-25',
+      paymentMethod: 'WIRE',
+      bankTraceNumber: 'TRC-FEDWIRE-104928'
+    },
+    createdAt: '2026-10-12T08:05:00Z',
+    updatedAt: '2026-10-25T10:00:00Z'
   },
   {
     id: 'inv-203',
@@ -1043,7 +1462,7 @@ export const initialCatalogItems: CatalogItem[] = [
   {
     id: 'cat-1',
     supplierOrgId: 'supp-org-1',
-    sku: 'NEX-AI-800',
+    sku: 'ACM-NODE-800',
     name: 'Enterprise AI Telemetry Streaming Ingestion Node',
     description: 'High-throughput dual-redundant stream processor supporting Kafka and S2P event bus with sub-10ms latency.',
     category: 'IT_HARDWARE_SERVICES',
@@ -1058,7 +1477,7 @@ export const initialCatalogItems: CatalogItem[] = [
   {
     id: 'cat-2',
     supplierOrgId: 'supp-org-1',
-    sku: 'NEX-VEC-100',
+    sku: 'ACM-VEC-100',
     name: 'Managed Vector Knowledge Retrieval Cluster',
     description: 'Enterprise semantic search index with 99.99% SLA, compliant with SOC 2 and ISO 27001.',
     category: 'IT_HARDWARE_SERVICES',
@@ -1073,7 +1492,7 @@ export const initialCatalogItems: CatalogItem[] = [
   {
     id: 'cat-3',
     supplierOrgId: 'supp-org-1',
-    sku: 'NEX-SVC-01',
+    sku: 'ACM-SVC-01',
     name: 'S2P Pipeline Integration & Custom Connectors',
     description: 'Professional engineering services for Coupa/SAP custom API mappings and cXML PunchOut setups.',
     category: 'PROFESSIONAL_SERVICES',
@@ -1099,6 +1518,36 @@ export const initialCatalogItems: CatalogItem[] = [
     minOrderQty: 1,
     status: 'PUBLISHED',
     lastUpdated: '2026-10-18T10:00:00Z'
+  },
+  {
+    id: 'cat-5',
+    supplierOrgId: 'supp-org-1',
+    sku: 'ACM-SENSOR-40',
+    name: 'Precision Multi-Axis Industrial IoT Sensor Array',
+    description: 'Ruggedized IP68 submersible telemetry array with vibration, thermal and electromagnetic monitoring.',
+    category: 'IT_HARDWARE_SERVICES',
+    unitPrice: 640.00,
+    currency: 'USD',
+    uom: 'EA',
+    leadTimeDays: 3,
+    minOrderQty: 10,
+    status: 'PUBLISHED',
+    lastUpdated: '2026-10-21T11:00:00Z'
+  },
+  {
+    id: 'cat-6',
+    supplierOrgId: 'supp-org-1',
+    sku: 'ACM-EDGE-200',
+    name: 'High-Tolerance Modular Edge Compute Node',
+    description: 'Enterprise secure server node with TPM 2.0 cryptographic vault, redundant power supply and 10Gbps SFP+.',
+    category: 'IT_HARDWARE_SERVICES',
+    unitPrice: 9000.00,
+    currency: 'USD',
+    uom: 'EA',
+    leadTimeDays: 10,
+    minOrderQty: 2,
+    status: 'PUBLISHED',
+    lastUpdated: '2026-10-22T14:00:00Z'
   }
 ];
 

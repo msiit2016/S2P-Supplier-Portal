@@ -62,3 +62,19 @@ Build all portals and production bundles:
 ```bash
 npm run build
 ```
+
+---
+
+## 🤖 Backend AI Copilot (Google Gemini 2.5 Flash Setup)
+
+Ava Copilot reasoning and live document mutations are powered entirely by the backend server (`server/src/services/geminiBackendService.ts`) with Master System Instructions (`server/src/services/masterInstructions.ts`).
+
+### Configuration Steps:
+1. **Obtain API Key:** Get a free Google Gemini API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
+2. **Add to Backend Environment:** In `server/.env` (or copy from `server/.env.example`), set:
+   ```env
+   PORT=3001
+   GEMINI_API_KEY=AIzaSyYourActualGeminiApiKeyHere
+   ```
+3. **Restart Backend:** If running via `npm run dev`, the server will automatically detect the key.
+4. **Autonomous Operations:** In the Supplier Portal on `http://localhost:3003`, open Ava Agent. Ask Ava to change delivery dates, append line items, adjust payment terms, or flip orders to ASNs/Invoices—all executed automatically with 0 credentials exposed in the UI.

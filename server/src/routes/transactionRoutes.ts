@@ -160,31 +160,41 @@ router.get('/catalog', (req: AuthenticatedRequest, res: Response) => {
 // POST Upsert Catalog item
 router.post('/catalog', (req: AuthenticatedRequest, res: Response) => {
   const user = req.user;
-  const { sku, name, description, category, unitPrice, currency, uom, leadTimeDays, minOrderQty } = req.body;
+  const { sku, name, description, category, unitPrice, currency, uom, leadTimeDays, minOrderQty, status, attachmentFileName, attachmentSize } = req.body;
 
   if (!sku || !name || unitPrice === undefined) {
     res.status(400).json({ error: 'sku, name, and unitPrice are required' });
     return;
   }
 
+  const existing = Array.from((db as any).catalogItems.values() as any[]).find((c: any) => c.sku === sku || c.id === req.body.id);
+
   const item: CatalogItem = {
-    id: req.body.id || `cat-${uuidv4().slice(0, 6)}`,
-    supplierOrgId: user?.organizationId || 'supp-org-1',
+    id: req.body.id || existing?.id || `cat-${uuidv4().slice(0, 6)}`,
+    supplierOrgId: user?.organizationId || existing?.supplierOrgId || 'supp-org-1',
     sku,
     name,
-    description: description || '',
-    category: category || 'IT_HARDWARE_SERVICES',
+    description: description !== undefined ? description : (existing?.description || ''),
+    category: category || existing?.category || 'IT_HARDWARE_SERVICES',
     unitPrice: Number(unitPrice),
-    currency: currency || 'USD',
-    uom: uom || 'EA',
-    leadTimeDays: Number(leadTimeDays) || 7,
-    minOrderQty: Number(minOrderQty) || 1,
-    status: 'PUBLISHED',
-    lastUpdated: new Date().toISOString()
-  };
+    currency: currency || existing?.currency || 'USD',
+    uom: uom || existing?.uom || 'EA',
+    leadTimeDays: Number(leadTimeDays) || existing?.leadTimeDays || 7,
+    minOrderQty: Number(minOrderQty) || existing?.minOrderQty || 1,
+    status: status || existing?.status || 'PUBLISHED',
+    lastUpdated: new Date().toISOString(),
+    ...(attachmentFileName ? { attachmentFileName, attachmentSize } : (existing?.attachmentFileName ? { attachmentFileName: existing.attachmentFileName, attachmentSize: existing.attachmentSize } : {}))
+  } as any;
 
   db.upsertCatalogItem(item);
   res.json({ catalogItem: item, message: 'Catalog item updated and published to buyer network.' });
+});
+
+// DELETE Catalog item
+router.delete('/catalog/:idOrSku', (req: AuthenticatedRequest, res: Response) => {
+  const { idOrSku } = req.params;
+  const deleted = db.deleteCatalogItem(idOrSku);
+  res.json({ success: true, deleted, message: `Catalog item ${idOrSku} removed.` });
 });
 
 // ========================

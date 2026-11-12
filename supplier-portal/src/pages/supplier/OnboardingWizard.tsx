@@ -172,7 +172,7 @@ export const OnboardingWizard: React.FC = () => {
     {
       id: 'msg-init-1',
       sender: 'AGENT',
-      text: "👋 Hi! I am your Autonomous Onboarding Copilot. We are working side-by-side to complete vendor onboarding for " + invitations[0].buyerName + ". Ask me to auto-fill fields, verify bank routing, run OCR on certificates, or query official business registries.",
+      text: "Hi! I am your Autonomous Onboarding Copilot. We are working side-by-side to complete vendor onboarding for " + invitations[0].buyerName + ". Ask me to auto-fill fields, verify bank routing, run OCR on certificates, or query official business registries.",
       time: 'Just now'
     }
   ]);
@@ -310,14 +310,14 @@ export const OnboardingWizard: React.FC = () => {
       origin: { y: 0.6 }
     });
 
-    setStatusMsg(`🎉 94% of Application Auto-Filled from Master Public Profile! 18 verified attributes populated for ${activeInvitation.buyerName}.`);
+    setStatusMsg(`94% of Application Auto-Filled from Master Public Profile! 18 verified attributes populated for ${activeInvitation.buyerName}.`);
     
     setChatMessages(prev => [
       ...prev,
       {
         id: 'msg-sync-' + Date.now(),
         sender: 'AGENT',
-        text: `⚡ Master Public Profile Sync Executed! I auto-populated Company Info, Contacts, Tax EIN (84-1294812), FedACH Bank routing (021000021), and attached 3 validated compliance files for ${activeInvitation.buyerName}.`,
+        text: `Master Public Profile Sync Executed! I auto-populated Company Info, Contacts, Tax EIN (84-1294812), FedACH Bank routing (021000021), and attached 3 validated compliance files for ${activeInvitation.buyerName}.`,
         time: 'Just now'
       }
     ]);
@@ -336,7 +336,7 @@ export const OnboardingWizard: React.FC = () => {
       {
         id: userMsgId,
         sender: 'USER',
-        text: `📄 Parse & extract verified attributes from ${filename} via Neural Vision OCR.`,
+        text: `Parse & extract verified attributes from ${filename} via Neural Vision OCR.`,
         time: 'Just now',
         attachedDoc: { name: filename, type: 'application/pdf' }
       },
@@ -413,7 +413,7 @@ export const OnboardingWizard: React.FC = () => {
       {
         id: userMsgId,
         sender: 'USER',
-        text: `🔍 Query official corporate registry & D-U-N-S records for "${legalName}".`,
+        text: `Query official corporate registry & D-U-N-S records for "${legalName}".`,
         time: 'Just now'
       },
       {
@@ -496,7 +496,7 @@ export const OnboardingWizard: React.FC = () => {
       {
         id: userMsgId,
         sender: 'USER',
-        text: `⚡ Auto-fill entire application from Master Public Profile.`,
+        text: `Auto-fill entire application from Master Public Profile.`,
         time: 'Just now'
       },
       {
@@ -521,7 +521,7 @@ export const OnboardingWizard: React.FC = () => {
       if (msg.id === agentMsgId && msg.toolCall) {
         return {
           ...msg,
-          text: `⚡ Auto-Fill Complete! I populated 18 verified attributes across Steps 1–6 (Company Info, Tax EIN 84-1294812, FedACH Routing 021000021, and 3 attached compliance documents).`,
+          text: `Auto-Fill Complete! I populated 18 verified attributes across Steps 1–6 (Company Info, Tax EIN 84-1294812, FedACH Routing 021000021, and 3 attached compliance documents).`,
           toolCall: {
             ...msg.toolCall,
             status: 'completed',
@@ -547,7 +547,7 @@ export const OnboardingWizard: React.FC = () => {
       {
         id: userMsgId,
         sender: 'USER',
-        text: `💳 Verify ABA Routing 021000021 with Federal Reserve FedACH directory.`,
+        text: `Verify ABA Routing 021000021 with Federal Reserve FedACH directory.`,
         time: 'Just now'
       },
       {
@@ -600,7 +600,7 @@ export const OnboardingWizard: React.FC = () => {
       {
         id: userMsgId,
         sender: 'USER',
-        text: `🏢 Cross-check Employer Identification Number (EIN) 84-1294812 with IRS Business Master File.`,
+        text: `Cross-check Employer Identification Number (EIN) 84-1294812 with IRS Business Master File.`,
         time: 'Just now'
       },
       {
@@ -827,7 +827,7 @@ export const OnboardingWizard: React.FC = () => {
             <div className="flex items-center space-x-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-                Incoming Buyer Onboarding Requests ({invitations.length})
+                Incoming Vendor Onboarding Requests ({invitations.length})
               </h2>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
@@ -840,7 +840,7 @@ export const OnboardingWizard: React.FC = () => {
             className="px-3 py-1.5 border border-slate-300 hover:border-slate-400 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-semibold transition shrink-0 flex items-center gap-1.5"
           >
             <Mail className="w-3.5 h-3.5 text-slate-500" />
-            <span>+ Enter Buyer Invitation Code</span>
+            <span>+ Enter Vendor Invitation Code</span>
           </button>
         </div>
 
@@ -873,7 +873,7 @@ export const OnboardingWizard: React.FC = () => {
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <span className="font-bold text-slate-900">{inv.buyerName}</span>
-                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                       inv.status === 'IN_PROGRESS' 
                         ? 'bg-sky-100 text-sky-800' 
                         : 'bg-emerald-100 text-emerald-800'
@@ -1337,7 +1337,7 @@ export const OnboardingWizard: React.FC = () => {
 
                   <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-2">
                     <div className="grid grid-cols-2 gap-2 text-slate-700">
-                      <div><span className="text-slate-400">Buyer Target:</span> <strong className="text-slate-900">{activeInvitation.buyerName}</strong></div>
+                      <div><span className="text-slate-400">Vendor Target:</span> <strong className="text-slate-900">{activeInvitation.buyerName}</strong></div>
                       <div><span className="text-slate-400">Legal Entity:</span> <strong className="text-slate-900">{legalName}</strong></div>
                       <div><span className="text-slate-400">Tax EIN:</span> <strong className="text-slate-900 font-mono">{taxId}</strong></div>
                       <div><span className="text-slate-400">Bank Routing:</span> <strong className="text-slate-900 font-mono">{bankRouting}</strong></div>
@@ -1437,7 +1437,7 @@ export const OnboardingWizard: React.FC = () => {
                       Autonomous Onboarding Copilot
                       <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                     </h3>
-                    <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                       Claude & GPT Vision
                     </span>
                   </div>
@@ -1519,7 +1519,7 @@ export const OnboardingWizard: React.FC = () => {
                   className={`p-3 rounded-xl text-xs leading-relaxed space-y-2 transition ${
                     msg.sender === 'AGENT'
                       ? 'bg-slate-900/90 border border-slate-800 text-slate-200'
-                      : 'bg-emerald-950/70 border border-emerald-800/80 text-emerald-100 ml-4'
+                      : 'bg-slate-800/90 border border-slate-700 text-slate-100 ml-4'
                   }`}
                 >
                   <div className="text-[10px] text-slate-400 font-semibold flex items-center justify-between">
@@ -1536,7 +1536,7 @@ export const OnboardingWizard: React.FC = () => {
                         </>
                       )}
                     </span>
-                    <span className="text-[9px] text-slate-500 font-mono">{msg.time}</span>
+                    <span className="text-[10px] text-slate-500 font-mono">{msg.time}</span>
                   </div>
 
                   {/* Attached Document Pill if present */}
@@ -1721,7 +1721,7 @@ export const OnboardingWizard: React.FC = () => {
                   className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/25 transition flex items-center gap-1"
                 >
                   <Sparkles className="w-3 h-3 text-amber-300" />
-                  <span>⚡ Auto-Fill Everything</span>
+                  <span>Auto-Fill Everything</span>
                 </button>
                 <button
                   onClick={() => executeOcrTool('IRS_W9', 'IRS_W9_Signed_2026.pdf')}
@@ -1729,7 +1729,7 @@ export const OnboardingWizard: React.FC = () => {
                   className="px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-slate-800 hover:bg-slate-750 text-slate-200 border border-slate-700 transition flex items-center gap-1"
                 >
                   <FileText className="w-3 h-3 text-emerald-400" />
-                  <span>📄 Parse W-9 via OCR</span>
+                  <span>Parse W-9 via OCR</span>
                 </button>
                 <button
                   onClick={() => executeOcrTool('ACORD_25', 'ACORD_25_Liability_Insurance.pdf')}
@@ -1737,7 +1737,7 @@ export const OnboardingWizard: React.FC = () => {
                   className="px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-slate-800 hover:bg-slate-750 text-slate-200 border border-slate-700 transition flex items-center gap-1"
                 >
                   <ShieldCheck className="w-3 h-3 text-sky-400" />
-                  <span>🛡️ Parse ACORD 25</span>
+                  <span>Parse ACORD 25</span>
                 </button>
                 <button
                   onClick={() => executeRegistrySearchTool()}
@@ -1745,7 +1745,7 @@ export const OnboardingWizard: React.FC = () => {
                   className="px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500/25 transition flex items-center gap-1"
                 >
                   <Globe className="w-3 h-3 text-indigo-400" />
-                  <span>🔍 Search Official Registry</span>
+                  <span>Search Official Registry</span>
                 </button>
                 <button
                   onClick={() => executeFedAchVerifyTool()}
@@ -1753,7 +1753,7 @@ export const OnboardingWizard: React.FC = () => {
                   className="px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-sky-500/15 text-sky-300 border border-sky-500/30 hover:bg-sky-500/25 transition flex items-center gap-1"
                 >
                   <CreditCard className="w-3 h-3 text-sky-400" />
-                  <span>💳 Verify Bank Routing</span>
+                  <span>Verify Bank Routing</span>
                 </button>
                 <button
                   onClick={() => executeTinVerifyTool()}
@@ -1761,7 +1761,7 @@ export const OnboardingWizard: React.FC = () => {
                   className="px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30 hover:bg-amber-500/25 transition flex items-center gap-1"
                 >
                   <Building2 className="w-3 h-3 text-amber-400" />
-                  <span>🏢 Verify IRS TIN</span>
+                  <span>Verify IRS TIN</span>
                 </button>
               </div>
             </div>
@@ -1896,10 +1896,10 @@ export const OnboardingWizard: React.FC = () => {
                 className={`p-2 rounded-lg text-xs leading-relaxed ${
                   msg.sender === 'AGENT'
                     ? 'bg-slate-900 border border-slate-800 text-slate-200'
-                    : 'bg-emerald-950/70 border border-emerald-800/80 text-emerald-100 ml-3'
+                    : 'bg-slate-800/90 border border-slate-700 text-slate-100 ml-3'
                 }`}
               >
-                <span className="text-[9px] text-slate-400 block font-semibold mb-0.5">
+                <span className="text-[10px] text-slate-400 block font-semibold mb-0.5">
                   {msg.sender === 'AGENT' ? 'Autonomous Copilot' : 'You'}:
                 </span>
                 <span>{msg.text}</span>
@@ -1920,13 +1920,13 @@ export const OnboardingWizard: React.FC = () => {
               onClick={() => executeOcrTool('IRS_W9', 'IRS_W9_Signed_2026.pdf')}
               className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-[10px] font-semibold transition"
             >
-              <span>📄 Parse W-9</span>
+              <span>Parse W-9</span>
             </button>
             <button
               onClick={() => executeRegistrySearchTool()}
               className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-[10px] font-semibold transition"
             >
-              <span>🔍 Registry Search</span>
+              <span>Registry Search</span>
             </button>
           </div>
 
@@ -1966,12 +1966,12 @@ export const OnboardingWizard: React.FC = () => {
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-slate-900">Enter Buyer Invitation Code</h3>
+              <h3 className="text-sm font-bold text-slate-900">Enter Vendor Invitation Code</h3>
               <button onClick={() => setShowInviteModal(false)} className="text-slate-400 hover:text-slate-600 text-sm">✕</button>
             </div>
 
             <p className="text-xs text-slate-500 leading-relaxed">
-              Suppliers received an onboarding invitation by email from an enterprise buyer procurement team. Enter the invitation token to unlock tailored requirements.
+              Suppliers received an onboarding invitation by email from an enterprise vendor procurement team. Enter the invitation token to unlock tailored requirements.
             </p>
 
             <form
