@@ -10,6 +10,7 @@
     "dev:supplier": "cd supplier-portal && npm run dev",
     "build": "(cd server && npm install && npm run build) && (cd buyer-portal && npm install && npm run build) && (cd supplier-portal && npm install && npm run build)",
     "build:all": "(cd server && npm install && npm run build) && (cd buyer-portal && npm install && npm run build) && (cd supplier-portal && npm install && npm run build)",
+    "build:supplier": "(cd server && npm install && npm run build) && (cd supplier-portal && npm install && npm run build)",
     "start": "node server/dist/server.js",
     "test": "cd server && npm test"
   },
