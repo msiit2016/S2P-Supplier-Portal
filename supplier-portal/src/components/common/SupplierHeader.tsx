@@ -802,24 +802,30 @@ export const SupplierHeader: React.FC<SupplierHeaderProps> = ({ onToggleAi }) =>
     navigate('/login');
   };
 
-  // 1. Primary visible links (Canonical Source-to-Pay Lifecycle Order)
+  // 1. Primary visible links with responsive tiering:
+  // - 'core': always visible in the desktop navbar (1024px+)
+  // - 'mid': visible on 1280px+ (xl)
+  // - 'wide': visible on 1536px+ (2xl)
   const primaryNavLinks = [
-    { label: 'Dashboard', icon: LayoutDashboard, route: '/dashboard', title: 'Executive Supplier Overview' },
-    { label: 'Onboarding', icon: FileCheck2, route: '/onboarding', title: 'Buyer Onboarding Requests & Qualifications' },
-    { label: 'RFPs & Bids', icon: FileText, route: '/rfps', title: 'Enterprise Sourcing & RFPs' },
-    { label: 'Orders', icon: ShoppingCart, route: '/orders', title: 'Purchase Orders & Line Items' },
-    { label: 'Shipments', icon: Truck, route: '/asns', title: 'Shipping & Advance Shipping Notices (ASN)' },
-    { label: 'Invoices', icon: Receipt, route: '/invoices', title: 'Commercial Invoices & 3-Way Match' },
-    { label: 'Documents', icon: FolderLock, route: '/documents', title: 'Enterprise Document Vault' }
+    { label: 'Dashboard', icon: LayoutDashboard, route: '/dashboard', title: 'Executive Supplier Overview', tier: 'core' },
+    { label: 'Onboarding', icon: FileCheck2, route: '/onboarding', title: 'Buyer Onboarding Requests & Qualifications', tier: 'core' },
+    { label: 'Orders', icon: ShoppingCart, route: '/orders', title: 'Purchase Orders & Line Items', tier: 'core' },
+    { label: 'Invoices', icon: Receipt, route: '/invoices', title: 'Commercial Invoices & 3-Way Match', tier: 'core' },
+    { label: 'Shipments', icon: Truck, route: '/asns', title: 'Shipping & Advance Shipping Notices (ASN)', tier: 'mid' },
+    { label: 'RFPs & Bids', icon: FileText, route: '/rfps', title: 'Enterprise Sourcing & RFPs', tier: 'wide' },
+    { label: 'Documents', icon: FolderLock, route: '/documents', title: 'Enterprise Document Vault', tier: 'wide' }
   ];
 
-  // 2. Secondary links (Governance, Catalog, Identity & Operations in "More" Hub)
+  // 2. Secondary links in "More" Hub (including items that collapse on compact desktop screens):
   const secondaryNavLinks = [
-    { label: 'Collaboration Hub', icon: MessageSquare, route: '/communications', title: 'Transactional Messaging & Collaboration Hub' },
-    { label: 'Catalog', icon: Package, route: '/catalog', title: 'Item Master & Product Catalog' },
+    { label: 'RFPs & Bids', icon: FileText, route: '/rfps', title: 'Enterprise Sourcing & RFPs', showBelow: '2xl' },
+    { label: 'Documents', icon: FolderLock, route: '/documents', title: 'Enterprise Document Vault', showBelow: '2xl' },
+    { label: 'Shipments', icon: Truck, route: '/asns', title: 'Shipping & Advance Shipping Notices (ASN)', showBelow: 'xl' },
     { label: 'Public Profile', icon: Globe, route: '/public-profile', title: 'Master Public Profile & Connected Buyers' },
+    { label: 'Catalog', icon: Package, route: '/catalog', title: 'Item Master & Product Catalog' },
+    { label: 'Task Queue', icon: ClipboardList, route: '/tasks', badge: '4', title: 'Operational Tasks & Approvals' },
     { label: 'All Transactions', icon: Layers, route: '/transactions', title: 'Consolidated Cross-Buyer Financial Ledger' },
-    { label: 'Task Queue', icon: ClipboardList, route: '/tasks', badge: '4', title: 'Operational Tasks & Approvals' }
+    { label: 'Collaboration Hub', icon: MessageSquare, route: '/communications', title: 'Transactional Messaging & Collaboration Hub' }
   ];
 
   const isLinkActive = (route: string) => {
@@ -845,25 +851,31 @@ export const SupplierHeader: React.FC<SupplierHeaderProps> = ({ onToggleAi }) =>
   return (
     <header className="bg-slate-900 border-b border-slate-800 text-white select-none sticky top-0 z-50 shadow-md">
       {/* Main navigation header */}
-      <div className="px-3 sm:px-4 lg:px-6 py-2.5 flex items-center justify-between gap-2 lg:gap-4">
-        <div className="flex items-center space-x-3 lg:space-x-4 min-w-0">
+      <div className="max-w-[1920px] mx-auto px-3 sm:px-4 xl:px-6 py-2 xl:py-2.5 flex items-center justify-between gap-2 xl:gap-4">
+        <div className="flex items-center gap-2 xl:gap-3.5 min-w-0">
           {/* Brand Logo & Name */}
           <VerisourceLogo size="sm" theme="dark" onClick={() => navigate('/dashboard')} />
 
           {/* Subtle Vertical Divider between Brand & Modules */}
-          <div className="hidden lg:block h-5 w-px bg-slate-800 shrink-0"></div>
+          <div className="hidden lg:block h-4.5 w-px bg-slate-800 shrink-0"></div>
 
           {/* Primary Navigation Links + Merged Navigation Hub */}
-          <nav className="hidden lg:flex items-center space-x-0.5 xl:space-x-1">
+          <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1">
             {primaryNavLinks.map((item) => {
               const active = isLinkActive(item.route);
               const Icon = item.icon;
+              const visibilityClass = item.tier === 'core' 
+                ? 'flex' 
+                : item.tier === 'mid' 
+                  ? 'hidden xl:flex' 
+                  : 'hidden 2xl:flex';
+
               return (
                 <button
                   key={item.route}
                   onClick={() => navigate(item.route)}
                   title={item.title || item.label}
-                  className={`flex items-center space-x-1.5 px-2 xl:px-2.5 py-1.5 rounded-lg text-xs transition-all relative cursor-pointer whitespace-nowrap shrink-0 ${
+                  className={`${visibilityClass} items-center space-x-1 xl:space-x-1.5 px-2 xl:px-2.5 py-1 xl:py-1.5 rounded-lg text-xs transition-all relative cursor-pointer whitespace-nowrap shrink-0 ${
                     active
                       ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shadow-xs font-bold'
                       : 'text-slate-300 hover:text-white hover:bg-slate-800/80 font-medium'
@@ -883,7 +895,7 @@ export const SupplierHeader: React.FC<SupplierHeaderProps> = ({ onToggleAi }) =>
               <button
                 type="button"
                 onClick={() => setMoreDropdownOpen(prev => !prev)}
-                className={`flex items-center space-x-1.5 px-2 xl:px-2.5 py-1.5 rounded-lg text-xs transition-all relative cursor-pointer whitespace-nowrap shrink-0 ${
+                className={`flex items-center space-x-1 xl:space-x-1.5 px-2 xl:px-2.5 py-1 xl:py-1.5 rounded-lg text-xs transition-all relative cursor-pointer whitespace-nowrap shrink-0 ${
                   activeSecondaryLink || moreDropdownOpen
                     ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shadow-xs font-bold'
                     : 'text-slate-300 hover:text-white hover:bg-slate-800/80 font-medium'
@@ -922,6 +934,11 @@ export const SupplierHeader: React.FC<SupplierHeaderProps> = ({ onToggleAi }) =>
                     {secondaryNavLinks.map((item) => {
                       const active = isLinkActive(item.route);
                       const Icon = item.icon;
+                      const hideClass = (item as any).showBelow === '2xl' 
+                        ? '2xl:hidden' 
+                        : (item as any).showBelow === 'xl' 
+                          ? 'xl:hidden' 
+                          : '';
 
                       return (
                         <button
@@ -930,7 +947,7 @@ export const SupplierHeader: React.FC<SupplierHeaderProps> = ({ onToggleAi }) =>
                             navigate(item.route);
                             setMoreDropdownOpen(false);
                           }}
-                          className={`w-full px-2.5 py-2 rounded-xl text-left flex items-center justify-between transition group cursor-pointer ${
+                          className={`${hideClass} w-full px-2.5 py-2 rounded-xl text-left flex items-center justify-between transition group cursor-pointer ${
                             active
                               ? 'bg-emerald-500/15 text-white border border-emerald-500/30'
                               : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
@@ -967,7 +984,7 @@ export const SupplierHeader: React.FC<SupplierHeaderProps> = ({ onToggleAi }) =>
         </div>
 
         {/* Right side: Bell Notifications, AI Copilot & Active User Dropdown */}
-        <div className="flex items-center space-x-2.5">
+        <div className="flex items-center gap-1 sm:gap-1.5 xl:gap-2.5 shrink-0">
           {/* 1. BELL NOTIFICATIONS DROPDOWN */}
           <div className="relative" ref={notifRef}>
             <button
@@ -977,14 +994,14 @@ export const SupplierHeader: React.FC<SupplierHeaderProps> = ({ onToggleAi }) =>
                 setMessagesOpen(false);
                 setMoreDropdownOpen(false);
               }}
-              className={`relative p-2 rounded-xl transition cursor-pointer ${
+              className={`relative p-1.5 xl:p-2 rounded-xl transition cursor-pointer ${
                 notificationsOpen
                   ? 'bg-slate-800 text-white ring-1 ring-slate-700'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800'
               }`}
               title="Notifications & Alerts"
             >
-              <Bell className="w-4.5 h-4.5" />
+              <Bell className="w-4 h-4 xl:w-4.5 xl:h-4.5" />
               {unreadNotificationCount > 0 && (
                 <span className="absolute top-1 right-1 w-4 h-4 bg-emerald-500 text-slate-950 rounded-full text-[10px] font-bold flex items-center justify-center animate-pulse shadow-xs">
                   {unreadNotificationCount}
@@ -1164,14 +1181,14 @@ export const SupplierHeader: React.FC<SupplierHeaderProps> = ({ onToggleAi }) =>
             <button
               onClick={handleClickMsg}
               onDoubleClick={handleDoubleClickMsg}
-              className={`relative p-2 rounded-xl transition cursor-pointer ${
+              className={`relative p-1.5 xl:p-2 rounded-xl transition cursor-pointer ${
                 currentRoute.startsWith('/communications') || currentRoute.startsWith('/messages') || messagesOpen
                   ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800'
               }`}
               title={messagesOpen ? undefined : (unreadMessageCount > 0 ? "Messages • Double-click to open Hub" : "Messages")}
             >
-              <MessageSquare className="w-4.5 h-4.5" />
+              <MessageSquare className="w-4 h-4 xl:w-4.5 xl:h-4.5" />
               {unreadMessageCount > 0 && (
                 <span className="absolute top-1 right-1 w-4 h-4 bg-emerald-500 text-slate-950 rounded-full text-[10px] font-bold flex items-center justify-center animate-pulse shadow-xs">
                   {unreadMessageCount}
@@ -1375,7 +1392,7 @@ export const SupplierHeader: React.FC<SupplierHeaderProps> = ({ onToggleAi }) =>
                 }
               }
             }}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl transition shadow-xs shrink-0 cursor-pointer text-xs font-semibold ${
+            className={`flex items-center space-x-1.5 px-2.5 xl:px-3 py-1 xl:py-1.5 rounded-xl transition shadow-xs shrink-0 cursor-pointer text-xs font-semibold ${
               aiDrawerOpen
                 ? 'bg-emerald-600 text-white border border-emerald-400/50 shadow-emerald-600/20'
                 : 'bg-emerald-600/90 hover:bg-emerald-600 text-white border border-emerald-500/40 hover:border-emerald-400/50 shadow-emerald-600/20'
@@ -1383,22 +1400,23 @@ export const SupplierHeader: React.FC<SupplierHeaderProps> = ({ onToggleAi }) =>
             title={`Ava Agent • ${getPageContextTitle(currentRoute)}`}
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-300 shrink-0" />
-            <span className="hidden sm:inline">Ava Agent</span>
+            <span className="hidden xl:inline">Ava Agent</span>
+            <span className="hidden md:inline xl:hidden">Ava</span>
             <span className={`w-1.5 h-1.5 rounded-full ${aiDrawerOpen ? 'bg-emerald-300' : 'bg-emerald-400'} animate-pulse shrink-0`}></span>
           </button>
 
           {/* 2. ACTIVE USER ICON WITH 5-ITEM DROPDOWN + SIGN OUT */}
-          <div className="relative pl-2 border-l border-slate-800" ref={userRef}>
+          <div className="relative pl-1.5 xl:pl-2 border-l border-slate-800" ref={userRef}>
             <button
               onClick={() => {
                 setUserMenuOpen(prev => !prev);
                 setNotificationsOpen(false);
                 setMessagesOpen(false);
               }}
-              className="flex items-center space-x-2 focus:outline-none group"
+              className="flex items-center space-x-1.5 xl:space-x-2 focus:outline-none group cursor-pointer"
               title="User Account & Navigation"
             >
-              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-emerald-700 to-teal-500 flex items-center justify-center text-white font-bold text-xs border border-emerald-400/80 shadow-xs group-hover:scale-105 transition-transform">
+              <div className="w-7 h-7 xl:w-8 xl:h-8 rounded-full bg-gradient-to-tr from-emerald-700 to-teal-500 flex items-center justify-center text-white font-bold text-xs border border-emerald-400/80 shadow-xs group-hover:scale-105 transition-transform">
                 {currentUser?.name ? currentUser.name.split(' ').map(n => n[0]).join('') : 'U'}
               </div>
               <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
