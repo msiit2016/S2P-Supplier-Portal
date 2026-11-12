@@ -17,6 +17,7 @@ interface HeaderBarProps {
 export const HeaderBar: React.FC<HeaderBarProps> = ({ onToggleAi }) => {
   const { currentUser, demoUsers, switchUser } = useAuth();
   const buyerUsers = demoUsers.filter(u => u.userType === 'BUYER');
+  const supplierPortalUrl = (import.meta as any).env?.VITE_SUPPLIER_PORTAL_URL || 'http://localhost:3003/';
 
   return (
     <header className="bg-slate-900 border-b border-slate-800 text-white select-none sticky top-0 z-50 shadow-md">
@@ -35,12 +36,12 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({ onToggleAi }) => {
         {/* Link to separate Supplier Portal */}
         <div className="flex items-center space-x-4">
           <a
-            href="http://localhost:3003/"
+            href={supplierPortalUrl}
             target="_blank"
             rel="noreferrer"
             className="flex items-center space-x-1.5 text-xs text-emerald-400 hover:text-emerald-300 font-semibold transition"
           >
-            <span>Open Supplier Portal (Port 3003)</span>
+            <span>Open Supplier Portal</span>
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
 

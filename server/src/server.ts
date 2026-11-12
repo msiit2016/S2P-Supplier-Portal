@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import authRoutes from './routes/authRoutes.js';
 import applicationRoutes from './routes/applicationRoutes.js';
@@ -68,6 +69,30 @@ app.use('/api/v1/audit', authenticate, auditRoutes);
 app.use('/api/v1/suppliers', authenticate, supplierDirectoryRoutes);
 app.use('/api/v1/p2p', authenticate, transactionRoutes);
 app.use('/api/v1/supplier-profiles', authenticate, profileRoutes);
+
+// -----------------------------------------------------------------------------
+// Production Static Frontend Serving (All-in-One Deployment Mode)
+// -----------------------------------------------------------------------------
+const supplierDist = path.resolve(__dirname, '../../supplier-portal/dist');
+const buyerDist = path.resolve(__dirname, '../../buyer-portal/dist');
+
+// Serve buyer portal at /buyer if built
+if (fs.existsSync(buyerDist)) {
+  app.use('/buyer', express.static(buyerDist));
+  app.get('/buyer*', (req, res, next) => {
+    if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) return next();
+    res.sendFile(path.join(buyerDist, 'index.html'));
+  });
+}
+
+// Serve supplier portal at / if built
+if (fs.existsSync(supplierDist)) {
+  app.use(express.static(supplierDist));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) return next();
+    res.sendFile(path.join(supplierDist, 'index.html'));
+  });
+}
 
 // Global Error Handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

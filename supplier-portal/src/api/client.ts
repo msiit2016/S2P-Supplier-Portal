@@ -1,4 +1,10 @@
-const BASE_URL = '/api/v1';
+const API_ORIGIN = (import.meta as any).env?.VITE_API_URL
+  ? ((import.meta as any).env.VITE_API_URL.startsWith('http')
+      ? (import.meta as any).env.VITE_API_URL
+      : `https://${(import.meta as any).env.VITE_API_URL}`)
+  : '';
+
+export const BASE_URL = `${API_ORIGIN}/api/v1`;
 
 export class ApiClient {
   private static getHeaders(): HeadersInit {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ApiClient } from '../../api/client.js';
+import { ApiClient, BASE_URL } from '../../api/client.js';
 import { ShoppingCart, Search, FileText, CheckCircle2, Clock, Truck, ChevronRight } from 'lucide-react';
 
 export const BuyerOrders: React.FC = () => {
@@ -15,7 +15,7 @@ export const BuyerOrders: React.FC = () => {
   const loadOrders = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/v1/p2p/orders');
+      const res = await fetch(`${BASE_URL}/p2p/orders`);
       const data = await res.json();
       if (data.orders) {
         setOrders(data.orders);

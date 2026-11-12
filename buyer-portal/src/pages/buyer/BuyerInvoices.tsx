@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BASE_URL } from '../../api/client.js';
 import { Receipt, Search, CheckCircle2, AlertTriangle, Clock, ArrowRight, ShieldCheck, DollarSign } from 'lucide-react';
 
 export const BuyerInvoices: React.FC = () => {
@@ -14,7 +15,7 @@ export const BuyerInvoices: React.FC = () => {
   const loadInvoices = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/v1/p2p/invoices');
+      const res = await fetch(`${BASE_URL}/p2p/invoices`);
       const data = await res.json();
       if (data.invoices) {
         setInvoices(data.invoices);

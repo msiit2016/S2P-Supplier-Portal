@@ -6,6 +6,7 @@
  */
 
 import { PageAction } from './pageActionBridge.js';
+import { BASE_URL } from '../api/client.js';
 
 export interface GeminiPromptOptions {
   prompt: string;
@@ -37,7 +38,7 @@ export async function sendGeminiPrompt(options: GeminiPromptOptions): Promise<Ge
   const { prompt, currentRoute, pageContextData, history = [] } = options;
 
   try {
-    const response = await fetch('/api/v1/ai/copilot-chat', {
+    const response = await fetch(`${BASE_URL}/ai/copilot-chat`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -94,7 +95,7 @@ export async function sendGeminiPromptStream(
   const { prompt, currentRoute, pageContextData, history = [] } = options;
 
   try {
-    const response = await fetch('/api/v1/ai/copilot-chat', {
+    const response = await fetch(`${BASE_URL}/ai/copilot-chat`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
