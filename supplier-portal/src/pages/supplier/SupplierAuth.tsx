@@ -54,12 +54,17 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
 
   // Sign up inputs
   const [companyName, setCompanyName] = useState('');
-  const [signupContactName, setSignupContactName] = useState('');
+  const [signupFirstName, setSignupFirstName] = useState('');
+  const [signupLastName, setSignupLastName] = useState('');
   const [signupEmail, setSignupEmail] = useState('');
   const [signupCountry, setSignupCountry] = useState('United States');
   const [signupPassword, setSignupPassword] = useState('');
+  const [signupConfirmPassword, setSignupConfirmPassword] = useState('');
   const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [showSignupConfirmPassword, setShowSignupConfirmPassword] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(true);
+  // Derived full contact name
+  const signupContactName = [signupFirstName, signupLastName].filter(Boolean).join(' ');
 
   // UI States
   const [loading, setLoading] = useState(false);
@@ -321,7 +326,15 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!companyName || !signupEmail) {
-      setErrorMsg('Please complete company legal entity name and work email.');
+      setErrorMsg('Please complete all required fields.');
+      return;
+    }
+    if (signupPassword !== signupConfirmPassword) {
+      setErrorMsg('Passwords do not match. Please re-enter.');
+      return;
+    }
+    if (signupPassword.length < 8) {
+      setErrorMsg('Password must be at least 8 characters.');
       return;
     }
     setLoading(true);
@@ -988,9 +1001,9 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
               </div>
 
               <form onSubmit={handleSignup} className="space-y-4 text-xs">
-                {/* Legal Entity Name */}
+                {/* Legal Company Name */}
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Company Legal Entity Name *</label>
+                  <label className="block font-semibold text-slate-700 mb-1">Legal Company Name *</label>
                   <div className="relative">
                     <Building2 className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                     <input
@@ -1004,42 +1017,57 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
                   </div>
                 </div>
 
-                {/* Contact Name & Corporate Email */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* First Name & Last Name */}
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-semibold text-slate-700 mb-1">Primary Authorized Contact *</label>
+                    <label className="block font-semibold text-slate-700 mb-1">First Name *</label>
                     <div className="relative">
                       <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                       <input
                         type="text"
                         required
-                        placeholder="Alex Morgan"
-                        value={signupContactName}
-                        onChange={(e) => setSignupContactName(e.target.value)}
+                        placeholder="Alex"
+                        value={signupFirstName}
+                        onChange={(e) => setSignupFirstName(e.target.value)}
                         className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 pl-9 pr-3 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"
                       />
                     </div>
                   </div>
-
                   <div>
-                    <label className="block font-semibold text-slate-700 mb-1">Authorized Business Email *</label>
+                    <label className="block font-semibold text-slate-700 mb-1">Last Name *</label>
                     <div className="relative">
-                      <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                      <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                       <input
-                        type="email"
+                        type="text"
                         required
-                        placeholder="alex@apexsystems.com"
-                        value={signupEmail}
-                        onChange={(e) => setSignupEmail(e.target.value)}
+                        placeholder="Morgan"
+                        value={signupLastName}
+                        onChange={(e) => setSignupLastName(e.target.value)}
                         className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 pl-9 pr-3 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"
                       />
                     </div>
                   </div>
                 </div>
 
+                {/* Work Email */}
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Work Email *</label>
+                  <div className="relative">
+                    <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                    <input
+                      type="email"
+                      required
+                      placeholder="alex@apexsystems.com"
+                      value={signupEmail}
+                      onChange={(e) => setSignupEmail(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 pl-9 pr-3 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"
+                    />
+                  </div>
+                </div>
+
                 {/* Country / HQ */}
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Country / Headquarters *</label>
+                  <label className="block font-semibold text-slate-700 mb-1">Country of Registration *</label>
                   <select
                     value={signupCountry}
                     onChange={(e) => setSignupCountry(e.target.value)}
@@ -1056,26 +1084,58 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
                   </select>
                 </div>
 
-                {/* Password */}
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Create Password *</label>
-                  <div className="relative">
-                    <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-                    <input
-                      type={showSignupPassword ? 'text' : 'password'}
-                      required
-                      placeholder="Minimum 8 characters"
-                      value={signupPassword}
-                      onChange={(e) => setSignupPassword(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 pl-9 pr-9 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowSignupPassword(!showSignupPassword)}
-                      className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
-                    >
-                      {showSignupPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                    </button>
+                {/* Password & Confirm Password */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">Password *</label>
+                    <div className="relative">
+                      <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                      <input
+                        type={showSignupPassword ? 'text' : 'password'}
+                        required
+                        placeholder="Min. 8 characters"
+                        value={signupPassword}
+                        onChange={(e) => setSignupPassword(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 pl-9 pr-9 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowSignupPassword(!showSignupPassword)}
+                        className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+                      >
+                        {showSignupPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">Confirm Password *</label>
+                    <div className="relative">
+                      <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                      <input
+                        type={showSignupConfirmPassword ? 'text' : 'password'}
+                        required
+                        placeholder="Re-enter password"
+                        value={signupConfirmPassword}
+                        onChange={(e) => setSignupConfirmPassword(e.target.value)}
+                        className={`w-full bg-slate-50 border rounded-xl py-2.5 pl-9 pr-9 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:bg-white transition ${
+                          signupConfirmPassword && signupPassword !== signupConfirmPassword
+                            ? 'border-red-400 focus:ring-red-400'
+                            : 'border-slate-300 focus:ring-emerald-500'
+                        }`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowSignupConfirmPassword(!showSignupConfirmPassword)}
+                        className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+                      >
+                        {showSignupConfirmPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
+                    {signupConfirmPassword && signupPassword !== signupConfirmPassword && (
+                      <p className="text-[10px] text-red-500 mt-1 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" /> Passwords do not match
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -1104,7 +1164,7 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
                 {/* Sign Up Submit -> Navigates to Public Profile */}
                 <button
                   type="submit"
-                  disabled={loading || !termsAccepted}
+                  disabled={loading || !termsAccepted || (!!signupConfirmPassword && signupPassword !== signupConfirmPassword)}
                   className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-md shadow-emerald-700/20 transition flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-50"
                 >
                   {loading ? (
