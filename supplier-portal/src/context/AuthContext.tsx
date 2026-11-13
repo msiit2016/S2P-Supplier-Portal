@@ -50,6 +50,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [demoUsers, setDemoUsers] = useState<User[]>(DEFAULT_DEMO_USERS);
   const [loading, setLoading] = useState<boolean>(true);
 
+  // Helpers to persist a registry of registered supplier users (email -> { orgName, name })
+  const getRegisteredUsers = (): Record<string, { organizationName: string; name: string }> => {
+    try {
+      const raw = localStorage.getItem('verisource_registered_users');
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  };
+
+  const saveRegisteredUser = (email: string, organizationName: string, name: string) => {
+    try {
+      const registry = getRegisteredUsers();
+      registry[email.toLowerCase()] = { organizationName, name };
+      localStorage.setItem('verisource_registered_users', JSON.stringify(registry));
+    } catch {}
+  };
+
   useEffect(() => {
     const init = async () => {
       try {
@@ -61,14 +79,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             ...data.users.filter((u: User) => u.email !== DEFAULT_DEMO_USERS[0].email)
           ];
           setDemoUsers(combined);
-          
+
           const saved = localStorage.getItem('active_supplier_user');
           if (saved === 'LOGGED_OUT') {
             setCurrentUser(null);
           } else if (saved) {
             try {
               const parsed = JSON.parse(saved);
-              if (parsed && (parsed.organizationName === 'Nexura Global Analytics Inc.' || !parsed.organizationName)) {
+              // Only fall back to Acme for the specific "Nexura" placeholder, never for real registered suppliers
+              if (parsed && parsed.organizationName === 'Nexura Global Analytics Inc.') {
                 parsed.organizationName = 'Acme Industrial Tech Inc.';
                 localStorage.setItem('active_supplier_user', JSON.stringify(parsed));
               }
@@ -117,19 +136,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.removeItem('verisource_master_profile');
     }
 
+    // If this is a new registration with org info, persist it in the registry
+    if (customOrgName && customName) {
+      saveRegisteredUser(userIdOrEmail, customOrgName, customName);
+    }
+
     let found = demoUsers.find(
       u => u.id === userIdOrEmail || u.email.toLowerCase() === userIdOrEmail.toLowerCase()
     );
 
     if (!found) {
-      // Dynamic fallback for any entered email
+      // For logins without explicit org info, look up from the registry first
+      const registry = getRegisteredUsers();
+      const registeredEntry = registry[userIdOrEmail.toLowerCase()];
+      const resolvedOrg = customOrgName || registeredEntry?.organizationName;
+      const resolvedName = customName || registeredEntry?.name;
+
       const newUser: User = {
         id: `user-supp-${Date.now()}`,
-        name: customName || userIdOrEmail.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        name: resolvedName || userIdOrEmail.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
         email: userIdOrEmail,
         role: 'SUPPLIER_ADMIN',
         userType: 'SUPPLIER',
-        organizationName: customOrgName || 'Acme Industrial Tech Inc.',
+        organizationName: resolvedOrg || 'Verified Supplier',
         organizationId: `supp-org-${Date.now()}`,
         isEmailVerified: true
       };
@@ -141,6 +170,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ...(customOrgName ? { organizationName: customOrgName } : {}),
         ...(customName ? { name: customName } : {})
       };
+    } else {
+      // Existing demo user logging in — check registry for updated org name
+      const registry = getRegisteredUsers();
+      const registeredEntry = registry[userIdOrEmail.toLowerCase()];
+      if (registeredEntry) {
+        found = { ...found, organizationName: registeredEntry.organizationName, name: registeredEntry.name };
+      }
     }
 
     const activeUser = found || DEFAULT_DEMO_USERS[0];

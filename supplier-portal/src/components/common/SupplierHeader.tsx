@@ -1430,7 +1430,7 @@ export const SupplierHeader: React.FC<SupplierHeaderProps> = ({ onToggleAi }) =>
                   <div className="font-bold text-xs text-white truncate">{currentUser?.name}</div>
                   <div className="text-[11px] text-slate-400 truncate">{currentUser?.email}</div>
                   <div className="mt-1.5 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 truncate">
-                    {currentUser?.organizationName && currentUser.organizationName !== 'Nexura Global Analytics Inc.' ? currentUser.organizationName : 'Acme Industrial Tech Inc.'}
+                    {currentUser?.organizationName || 'Verified Supplier'}
                   </div>
                 </div>
 

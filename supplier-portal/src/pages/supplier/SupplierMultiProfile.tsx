@@ -1064,8 +1064,26 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
   );
 
   const getInitialProfile = (): GlobalSupplierProfile => {
-    // If explicitly in a new registration redirect, use clean blank template
-    if (isNewRegistration && currentUser && currentUser.organizationName !== 'Acme Industrial Tech Inc.') {
+    // Non-Acme registered supplier: load their own stored profile or create blank
+    if (currentUser && currentUser.organizationName !== 'Acme Industrial Tech Inc.') {
+      // Try org-keyed profile first, then generic key
+      const orgKey = `verisource_profile_${currentUser.organizationName.toLowerCase().replace(/\s+/g, '_')}`;
+      if (typeof window !== 'undefined') {
+        try {
+          const orgStored = localStorage.getItem(orgKey);
+          if (orgStored) return JSON.parse(orgStored);
+          const stored = localStorage.getItem(MASTER_PROFILE_STORAGE_KEY);
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (parsed.legalName && parsed.legalName !== 'Acme Industrial Tech Inc.') {
+              return parsed;
+            }
+          }
+        } catch (e) {
+          console.warn('Error reading profile from localStorage:', e);
+        }
+      }
+      // Fall back to blank profile for this supplier
       return createBlankSupplierProfile(
         currentUser.organizationName || 'New Supplier',
         currentUser.name || 'Primary Contact',
@@ -1074,17 +1092,14 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
       );
     }
 
+    // Acme / demo user: load from storage or return full Acme profile
     if (typeof window !== 'undefined') {
       try {
         const stored = localStorage.getItem(MASTER_PROFILE_STORAGE_KEY);
         if (stored) {
           const parsed = JSON.parse(stored);
-          // If viewing Acme or user is Acme, ensure full verified Acme profile is returned
-          if (!currentUser || currentUser.organizationName === 'Acme Industrial Tech Inc.' || parsed.legalName === 'Acme Industrial Tech Inc.') {
+          if (parsed.legalName === 'Acme Industrial Tech Inc.') {
             return mergeAcmeProfile(parsed);
-          }
-          if (parsed.legalName && parsed.legalName !== DEFAULT_ACME_PROFILE.legalName) {
-            return parsed;
           }
         }
       } catch (e) {
@@ -1132,48 +1147,6 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
     setSuccessMessage('Successfully reverted to Acme Industrial Tech Inc. verified master profile.');
     setTimeout(() => setSuccessMessage(null), 4000);
   };
-
-  // Auto-revert to Acme if visiting standard public profile URL without explicit new registration state
-  useEffect(() => {
-    if (!routeState?.isNewRegistration) {
-      if (typeof window !== 'undefined') {
-        const isNewFlag = localStorage.getItem('is_new_registration');
-        const stored = localStorage.getItem(MASTER_PROFILE_STORAGE_KEY);
-        let storedOrg = '';
-        let hasMissingArrays = false;
-        if (stored) {
-          try {
-            const parsed = JSON.parse(stored);
-            storedOrg = parsed.legalName;
-            if (
-              !parsed.gepCertificates || parsed.gepCertificates.length === 0 ||
-              !parsed.locations || parsed.locations.length === 0 ||
-              !parsed.gepBankAccounts || parsed.gepBankAccounts.length === 0 ||
-              !parsed.identifications || parsed.identifications.length === 0
-            ) {
-              hasMissingArrays = true;
-            }
-          } catch (e) {}
-        }
-
-        if (
-          isNewFlag === 'true' || 
-          (storedOrg && storedOrg !== 'Acme Industrial Tech Inc.') ||
-          (!storedOrg || hasMissingArrays)
-        ) {
-          const acmeFull = mergeAcmeProfile();
-          localStorage.setItem(MASTER_PROFILE_STORAGE_KEY, JSON.stringify(acmeFull));
-          localStorage.removeItem('is_new_registration');
-          setGlobalProfile(acmeFull);
-          setFormData(JSON.parse(JSON.stringify(acmeFull)));
-          setBuyerProfiles(DEFAULT_BUYER_PROFILES);
-          if (currentUser && currentUser.organizationName !== 'Acme Industrial Tech Inc.') {
-            switchUser('user-supp-acme', 'Acme Industrial Tech Inc.', 'Elena Rostova');
-          }
-        }
-      }
-    }
-  }, [routeState]);
 
   // Section Add Record Triggers (sync with enterprise onboarding modal flows)
   const [idAddTrigger, setIdAddTrigger] = useState<number>(0);
@@ -1442,6 +1415,11 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
 
       if (typeof window !== 'undefined') {
         localStorage.setItem(MASTER_PROFILE_STORAGE_KEY, JSON.stringify(payload));
+        // Also save to org-keyed slot so non-Acme suppliers persist across sessions
+        if (payload.legalName && payload.legalName !== 'Acme Industrial Tech Inc.') {
+          const orgKey = `verisource_profile_${payload.legalName.toLowerCase().replace(/\s+/g, '_')}`;
+          localStorage.setItem(orgKey, JSON.stringify(payload));
+        }
         window.dispatchEvent(new CustomEvent('verisource_master_profile_updated', { detail: payload }));
       }
 
@@ -1755,27 +1733,6 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
   return (
     <div className="space-y-4 max-w-7xl mx-auto pb-16">
 
-      {/* Notice & Revert Banner if viewing custom registration profile */}
-      {profile.legalName !== 'Acme Industrial Tech Inc.' && (
-        <div className="bg-amber-50 border border-amber-200/90 p-3.5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-950 shadow-2xs animate-in fade-in slide-in-from-top-1">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <Info className="w-4 h-4 text-amber-600 shrink-0" />
-            <div className="min-w-0">
-              <span className="font-semibold">Custom Registered Profile: </span>
-              <span className="font-mono text-amber-900 font-bold">{profile.legalName}</span>
-              <span className="text-amber-800 hidden sm:inline"> — Click Revert anytime to restore the complete verified Acme Industrial Tech Inc. master profile.</span>
-            </div>
-          </div>
-          <button
-            onClick={handleRevertToAcme}
-            className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-semibold shadow-2xs transition flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Revert to Acme Master Profile</span>
-          </button>
-        </div>
-      )}
-
       {/* ========================================================================= */}
       {/* 1. RE-DESIGNED FIRST STRIP / HERO BANNER                                  */}
       {/* ========================================================================= */}
@@ -2007,17 +1964,6 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
                     </>
                   ) : (
                     <>
-                      {profile.legalName !== 'Acme Industrial Tech Inc.' && (
-                        <button
-                          type="button"
-                          onClick={handleRevertToAcme}
-                          className="px-3.5 py-1.5 rounded-xl border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-semibold shadow-2xs transition cursor-pointer flex items-center gap-1.5 shrink-0"
-                          title="Revert and restore complete verified Acme Industrial Tech Inc. master profile"
-                        >
-                          <RotateCcw className="w-3.5 h-3.5 text-amber-700" />
-                          <span>Revert Acme</span>
-                        </button>
-                      )}
 
                       <button
                         type="button"
