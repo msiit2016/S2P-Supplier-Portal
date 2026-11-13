@@ -1877,43 +1877,6 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
                             </div>
                           </div>
 
-                          {/* Completed Items Roster */}
-                          <div className="space-y-1.5 pt-1">
-                            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                              Completed & Verified (7)
-                            </div>
-                            <div className="space-y-1 text-[11px]">
-                              <div className="flex items-center gap-2 text-slate-700 py-0.5">
-                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                                <span className="flex-1 truncate">Legal Entity: D&B Active & DE Good Standing</span>
-                              </div>
-                              <div className="flex items-center gap-2 text-slate-700 py-0.5">
-                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                                <span className="flex-1 truncate">Tax: W-9 Verified (IRS TIN Match 100%)</span>
-                              </div>
-                              <div className="flex items-center gap-2 text-slate-700 py-0.5">
-                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                                <span className="flex-1 truncate">Banking: Plaid Tokenized FedACH Verified</span>
-                              </div>
-                              <div className="flex items-center gap-2 text-slate-700 py-0.5">
-                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                                <span className="flex-1 truncate">Insurance: $5M Commercial General Liability</span>
-                              </div>
-                              <div className="flex items-center gap-2 text-slate-700 py-0.5">
-                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                                <span className="flex-1 truncate">Security: ISO 27001 & SOC 2 Type II Current</span>
-                              </div>
-                              <div className="flex items-center gap-2 text-slate-700 py-0.5">
-                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                                <span className="flex-1 truncate">Compliance: ITAR Registered & MBE Certified</span>
-                              </div>
-                              <div className="flex items-center gap-2 text-slate-700 py-0.5">
-                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                                <span className="flex-1 truncate">Key Contacts: 4 Authorized Signatories Active</span>
-                              </div>
-                            </div>
-                          </div>
-
                           {/* Pending Action Item */}
                           <div className="mt-3 pt-2.5 border-t border-slate-100">
                             <div className="text-[10px] font-bold uppercase tracking-wider text-amber-600 mb-1">
