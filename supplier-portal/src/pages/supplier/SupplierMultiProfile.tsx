@@ -1876,21 +1876,8 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
                               />
                             </div>
                           </div>
-
-                          {/* Pending Action Item */}
-                          <div className="mt-3 pt-2.5 border-t border-slate-100">
-                            <div className="text-[10px] font-bold uppercase tracking-wider text-amber-600 mb-1">
-                              Pending Action (1)
-                            </div>
-                            <div className="p-2 bg-amber-50/70 rounded-xl border border-amber-200/80 flex items-start gap-2 text-[11px] text-amber-900">
-                              <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
-                              <div>
-                                <div className="font-semibold">Cyber Liability Policy Renewal</div>
-                                <div className="text-[10px] text-amber-800 mt-0.5">Annual renewal due in 45 days (Dec 15, 2026). Upload updated binder to achieve 100%.</div>
-                              </div>
-                            </div>
-                          </div>
                         </div>
+
                       </>
                     )}
                   </div>
