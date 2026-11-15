@@ -586,6 +586,23 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({ inline = f
     }
   }, [aiDrawerOpen]);
 
+  // Listen for 'Escape' key to close drawer when open
+  useEffect(() => {
+    if (!aiDrawerOpen || inline) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (onClose) {
+          onClose();
+        } else {
+          setCopilotViewMode('MINIMIZE');
+          setAiDrawerOpen(false);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [aiDrawerOpen, inline, onClose]);
+
   // Live Page Context Listener
   const [livePageContext, setLivePageContext] = useState<Record<string, any>>(() => getPageContext());
 
@@ -1435,6 +1452,9 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({ inline = f
             <Plus className="w-3.5 h-3.5" />
           </button>
 
+          {/* Vertical Separator Divider */}
+          <div className="h-4 w-px bg-slate-200 mx-1 shrink-0" />
+
           {/* Minimize / Close */}
           <button
             type="button"
@@ -1446,10 +1466,10 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({ inline = f
                 setAiDrawerOpen(false);
               }
             }}
-            className="p-1.5 hover:text-rose-600 rounded-lg hover:bg-slate-100 transition cursor-pointer"
-            title="Close / Minimize Agent"
+            className="p-1.5 rounded-lg bg-slate-100/90 hover:bg-rose-50 text-slate-500 hover:text-rose-600 border border-slate-200/80 hover:border-rose-200 transition shadow-2xs cursor-pointer group flex items-center justify-center shrink-0"
+            title="Close Agent Drawer (Esc)"
           >
-            <X className="w-3.5 h-3.5" />
+            <X className="w-4 h-4 transition-transform group-hover:scale-110" />
           </button>
         </div>
       </div>
