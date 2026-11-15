@@ -24,7 +24,8 @@ import {
   AVAILABLE_SUPPLIER_MANAGERS, 
   getCurrencySymbol, 
   AVAILABLE_CURRENCIES, 
-  AVAILABLE_COUNTRIES 
+  AVAILABLE_COUNTRIES,
+  AVAILABLE_PHONE_COUNTRY_CODES
 } from './OnboardingRequest.js';
 import { GepIdentificationGrid } from '../../components/onboarding/GepIdentificationGrid.js';
 import { GepContactMatrix } from '../../components/onboarding/GepContactMatrix.js';
@@ -119,6 +120,10 @@ export const createBlankSupplierProfile = (
     supplierManager: '',
     hasDuns: false,
     dunsNumber: '',
+    primaryTaxId: '',
+    phoneCountryCode: '+1',
+    mobilePhone: '',
+    primaryLanguage: 'English',
     taxIdMasked: '',
     incorporationDate: '',
     entityStructure: '',
@@ -228,6 +233,10 @@ const DEFAULT_ACME_PROFILE: GlobalSupplierProfile = {
   hasDuns: true,
   dunsNumber: '09-842-1928',
   taxIdMasked: '84-1294812',
+  primaryTaxId: '84-1294812',
+  phoneCountryCode: '+1',
+  mobilePhone: '(512) 555-0199',
+  primaryLanguage: 'English',
   incorporationDate: '2016-04-12',
   entityStructure: 'C-Corporation (Private)',
   stateOfIncorporation: 'Delaware, USA',
@@ -958,6 +967,10 @@ export const mergeAcmeProfile = (source?: Partial<GlobalSupplierProfile> | null)
     formerlyKnownAs: source.formerlyKnownAs ?? clone.formerlyKnownAs,
     normalisedName: source.normalisedName || clone.normalisedName,
     taxIdMasked: source.taxIdMasked || clone.taxIdMasked,
+    primaryTaxId: source.primaryTaxId || clone.primaryTaxId,
+    phoneCountryCode: source.phoneCountryCode || clone.phoneCountryCode,
+    mobilePhone: source.mobilePhone || clone.mobilePhone,
+    primaryLanguage: source.primaryLanguage || clone.primaryLanguage,
     dunsNumber: source.dunsNumber || clone.dunsNumber,
     incorporationDate: source.incorporationDate || clone.incorporationDate,
     entityStructure: source.entityStructure || clone.entityStructure,
@@ -2521,6 +2534,98 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
                   placeholder="ACME INDUSTRIAL TECH INC"
                   className="w-full px-3 py-2 text-xs font-mono font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-lg cursor-default"
                 />
+              </div>
+
+              {/* Primary Tax Identification Number */}
+              <div className="space-y-1.5 lg:col-span-2">
+                <div className="flex items-center justify-between min-h-[20px] h-5">
+                  <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
+                    Primary Tax Identification Number <span className="text-red-500">*</span>
+                  </label>
+                </div>
+                <div className="relative">
+                  <input
+                    type="text"
+                    disabled={!isEditing}
+                    value={profile.primaryTaxId || profile.taxIdMasked || ''}
+                    onChange={(e) => {
+                      updateFormField('primaryTaxId', e.target.value);
+                      updateFormField('taxIdMasked', e.target.value);
+                    }}
+                    placeholder="e.g. 84-1294812"
+                    className={`w-full px-3 py-2 text-xs font-mono rounded-lg border transition ${
+                      !isEditing
+                        ? 'bg-slate-50 text-slate-700 border-slate-200 cursor-default font-semibold'
+                        : 'bg-white text-slate-900 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600'
+                    }`}
+                  />
+                  {(profile.primaryTaxId || profile.taxIdMasked) && (
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                      <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                      <span>TIN Verified</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Mobile Phone Number */}
+              <div className="space-y-1.5 lg:col-span-2">
+                <div className="flex items-center justify-between min-h-[20px] h-5">
+                  <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
+                    Mobile Phone Number <span className="text-red-500">*</span>
+                  </label>
+                </div>
+                <div className="flex gap-1.5">
+                  <select
+                    disabled={!isEditing}
+                    value={profile.phoneCountryCode || '+1'}
+                    onChange={(e) => updateFormField('phoneCountryCode', e.target.value)}
+                    className="w-24 px-2 py-2 text-xs rounded-lg border bg-slate-50 text-slate-800 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 font-medium shrink-0 cursor-pointer disabled:cursor-default"
+                  >
+                    {AVAILABLE_PHONE_COUNTRY_CODES.map((c) => (
+                      <option key={c.code} value={c.code}>
+                        {c.flag} {c.code}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="tel"
+                    disabled={!isEditing}
+                    value={profile.mobilePhone || ''}
+                    onChange={(e) => updateFormField('mobilePhone', e.target.value)}
+                    placeholder="(512) 555-0199"
+                    className={`flex-1 px-3 py-2 text-xs rounded-lg border transition ${
+                      !isEditing
+                        ? 'bg-slate-50 text-slate-700 border-slate-200 cursor-default font-semibold'
+                        : 'bg-white text-slate-900 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600'
+                    }`}
+                  />
+                </div>
+              </div>
+
+              {/* Primary Language */}
+              <div className="space-y-1.5 lg:col-span-2">
+                <div className="flex items-center justify-between min-h-[20px] h-5">
+                  <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
+                    Primary Language <span className="text-red-500">*</span>
+                  </label>
+                </div>
+                <select
+                  disabled={!isEditing}
+                  value={profile.primaryLanguage || 'English'}
+                  onChange={(e) => updateFormField('primaryLanguage', e.target.value)}
+                  className={`w-full px-3 py-2 text-xs font-medium rounded-lg border transition ${
+                    !isEditing
+                      ? 'bg-slate-50 text-slate-700 border-slate-200 cursor-default font-semibold'
+                      : 'bg-white text-slate-900 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600 cursor-pointer'
+                  }`}
+                >
+                  {AVAILABLE_LANGUAGES.map((lang) => (
+                    <option key={lang} value={lang}>
+                      {lang}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Subcategory (UNSPSC) */}

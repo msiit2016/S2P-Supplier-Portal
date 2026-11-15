@@ -559,6 +559,10 @@ export interface GlobalSupplierProfile {
   partnerStatus?: string;
   supplierManager?: string;
   hasDuns?: boolean;
+  primaryTaxId?: string;
+  phoneCountryCode?: string;
+  mobilePhone?: string;
+  primaryLanguage?: string;
   subcategories?: string[];
   serviceLocations?: string[];
   reportingCurrency?: string;

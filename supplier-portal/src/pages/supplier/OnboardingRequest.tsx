@@ -790,6 +790,23 @@ export const AVAILABLE_LANGUAGES = [
   'Dutch'
 ];
 
+export const AVAILABLE_PHONE_COUNTRY_CODES = [
+  { code: '+1', flag: '🇺🇸', label: '+1 (US / CA)' },
+  { code: '+44', flag: '🇬🇧', label: '+44 (UK)' },
+  { code: '+49', flag: '🇩🇪', label: '+49 (DE)' },
+  { code: '+33', flag: '🇫🇷', label: '+33 (FR)' },
+  { code: '+91', flag: '🇮🇳', label: '+91 (IN)' },
+  { code: '+81', flag: '🇯🇵', label: '+81 (JP)' },
+  { code: '+61', flag: '🇦🇺', label: '+61 (AU)' },
+  { code: '+65', flag: '🇸🇬', label: '+65 (SG)' },
+  { code: '+52', flag: '🇲🇽', label: '+52 (MX)' },
+  { code: '+55', flag: '🇧🇷', label: '+55 (BR)' },
+  { code: '+31', flag: '🇳🇱', label: '+31 (NL)' },
+  { code: '+41', flag: '🇨🇭', label: '+41 (CH)' },
+  { code: '+971', flag: '🇦🇪', label: '+971 (AE)' },
+  { code: '+966', flag: '🇸🇦', label: '+966 (SA)' }
+];
+
 export const AVAILABLE_SUPPLIER_MANAGERS = [
   { value: 'Sarah Jenkins (Senior Category Manager - Cloud & IT)', label: 'Sarah Jenkins (Senior Category Manager - Cloud & IT)' },
   { value: 'David Miller (Procurement Director - Electronics & Defense)', label: 'David Miller (Procurement Director - Electronics & Defense)' },
@@ -926,7 +943,6 @@ export const OnboardingRequest: React.FC = () => {
     }
   ]);
   const [activeInvitation, setActiveInvitation] = useState<BuyerInvitation>(invitations[0]);
-  const [buyerDropdownOpen, setBuyerDropdownOpen] = useState(false);
 
   // View Mode: Defaults to 'DETAIL' since OnboardingRequestsList handles the list view
   const [viewMode, setViewMode] = useState<'LIST' | 'DETAIL'>('DETAIL');
@@ -981,6 +997,34 @@ export const OnboardingRequest: React.FC = () => {
   const [syncSuccessToast, setSyncSuccessToast] = useState<{ count: number; sections: number; message: string } | null>(null);
 
   const handleSaveDraft = () => {
+    try {
+      const stored = localStorage.getItem('verisource_master_profile');
+      const base = stored ? JSON.parse(stored) : {};
+      const updated = {
+        ...base,
+        legalName,
+        tradeName,
+        formerlyKnownAs,
+        normalisedName,
+        dunsNumber,
+        hasDuns,
+        primaryTaxId: taxId,
+        taxIdMasked: taxId,
+        phoneCountryCode,
+        mobilePhone,
+        phone: `${phoneCountryCode} ${mobilePhone}`.trim(),
+        primaryLanguage,
+        updatedAt: new Date().toISOString()
+      };
+      localStorage.setItem('verisource_master_profile', JSON.stringify(updated));
+      if (updated.legalName && updated.legalName !== 'Acme Industrial Tech Inc.') {
+        const orgKey = `verisource_profile_${updated.legalName.toLowerCase().replace(/\s+/g, '_')}`;
+        localStorage.setItem(orgKey, JSON.stringify(updated));
+      }
+      window.dispatchEvent(new CustomEvent('verisource_master_profile_updated', { detail: updated }));
+    } catch (e) {
+      console.warn('Error saving draft to master profile:', e);
+    }
     setDraftSavedState(true);
     setTimeout(() => setDraftSavedState(false), 2500);
   };
@@ -1006,6 +1050,9 @@ export const OnboardingRequest: React.FC = () => {
   const [supplierManager, setSupplierManager] = useState('Sarah Jenkins (Senior Category Manager - Cloud & IT)');
   const [hasDuns, setHasDuns] = useState(true);
   const [dunsNumber, setDunsNumber] = useState('09-842-1928');
+  const [phoneCountryCode, setPhoneCountryCode] = useState('+1');
+  const [mobilePhone, setMobilePhone] = useState('(512) 555-0199');
+  const [primaryLanguage, setPrimaryLanguage] = useState('English');
   const [subcategories, setSubcategories] = useState<string[]>([
     '41111900 - Industrial Sensors & Transducers',
     '43222600 - Network and Telemetry Equipment',
@@ -1319,6 +1366,10 @@ export const OnboardingRequest: React.FC = () => {
           if (profile.normalisedName) setNormalisedName(profile.normalisedName);
           if (profile.hasDuns !== undefined) setHasDuns(profile.hasDuns);
           if (profile.dunsNumber) setDunsNumber(profile.dunsNumber);
+          if (profile.primaryTaxId || profile.taxIdMasked) setTaxId(profile.primaryTaxId || profile.taxIdMasked);
+          if (profile.phoneCountryCode) setPhoneCountryCode(profile.phoneCountryCode);
+          if (profile.mobilePhone) setMobilePhone(profile.mobilePhone);
+          if (profile.primaryLanguage) setPrimaryLanguage(profile.primaryLanguage);
           if (profile.reportingCurrency) setReportingCurrency(profile.reportingCurrency);
           if (profile.annualRevenue) setAnnualRevenue(profile.annualRevenue);
           if (profile.totalEmployees) setTotalEmployees(profile.totalEmployees);
@@ -1935,6 +1986,19 @@ export const OnboardingRequest: React.FC = () => {
           setHasDuns(masterProfile?.hasDuns !== undefined ? masterProfile.hasDuns : true);
           setDunsNumber(masterProfile?.dunsNumber || '09-842-1928');
           syncedFieldCount += 2;
+        }
+        if (!isSmartMerge || !taxId) {
+          setTaxId(masterProfile?.primaryTaxId || masterProfile?.taxIdMasked || '84-1294812');
+          syncedFieldCount++;
+        }
+        if (!isSmartMerge || !mobilePhone) {
+          setPhoneCountryCode(masterProfile?.phoneCountryCode || '+1');
+          setMobilePhone(masterProfile?.mobilePhone || '(512) 555-0199');
+          syncedFieldCount += 2;
+        }
+        if (!isSmartMerge || !primaryLanguage) {
+          setPrimaryLanguage(masterProfile?.primaryLanguage || 'English');
+          syncedFieldCount++;
         }
         if (!isSmartMerge || subcategories.length === 0) {
           setSubcategories(masterProfile?.subcategories || [
@@ -2740,7 +2804,6 @@ export const OnboardingRequest: React.FC = () => {
     }));
 
     setActiveInvitation(inv);
-    setBuyerDropdownOpen(false);
     setSelectedBuyerId(inv.buyerOrgId);
 
     // Update Ava Agent greeting & isolate chat session
@@ -3648,20 +3711,16 @@ export const OnboardingRequest: React.FC = () => {
                 </button>
               </div>
 
-              {/* Minimalist Active Vendor Onboarding Card */}
+              {/* Minimalist Active Buyer Onboarding Card */}
               <div className="relative bg-slate-50/70 border border-slate-200 rounded-xl p-2.5 space-y-2 shadow-2xs">
-                {/* Vendor Selector Header */}
-                <button
-                  type="button"
-                  onClick={() => setBuyerDropdownOpen(!buyerDropdownOpen)}
-                  className="w-full flex items-center justify-between p-1.5 rounded-lg bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50/80 transition shadow-2xs group text-left cursor-pointer"
-                >
+                {/* Buyer Information Header */}
+                <div className="w-full flex items-center justify-between p-1.5 rounded-lg bg-white border border-slate-200 shadow-2xs">
                   <div className="flex items-center space-x-2 min-w-0 pr-1">
                     <div className="w-6 h-6 rounded-md bg-emerald-100 text-emerald-800 flex items-center justify-center text-[10px] font-bold shrink-0">
                       {activeInvitation.buyerName.slice(0, 2).toUpperCase()}
                     </div>
                     <div className="min-w-0">
-                      <div className="font-bold text-xs text-slate-900 group-hover:text-emerald-700 truncate">
+                      <div className="font-bold text-xs text-slate-900 truncate" title={activeInvitation.buyerName}>
                         {activeInvitation.buyerName}
                       </div>
                       <div className="text-[10px] text-slate-400 font-mono truncate">
@@ -3669,39 +3728,7 @@ export const OnboardingRequest: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  <ChevronDown className={`w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 shrink-0 transition-transform ${buyerDropdownOpen ? 'rotate-180' : ''}`} />
-                </button>
-
-                {/* Multi-Vendor Dropdown Menu */}
-                {buyerDropdownOpen && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 p-1.5 space-y-1 animate-in fade-in slide-in-from-top-1">
-                    <div className="text-[10px] font-bold text-slate-400 uppercase px-2 py-1">
-                      Switch Vendor ({invitations.length})
-                    </div>
-                    {invitations.map((inv) => (
-                      <button
-                        key={inv.id}
-                        type="button"
-                        onClick={() => {
-                          handleSelectInvitation(inv);
-                        }}
-                        className={`w-full p-2 rounded-lg text-left transition flex items-start justify-between cursor-pointer ${
-                          inv.id === activeInvitation.id
-                            ? 'bg-emerald-50 text-emerald-900 font-semibold'
-                            : 'hover:bg-slate-50 text-slate-700'
-                        }`}
-                      >
-                        <div className="min-w-0 pr-2">
-                          <div className="text-xs truncate font-medium">{inv.buyerName}</div>
-                          <div className="text-[10px] text-slate-500 font-mono truncate">{inv.invitationCode} • {inv.category}</div>
-                        </div>
-                        {inv.id === activeInvitation.id && (
-                          <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                </div>
 
                 {/* Compact Progress Line */}
                 <div className="pt-1.5 border-t border-slate-200/60 flex items-center justify-between text-[10px]">
@@ -4516,6 +4543,99 @@ export const OnboardingRequest: React.FC = () => {
                       />
                     </div>
 
+                    {/* Primary Tax Identification Number */}
+                    <div className="space-y-1.5 lg:col-span-2">
+                      <div className="flex items-center justify-between min-h-[20px] h-5">
+                        <div className="flex items-center gap-1.5">
+                          <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
+                            Primary Tax Identification Number <span className="text-red-500">*</span>
+                          </label>
+                          <AiFilledBadge isAiFilled={aiFilledFields.taxId} fieldName="Primary Tax ID" />
+                        </div>
+                      </div>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          disabled={isFormReadOnly}
+                          value={taxId}
+                          onChange={(e) => {
+                            setTaxId(e.target.value);
+                            if (aiFilledFields.taxId) setAiFilledFields(prev => ({ ...prev, taxId: false }));
+                          }}
+                          placeholder="e.g. 84-1294812"
+                          className={`w-full pl-3 pr-24 py-2 text-xs font-mono rounded-lg border transition ${
+                            isFormReadOnly
+                              ? 'bg-slate-50 text-slate-700 border-slate-200 cursor-default font-semibold'
+                              : highlightField === 'taxId'
+                              ? 'ring-2 ring-emerald-500 border-emerald-500 bg-emerald-50/50'
+                              : 'bg-white text-slate-900 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600'
+                          }`}
+                        />
+                        <div className="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none">
+                          <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/80 flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                            <span>TIN Verified</span>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Mobile Phone Number with Country Code */}
+                    <div className="space-y-1.5 lg:col-span-2">
+                      <div className="flex items-center justify-between min-h-[20px] h-5">
+                        <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
+                          Mobile Phone Number <span className="text-red-500">*</span>
+                        </label>
+                      </div>
+                      <div className="flex gap-1.5">
+                        <select
+                          disabled={isFormReadOnly}
+                          value={phoneCountryCode}
+                          onChange={(e) => setPhoneCountryCode(e.target.value)}
+                          className="w-24 px-2 py-2 text-xs rounded-lg border bg-slate-50 text-slate-800 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 font-medium shrink-0 cursor-pointer disabled:cursor-default"
+                        >
+                          {AVAILABLE_PHONE_COUNTRY_CODES.map(c => (
+                            <option key={c.code} value={c.code}>{c.flag} {c.code}</option>
+                          ))}
+                        </select>
+                        <input
+                          type="tel"
+                          disabled={isFormReadOnly}
+                          value={mobilePhone}
+                          onChange={(e) => setMobilePhone(e.target.value)}
+                          placeholder="(555) 000-0000"
+                          className={`flex-1 px-3 py-2 text-xs font-medium rounded-lg border transition ${
+                            isFormReadOnly
+                              ? 'bg-slate-50 text-slate-700 border-slate-200 cursor-default'
+                              : 'bg-white text-slate-900 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600'
+                          }`}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Primary Language */}
+                    <div className="space-y-1.5 lg:col-span-2">
+                      <div className="flex items-center justify-between min-h-[20px] h-5">
+                        <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
+                          Primary Language <span className="text-red-500">*</span>
+                        </label>
+                      </div>
+                      <select
+                        disabled={isFormReadOnly}
+                        value={primaryLanguage}
+                        onChange={(e) => setPrimaryLanguage(e.target.value)}
+                        className={`w-full px-3 py-2 text-xs font-medium rounded-lg border transition ${
+                          isFormReadOnly
+                            ? 'bg-slate-50 text-slate-700 border-slate-200 cursor-default'
+                            : 'bg-white text-slate-900 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600 cursor-pointer'
+                        }`}
+                      >
+                        {AVAILABLE_LANGUAGES.map(lang => (
+                          <option key={lang} value={lang}>{lang}</option>
+                        ))}
+                      </select>
+                    </div>
+
                     {/* Subcategory (UNSPSC) */}
                     <div className="space-y-2 lg:col-span-3">
                       <div className="h-6 flex items-center justify-between gap-1">
@@ -5046,10 +5166,32 @@ export const OnboardingRequest: React.FC = () => {
                             </div>
                           </div>
 
-                          <div className="space-y-1 lg:col-span-4">
+                          <div className="space-y-1 lg:col-span-2">
                             <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Normalised Corporate Name</label>
                             <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 font-mono text-slate-800 text-xs">
                               {normalisedName}
+                            </div>
+                          </div>
+
+                          <div className="space-y-1 lg:col-span-2">
+                            <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Primary Tax Identification</label>
+                            <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 font-mono text-slate-800 flex items-center justify-between">
+                              <span>{taxId || '—'}</span>
+                              <span className="text-[10px] font-sans font-medium text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">TIN Matched</span>
+                            </div>
+                          </div>
+
+                          <div className="space-y-1 lg:col-span-2">
+                            <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Mobile Phone Number</label>
+                            <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 text-slate-800 font-medium">
+                              {phoneCountryCode} {mobilePhone}
+                            </div>
+                          </div>
+
+                          <div className="space-y-1 lg:col-span-2">
+                            <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Primary Language</label>
+                            <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 text-slate-800 font-medium">
+                              {primaryLanguage}
                             </div>
                           </div>
 
