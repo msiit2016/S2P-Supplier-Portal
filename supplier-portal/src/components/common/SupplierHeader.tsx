@@ -812,19 +812,17 @@ export const SupplierHeader: React.FC<SupplierHeaderProps> = ({ onToggleAi }) =>
     { label: 'RFPs & Bids', icon: FileText, route: '/rfps', title: 'Enterprise Sourcing & RFPs', tier: 'core' },
     { label: 'Orders', icon: ShoppingCart, route: '/orders', title: 'Purchase Orders & Line Items', tier: 'core' },
     { label: 'Invoices', icon: Receipt, route: '/invoices', title: 'Commercial Invoices & 3-Way Match', tier: 'core' },
-    { label: 'Shipments', icon: Truck, route: '/asns', title: 'Shipping & Advance Shipping Notices (ASN)', tier: 'mid' },
-    { label: 'Documents', icon: FolderLock, route: '/documents', title: 'Enterprise Document Vault', tier: 'wide' }
+    { label: 'Shipments', icon: Truck, route: '/asns', title: 'Shipping & Advance Shipping Notices (ASN)', tier: 'core' }
   ];
 
-  // 2. Secondary links in "More" Hub (including items that collapse on compact desktop screens):
+  // 2. Secondary links in "More" Hub (Re-ordered by Urgency & Operational Frequency):
   const secondaryNavLinks = [
-    { label: 'Documents', icon: FolderLock, route: '/documents', title: 'Enterprise Document Vault', showBelow: '2xl' },
-    { label: 'Shipments', icon: Truck, route: '/asns', title: 'Shipping & Advance Shipping Notices (ASN)', showBelow: 'xl' },
-    { label: 'Public Profile', icon: Globe, route: '/public-profile', title: 'Master Public Profile & Connected Buyers' },
-    { label: 'Catalog', icon: Package, route: '/catalog', title: 'Item Master & Product Catalog' },
-    { label: 'Task Queue', icon: ClipboardList, route: '/tasks', badge: '4', title: 'Operational Tasks & Approvals' },
-    { label: 'All Transactions', icon: Layers, route: '/transactions', title: 'Consolidated Cross-Buyer Financial Ledger' },
-    { label: 'Collaboration Hub', icon: MessageSquare, route: '/communications', title: 'Transactional Messaging & Collaboration Hub' }
+    { label: 'Task Queue', icon: ClipboardList, route: '/tasks', badge: '4', title: 'Operational Tasks & Approvals', category: 'action' },
+    { label: 'Collaboration Hub', icon: MessageSquare, route: '/communications', title: 'Transactional Messaging & Collaboration Hub', category: 'action' },
+    { label: 'Catalog', icon: Package, route: '/catalog', title: 'Item Master & Product Catalog', category: 'commercial' },
+    { label: 'All Transactions', icon: Layers, route: '/transactions', title: 'Consolidated Cross-Buyer Financial Ledger', category: 'commercial' },
+    { label: 'Documents', icon: FolderLock, route: '/documents', title: 'Enterprise Document Vault', category: 'compliance' },
+    { label: 'Public Profile', icon: Globe, route: '/public-profile', title: 'Master Public Profile & Connected Buyers', category: 'compliance' }
   ];
 
   const isLinkActive = (route: string) => {
@@ -928,51 +926,51 @@ export const SupplierHeader: React.FC<SupplierHeaderProps> = ({ onToggleAi }) =>
                     </span>
                   </div>
 
-                  {/* Single Column List with Module Names Only */}
+                  {/* Single Column List with Categorized Group Dividers */}
                   <div className="p-1.5 space-y-0.5">
-                    {secondaryNavLinks.map((item) => {
+                    {secondaryNavLinks.map((item, idx) => {
                       const active = isLinkActive(item.route);
                       const Icon = item.icon;
-                      const hideClass = (item as any).showBelow === '2xl' 
-                        ? '2xl:hidden' 
-                        : (item as any).showBelow === 'xl' 
-                          ? 'xl:hidden' 
-                          : '';
+                      const showDivider = idx === 2 || idx === 4;
 
                       return (
-                        <button
-                          key={item.route}
-                          onClick={() => {
-                            navigate(item.route);
-                            setMoreDropdownOpen(false);
-                          }}
-                          className={`${hideClass} w-full px-2.5 py-2 rounded-xl text-left flex items-center justify-between transition group cursor-pointer ${
-                            active
-                              ? 'bg-emerald-500/15 text-white border border-emerald-500/30'
-                              : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
-                          }`}
-                        >
-                          <div className="flex items-center space-x-2.5 min-w-0">
-                            <div className={`w-7 h-7 rounded-lg border flex items-center justify-center shrink-0 text-xs font-bold ${
-                              active 
-                                ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300' 
-                                : 'bg-slate-800 border-slate-700 text-slate-300 group-hover:text-emerald-400'
-                            }`}>
-                              <Icon className="w-3.5 h-3.5" />
-                            </div>
-                            <span className="font-semibold text-xs truncate group-hover:text-white flex items-center gap-1.5">
-                              <span>{item.label}</span>
-                              {item.badge && (
-                                <span className="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-emerald-500 text-slate-950">
-                                  {item.badge}
-                                </span>
-                              )}
-                            </span>
-                          </div>
-                          {active && (
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 ml-2" />
+                        <React.Fragment key={item.route}>
+                          {showDivider && (
+                            <div className="my-1 border-t border-slate-800/80" />
                           )}
-                        </button>
+                          <button
+                            onClick={() => {
+                              navigate(item.route);
+                              setMoreDropdownOpen(false);
+                            }}
+                            className={`w-full px-2.5 py-2 rounded-xl text-left flex items-center justify-between transition group cursor-pointer ${
+                              active
+                                ? 'bg-emerald-500/15 text-white border border-emerald-500/30'
+                                : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
+                            }`}
+                          >
+                            <div className="flex items-center space-x-2.5 min-w-0">
+                              <div className={`w-7 h-7 rounded-lg border flex items-center justify-center shrink-0 text-xs font-bold ${
+                                active 
+                                  ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300' 
+                                  : 'bg-slate-800 border-slate-700 text-slate-300 group-hover:text-emerald-400'
+                              }`}>
+                                <Icon className="w-3.5 h-3.5" />
+                              </div>
+                              <span className="font-semibold text-xs truncate group-hover:text-white flex items-center gap-1.5">
+                                <span>{item.label}</span>
+                                {item.badge && (
+                                  <span className="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-emerald-500 text-slate-950">
+                                    {item.badge}
+                                  </span>
+                                )}
+                              </span>
+                            </div>
+                            {active && (
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 ml-2" />
+                            )}
+                          </button>
+                        </React.Fragment>
                       );
                     })}
                   </div>
