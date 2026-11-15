@@ -900,7 +900,14 @@ export const AiFilledBadge: React.FC<AiFilledBadgeProps> = () => {
 };
 
 export const OnboardingRequest: React.FC = () => {
-  const { navigate, routeState, selectedBuyerId, setSelectedBuyerId } = usePortal();
+  const { 
+    navigate, 
+    routeState, 
+    selectedBuyerId, 
+    setSelectedBuyerId,
+    setAiDrawerOpen,
+    setCopilotViewMode: setGlobalCopilotViewMode 
+  } = usePortal();
   const { currentUser } = useAuth();
 
   // Active Buyer Invitation Context & Multi-Buyer Support
@@ -966,6 +973,12 @@ export const OnboardingRequest: React.FC = () => {
 
   // Stepper state: Step 1 to Step 8 (GEP Quantum Benchmark)
   const [activeStep, setActiveStep] = useState<number>(1);
+
+  // By default, open Ava Agent in DOCK view so users immediately see AI assistance
+  useEffect(() => {
+    setGlobalCopilotViewMode('DOCK');
+    setAiDrawerOpen(true);
+  }, [setGlobalCopilotViewMode, setAiDrawerOpen]);
   const [activeStageDetail, setActiveStageDetail] = useState<number | null>(null);
 
   // Left sidebar minimize / maximize state (ChatGPT-style collapse)
@@ -1360,32 +1373,72 @@ export const OnboardingRequest: React.FC = () => {
         const stored = localStorage.getItem('verisource_master_profile');
         if (stored) {
           const profile = JSON.parse(stored);
+          const isNewReg = localStorage.getItem('is_new_registration') === 'true' || routeState?.isNewRegistration;
+          const isNonAcme = profile.legalName && profile.legalName !== 'Acme Industrial Tech Inc.';
+
           if (profile.legalName) setLegalName(profile.legalName);
-          if (profile.tradeName) setTradeName(profile.tradeName);
-          if (profile.formerlyKnownAs) setFormerlyKnownAs(profile.formerlyKnownAs);
-          if (profile.normalisedName) setNormalisedName(profile.normalisedName);
-          if (profile.hasDuns !== undefined) setHasDuns(profile.hasDuns);
-          if (profile.dunsNumber) setDunsNumber(profile.dunsNumber);
-          if (profile.primaryTaxId || profile.taxIdMasked) setTaxId(profile.primaryTaxId || profile.taxIdMasked);
-          if (profile.phoneCountryCode) setPhoneCountryCode(profile.phoneCountryCode);
-          if (profile.mobilePhone) setMobilePhone(profile.mobilePhone);
-          if (profile.primaryLanguage) setPrimaryLanguage(profile.primaryLanguage);
-          if (profile.reportingCurrency) setReportingCurrency(profile.reportingCurrency);
-          if (profile.annualRevenue) setAnnualRevenue(profile.annualRevenue);
-          if (profile.totalEmployees) setTotalEmployees(profile.totalEmployees);
-          if (profile.incorporationDate) setIncorporationDate(profile.incorporationDate);
-          if (profile.registeredAddress || profile.hqAddress) setRegisteredAddress(profile.registeredAddress || profile.hqAddress);
-          if (profile.country) setCountry(profile.country);
-          if (profile.website) setWebsite(profile.website);
-          if (profile.identifications && profile.identifications.length > 0) setIdentifications(profile.identifications);
-          // Note: Buyer-scoped fields (supplierManager, subcategories, serviceLocations, bankAccounts, 
-          // commercialSettings, certificates) are deliberately NOT auto-overwritten here to protect
-          // buyer-specific requirements. They sync explicitly via the "Sync with Master Profile" modal.
+          if (profile.normalisedName) {
+            setNormalisedName(profile.normalisedName);
+          } else if (profile.legalName) {
+            setNormalisedName(profile.legalName.toUpperCase());
+          }
+
+          if (isNonAcme || isNewReg) {
+            setTradeName(profile.tradeName || '');
+            setFormerlyKnownAs(profile.formerlyKnownAs || '');
+            setHasDuns(profile.hasDuns ?? false);
+            setDunsNumber(profile.dunsNumber || '');
+            setTaxId(profile.primaryTaxId || profile.taxIdMasked || '');
+            setPhoneCountryCode(profile.phoneCountryCode || '+1');
+            setMobilePhone(profile.mobilePhone || '');
+            setPrimaryLanguage(profile.primaryLanguage || 'English');
+            setCountry(profile.country || 'United States (US)');
+            setRegisteredAddress(profile.registeredAddress || profile.hqAddress || '');
+            setWebsite(profile.website || '');
+            setReportingCurrency(profile.reportingCurrency || 'USD ($) - US Dollar');
+            setAnnualRevenue(profile.annualRevenue || '');
+            setTotalEmployees(profile.totalEmployees || '');
+            setIncorporationDate(profile.incorporationDate || '');
+            setDescriptionOfServices(profile.description || '');
+            if (profile.subcategories && profile.subcategories.length > 0) {
+              setSubcategories(profile.subcategories);
+            }
+            if (profile.serviceLocations && profile.serviceLocations.length > 0) {
+              setServiceLocations(profile.serviceLocations);
+            }
+            if (profile.businessUnits && profile.businessUnits.length > 0) {
+              setBusinessUnits(profile.businessUnits);
+            }
+            if (profile.identifications && profile.identifications.length > 0) {
+              setIdentifications(profile.identifications);
+            }
+          } else {
+            // Acme Demo profile
+            if (profile.tradeName) setTradeName(profile.tradeName);
+            if (profile.formerlyKnownAs) setFormerlyKnownAs(profile.formerlyKnownAs);
+            if (profile.hasDuns !== undefined) setHasDuns(profile.hasDuns);
+            if (profile.dunsNumber) setDunsNumber(profile.dunsNumber);
+            if (profile.primaryTaxId || profile.taxIdMasked) setTaxId(profile.primaryTaxId || profile.taxIdMasked);
+            if (profile.phoneCountryCode) setPhoneCountryCode(profile.phoneCountryCode);
+            if (profile.mobilePhone) setMobilePhone(profile.mobilePhone);
+            if (profile.primaryLanguage) setPrimaryLanguage(profile.primaryLanguage);
+            if (profile.reportingCurrency) setReportingCurrency(profile.reportingCurrency);
+            if (profile.annualRevenue) setAnnualRevenue(profile.annualRevenue);
+            if (profile.totalEmployees) setTotalEmployees(profile.totalEmployees);
+            if (profile.incorporationDate) setIncorporationDate(profile.incorporationDate);
+            if (profile.registeredAddress || profile.hqAddress) setRegisteredAddress(profile.registeredAddress || profile.hqAddress);
+            if (profile.country) setCountry(profile.country);
+            if (profile.website) setWebsite(profile.website);
+            if (profile.identifications && profile.identifications.length > 0) setIdentifications(profile.identifications);
+          }
         }
       } catch (e) {
         console.warn('Sync master profile error:', e);
       }
     };
+
+    // Apply on mount immediately
+    applyUniversalMasterProfile();
 
     window.addEventListener('verisource_master_profile_updated', applyUniversalMasterProfile);
     window.addEventListener('storage', applyUniversalMasterProfile);
@@ -1393,7 +1446,7 @@ export const OnboardingRequest: React.FC = () => {
       window.removeEventListener('verisource_master_profile_updated', applyUniversalMasterProfile);
       window.removeEventListener('storage', applyUniversalMasterProfile);
     };
-  }, [isSubmitted, isEditingAfterSubmit]);
+  }, [isSubmitted, isEditingAfterSubmit, routeState]);
 
   // =========================================================================
   // AGENT COPILOT STATE & PAGINATION (No page height blowout)
@@ -2603,6 +2656,7 @@ export const OnboardingRequest: React.FC = () => {
   // Handle Final Submit & Resubmit
   const handleFinalSubmit = () => {
     setDeclarationError(null);
+    handleSaveDraft();
     setSubmitting(true);
     setTimeout(() => {
       setSubmitting(false);
@@ -4537,8 +4591,8 @@ export const OnboardingRequest: React.FC = () => {
                       <input
                         type="text"
                         disabled
-                        value={normalisedName}
-                        placeholder="ACME INDUSTRIAL TECH INC"
+                        value={normalisedName || (legalName ? legalName.toUpperCase() : '')}
+                        placeholder="e.g. ACME INDUSTRIAL TECH INC"
                         className="w-full px-3 py-2 text-xs font-mono font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-lg cursor-default"
                       />
                     </div>

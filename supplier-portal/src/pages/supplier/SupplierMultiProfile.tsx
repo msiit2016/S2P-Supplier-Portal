@@ -2530,8 +2530,8 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
                 <input
                   type="text"
                   disabled
-                  value={profile.normalisedName || 'ACME INDUSTRIAL TECH INC'}
-                  placeholder="ACME INDUSTRIAL TECH INC"
+                  value={profile.normalisedName || (profile.legalName ? profile.legalName.toUpperCase() : '')}
+                  placeholder="e.g. ACME INDUSTRIAL TECH INC"
                   className="w-full px-3 py-2 text-xs font-mono font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-lg cursor-default"
                 />
               </div>

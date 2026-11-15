@@ -366,14 +366,14 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
         setErrorMsg(res.error);
         setLoading(false);
       } else {
-        setSuccessMsg('Account created successfully! Initializing your public profile in edit mode...');
+        setSuccessMsg('Account created successfully! Launching your onboarding questionnaire...');
         setTimeout(() => {
           switchUser(signupEmail, companyName, signupContactName);
-          navigate('/public-profile', { isNewRegistration: true, editMode: true });
+          navigate('/onboarding/detail', { isNewRegistration: true, autoDetail: true, openAva: true });
         }, 700);
       }
     } catch (err: any) {
-      // Offline fallback: provision profile and navigate to public profile in edit mode
+      // Offline fallback: provision profile and navigate to onboarding questionnaire
       const cleanProfile = createBlankSupplierProfile(
         companyName,
         signupContactName || 'Authorized Officer',
@@ -385,7 +385,7 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
         localStorage.setItem('is_new_registration', 'true');
       }
       switchUser(signupEmail, companyName, signupContactName);
-      navigate('/public-profile', { isNewRegistration: true, editMode: true });
+      navigate('/onboarding/detail', { isNewRegistration: true, autoDetail: true, openAva: true });
     } finally {
       setLoading(false);
     }
@@ -988,7 +988,7 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
           )}
 
           {/* =========================================================
-              VIEW 2: CREATE SUPPLIER ACCOUNT (Signs up -> Lands on /public-profile)
+              VIEW 2: CREATE SUPPLIER ACCOUNT (Signs up -> Lands on /onboarding/detail)
               Clean, professional enterprise form without DUNS, invite code, or master banner
              ========================================================= */}
           {activeTab === 'SIGNUP' && (
