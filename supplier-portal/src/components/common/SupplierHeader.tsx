@@ -809,16 +809,15 @@ export const SupplierHeader: React.FC<SupplierHeaderProps> = ({ onToggleAi }) =>
   const primaryNavLinks = [
     { label: 'Dashboard', icon: LayoutDashboard, route: '/dashboard', title: 'Executive Supplier Overview', tier: 'core' },
     { label: 'Onboarding', icon: FileCheck2, route: '/onboarding', title: 'Buyer Onboarding Requests & Qualifications', tier: 'core' },
+    { label: 'RFPs & Bids', icon: FileText, route: '/rfps', title: 'Enterprise Sourcing & RFPs', tier: 'core' },
     { label: 'Orders', icon: ShoppingCart, route: '/orders', title: 'Purchase Orders & Line Items', tier: 'core' },
     { label: 'Invoices', icon: Receipt, route: '/invoices', title: 'Commercial Invoices & 3-Way Match', tier: 'core' },
     { label: 'Shipments', icon: Truck, route: '/asns', title: 'Shipping & Advance Shipping Notices (ASN)', tier: 'mid' },
-    { label: 'RFPs & Bids', icon: FileText, route: '/rfps', title: 'Enterprise Sourcing & RFPs', tier: 'wide' },
     { label: 'Documents', icon: FolderLock, route: '/documents', title: 'Enterprise Document Vault', tier: 'wide' }
   ];
 
   // 2. Secondary links in "More" Hub (including items that collapse on compact desktop screens):
   const secondaryNavLinks = [
-    { label: 'RFPs & Bids', icon: FileText, route: '/rfps', title: 'Enterprise Sourcing & RFPs', showBelow: '2xl' },
     { label: 'Documents', icon: FolderLock, route: '/documents', title: 'Enterprise Document Vault', showBelow: '2xl' },
     { label: 'Shipments', icon: Truck, route: '/asns', title: 'Shipping & Advance Shipping Notices (ASN)', showBelow: 'xl' },
     { label: 'Public Profile', icon: Globe, route: '/public-profile', title: 'Master Public Profile & Connected Buyers' },
