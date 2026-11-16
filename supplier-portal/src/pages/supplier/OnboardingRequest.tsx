@@ -59,7 +59,8 @@ import {
   Plus,
   Trash2,
   LayoutGrid,
-  AlertCircle
+  AlertCircle,
+  Table as TableIcon
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { GepIdentificationGrid } from '../../components/onboarding/GepIdentificationGrid.js';
@@ -5125,34 +5126,36 @@ export const OnboardingRequest: React.FC = () => {
                     </button>
                   )}
 
-                  {/* Step 9 View Switcher: Compact Icon Toggle (Complete Form Dossier vs Compact Summary) */}
+                  {/* Step 9 View Switcher: Consistent List / Grid Toggle Matching Global Standards */}
                   {activeStep === 9 && (
-                    <div className="flex items-center gap-0.5 p-1 bg-slate-100 rounded-xl border border-slate-200/80 shrink-0 select-none">
+                    <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 shrink-0 select-none">
                       <button
                         type="button"
                         onClick={() => setReviewViewMode('DOSSIER')}
-                        title="Complete Form View"
-                        aria-label="Complete Form View"
-                        className={`p-1.5 rounded-lg transition cursor-pointer flex items-center justify-center ${
+                        className={`p-1.5 rounded-md text-xs font-medium transition cursor-pointer flex items-center gap-1 ${
                           reviewViewMode === 'DOSSIER'
-                            ? 'bg-white text-emerald-700 shadow-2xs'
-                            : 'text-slate-400 hover:text-slate-700 hover:bg-slate-200/60'
+                            ? 'bg-white text-slate-900 shadow-2xs font-semibold'
+                            : 'text-slate-500 hover:text-slate-900'
                         }`}
+                        title="Detailed List / Form View"
+                        aria-label="Detailed List / Form View"
                       >
-                        <FileText className="w-4 h-4" />
+                        <TableIcon className="w-3.5 h-3.5" />
+                        <span className="text-[11px]">List</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => setReviewViewMode('SUMMARY')}
-                        title="Compact Summary View"
-                        aria-label="Compact Summary View"
-                        className={`p-1.5 rounded-lg transition cursor-pointer flex items-center justify-center ${
+                        className={`p-1.5 rounded-md text-xs font-medium transition cursor-pointer flex items-center gap-1 ${
                           reviewViewMode === 'SUMMARY'
-                            ? 'bg-white text-emerald-700 shadow-2xs'
-                            : 'text-slate-400 hover:text-slate-700 hover:bg-slate-200/60'
+                            ? 'bg-white text-slate-900 shadow-2xs font-semibold'
+                            : 'text-slate-500 hover:text-slate-900'
                         }`}
+                        title="Summary Card Grid View"
+                        aria-label="Summary Card Grid View"
                       >
-                        <LayoutGrid className="w-4 h-4" />
+                        <LayoutGrid className="w-3.5 h-3.5" />
+                        <span className="text-[11px]">Grid</span>
                       </button>
                     </div>
                   )}
