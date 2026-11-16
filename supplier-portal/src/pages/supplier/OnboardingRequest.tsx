@@ -5480,13 +5480,14 @@ export const OnboardingRequest: React.FC = () => {
                     <div id="subcategories" className={`space-y-2 lg:col-span-3 rounded-xl transition ${
                       isFieldHighlighted('subcategories') ? 'ring-2 ring-rose-500 border border-rose-400 p-1 rounded-xl bg-rose-50/30' : ''
                     }`}>
-                      <div className="h-6 flex items-center justify-between gap-1.5 min-w-0">
-                        <label className="text-xs font-semibold text-slate-700 truncate" title="Subcategory">
-                          Subcategory <span className="text-red-500">*</span>
+                      <div className="h-6 flex items-center gap-1.5 min-w-0">
+                        <label className="text-xs font-semibold text-slate-700 flex items-center gap-1 truncate" title="Subcategory">
+                          <span>Subcategory</span>
+                          <span className={`text-xs ${subcategories.length > 0 ? 'text-slate-600 font-medium' : 'text-slate-400 font-normal'}`}>
+                            ({subcategories.length})
+                          </span>
+                          <span className="text-red-500">*</span>
                         </label>
-                        <span className="text-[10px] font-bold text-slate-500 font-mono bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 shrink-0">
-                          {subcategories.length}
-                        </span>
                       </div>
 
                       {!isFormReadOnly && (
@@ -5550,13 +5551,14 @@ export const OnboardingRequest: React.FC = () => {
                     <div id="serviceLocations" className={`space-y-2 lg:col-span-3 rounded-xl transition ${
                       isFieldHighlighted('serviceLocations') ? 'ring-2 ring-rose-500 border border-rose-400 p-1 rounded-xl bg-rose-50/30' : ''
                     }`}>
-                      <div className="h-6 flex items-center justify-between gap-1.5 min-w-0">
-                        <label className="text-xs font-semibold text-slate-700 truncate" title="Service Locations">
-                          Service Locations <span className="text-red-500">*</span>
+                      <div className="h-6 flex items-center gap-1.5 min-w-0">
+                        <label className="text-xs font-semibold text-slate-700 flex items-center gap-1 truncate" title="Service Locations">
+                          <span>Service Locations</span>
+                          <span className={`text-xs ${serviceLocations.length > 0 ? 'text-slate-600 font-medium' : 'text-slate-400 font-normal'}`}>
+                            ({serviceLocations.length})
+                          </span>
+                          <span className="text-red-500">*</span>
                         </label>
-                        <span className="text-[10px] font-bold text-slate-500 font-mono bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 shrink-0">
-                          {serviceLocations.length}
-                        </span>
                       </div>
 
                       {!isFormReadOnly && (
@@ -5810,13 +5812,14 @@ export const OnboardingRequest: React.FC = () => {
                     <div id="businessUnits" className={`space-y-2 lg:col-span-3 rounded-xl transition ${
                       isFieldHighlighted('businessUnits') ? 'ring-2 ring-rose-500 border border-rose-400 p-1 rounded-xl bg-rose-50/30' : ''
                     }`}>
-                      <div className="h-6 flex items-center justify-between gap-1.5 min-w-0">
-                        <label className="text-xs font-semibold text-slate-700 truncate" title="Target Business Units">
-                          Target Business Units <span className="text-red-500">*</span>
+                      <div className="h-6 flex items-center gap-1.5 min-w-0">
+                        <label className="text-xs font-semibold text-slate-700 flex items-center gap-1 truncate" title="Target Business Units">
+                          <span>Target Business Units</span>
+                          <span className={`text-xs ${businessUnits.length > 0 ? 'text-slate-600 font-medium' : 'text-slate-400 font-normal'}`}>
+                            ({businessUnits.length})
+                          </span>
+                          <span className="text-red-500">*</span>
                         </label>
-                        <span className="text-[10px] font-bold text-slate-500 font-mono bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 shrink-0">
-                          {businessUnits.length}
-                        </span>
                       </div>
 
                       {!isFormReadOnly && (
@@ -5868,13 +5871,14 @@ export const OnboardingRequest: React.FC = () => {
                     <div id="operatingLanguages" className={`space-y-2 lg:col-span-3 rounded-xl transition ${
                       isFieldHighlighted('operatingLanguages') ? 'ring-2 ring-rose-500 border border-rose-400 p-1 rounded-xl bg-rose-50/30' : ''
                     }`}>
-                      <div className="h-6 flex items-center justify-between gap-1.5 min-w-0">
-                        <label className="text-xs font-semibold text-slate-700 truncate" title="Supported Languages">
-                          Supported Languages <span className="text-red-500">*</span>
+                      <div className="h-6 flex items-center gap-1.5 min-w-0">
+                        <label className="text-xs font-semibold text-slate-700 flex items-center gap-1 truncate" title="Supported Languages">
+                          <span>Supported Languages</span>
+                          <span className={`text-xs ${operatingLanguages.length > 0 ? 'text-slate-600 font-medium' : 'text-slate-400 font-normal'}`}>
+                            ({operatingLanguages.length})
+                          </span>
+                          <span className="text-red-500">*</span>
                         </label>
-                        <span className="text-[10px] text-slate-500 font-mono font-bold bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 shrink-0">
-                          {operatingLanguages.length}
-                        </span>
                       </div>
 
                       {!isFormReadOnly && (
