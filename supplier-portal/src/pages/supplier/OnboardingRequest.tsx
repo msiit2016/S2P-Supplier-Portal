@@ -4499,7 +4499,6 @@ export const OnboardingRequest: React.FC = () => {
                 {phases.map((phase) => {
                   const phaseSteps = steps.filter((s) => phase.stepNums.includes(s.num));
                   const phaseDoneCount = phaseSteps.filter((s) => isStepCompleted(s.num)).length;
-                  const isPhaseDone = phaseDoneCount === phaseSteps.length;
                   const isPhaseActive = phase.stepNums.includes(activeStep);
 
                   return (
@@ -4511,12 +4510,8 @@ export const OnboardingRequest: React.FC = () => {
                         }`}>
                           {phase.title}
                         </span>
-                        {/* Milestone Ratio Pill: Consistent numeric ratio (no text noise) */}
-                        <span className={`text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded-md border ${
-                          isPhaseDone
-                            ? 'text-emerald-700 bg-emerald-50 border-emerald-200/80 shadow-2xs'
-                            : 'text-slate-600 bg-slate-100 border-slate-200'
-                        }`}>
+                        {/* Milestone Ratio Pill: Consistent neutral numeric ratio */}
+                        <span className="text-[10px] font-mono font-medium text-slate-500 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded-md">
                           {phaseDoneCount}/{phase.stepNums.length}
                         </span>
                       </div>
