@@ -71,7 +71,7 @@ import { MasterProfileSyncModal, SyncStrategy } from '../../components/onboardin
 import { VerificationIndicator } from '../../components/common/VerificationIndicator.js';
 import { SearchableSelect } from '../../components/common/SearchableSelect.js';
 import { FilterSelect } from '../../components/common/FilterSelect.js';
-import { saveBuyerOnboardingProgress } from '../../services/onboardingStateService.js';
+import { saveBuyerOnboardingProgress, getBuyerOnboardingProgress } from '../../services/onboardingStateService.js';
 import { formatDateMMDDYYYY } from '../../utils/dateUtils.js';
 import { 
   GepIdentificationItem, 
@@ -927,7 +927,9 @@ export const OnboardingRequest: React.FC = () => {
 
   const initProfile = getInitialSupplierMaster();
   const initIsNewReg = (typeof window !== 'undefined' && localStorage.getItem('is_new_registration') === 'true') || Boolean(routeState?.isNewRegistration);
-  const initIsNonAcme = (initProfile?.legalName && initProfile?.legalName !== 'Acme Industrial Tech Inc.') || initIsNewReg;
+  const userOrg = currentUser?.organizationName;
+  const isUserCustom = Boolean(userOrg && userOrg !== 'Acme Industrial Tech Inc.' && userOrg !== 'Verified Supplier');
+  const initIsNonAcme = (initProfile?.legalName && initProfile?.legalName !== 'Acme Industrial Tech Inc.') || isUserCustom || initIsNewReg;
 
   // Active Buyer Invitation Context & Multi-Buyer Support
   const [invitations] = useState<BuyerInvitation[]>(() => {
@@ -1096,10 +1098,11 @@ export const OnboardingRequest: React.FC = () => {
   });
 
   // Section 1: Basic Details (Corporate Legal Governance & Hierarchy - GEP Benchmark)
-  const [legalName, setLegalName] = useState(() => initProfile?.legalName || 'Acme Industrial Tech Inc.');
+  const defaultLegal = initProfile?.legalName || (isUserCustom ? userOrg : 'Acme Industrial Tech Inc.');
+  const [legalName, setLegalName] = useState(() => defaultLegal);
   const [formerlyKnownAs, setFormerlyKnownAs] = useState(() => initIsNonAcme ? (initProfile?.formerlyKnownAs || '') : 'Acme Hardware & Sensors Corp');
   const [tradeName, setTradeName] = useState(() => initIsNonAcme ? (initProfile?.tradeName || '') : 'Acme Tech Solutions');
-  const [normalisedName, setNormalisedName] = useState(() => initProfile?.normalisedName || (initProfile?.legalName ? initProfile.legalName.toUpperCase() : 'ACME INDUSTRIAL TECH INC'));
+  const [normalisedName, setNormalisedName] = useState(() => initProfile?.normalisedName || (defaultLegal ? defaultLegal.toUpperCase() : 'ACME INDUSTRIAL TECH INC'));
   const [origination] = useState('Verisource');
   const [partnerStatus, setPartnerStatus] = useState<'INVITED' | 'NOT_INVITED' | 'ACTIVE'>('INVITED');
   const [supplierManager, setSupplierManager] = useState('Sarah Jenkins (Senior Category Manager - Cloud & IT)');
@@ -3182,6 +3185,28 @@ export const OnboardingRequest: React.FC = () => {
 
     setActiveInvitation(inv);
     setSelectedBuyerId(inv.buyerOrgId);
+
+    // Synchronize live buyer context with Ava immediately
+    const invProgress = getBuyerOnboardingProgress(inv.id);
+    const nextCompletedCount = invProgress.completedStepsCount || 0;
+    const nextProgressPercent = invProgress.progressPercent || 0;
+    broadcastPageContext({
+      page: 'onboarding-detail',
+      activeMode: 'DETAIL',
+      isDetail: true,
+      buyerName: inv.buyerName,
+      buyerOrgId: inv.buyerOrgId,
+      invitationCode: inv.invitationCode,
+      program: inv.category,
+      progressPercent: nextProgressPercent,
+      completedStepsCount: nextCompletedCount,
+      activeStep: 1,
+      legalName,
+      tradeName,
+      normalisedName,
+      hasDuns,
+      dunsNumber
+    });
 
     // Update Ava Agent greeting & isolate chat session
     setChatMessages(currentMsgs => {

@@ -2543,13 +2543,13 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
               </div>
 
               {/* Primary Tax Identification Number */}
-              <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
-                <div className="flex items-center justify-between min-h-[20px]">
-                  <label className="text-xs font-semibold text-slate-700 truncate" title="Primary Tax Identification Number">
-                    Primary Tax Identification Number <span className="text-red-500">*</span>
+              <div className={`space-y-1.5 min-w-0 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                <div className="flex items-center justify-between min-h-[20px] min-w-0">
+                  <label className="text-xs font-semibold text-slate-700 truncate block" title="Primary Tax Identification Number (TIN)">
+                    Tax Identification Number (TIN) <span className="text-red-500">*</span>
                   </label>
                 </div>
-                <div className="relative">
+                <div className="relative min-w-0">
                   <input
                     type="text"
                     disabled={!isEditing}
@@ -2575,9 +2575,9 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
               </div>
 
               {/* Mobile Phone Number */}
-              <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
-                <div className="flex items-center justify-between min-h-[20px]">
-                  <label className="text-xs font-semibold text-slate-700 truncate" title="Mobile Phone Number">
+              <div className={`space-y-1.5 min-w-0 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                <div className="flex items-center justify-between min-h-[20px] min-w-0">
+                  <label className="text-xs font-semibold text-slate-700 truncate block" title="Mobile Phone Number">
                     Mobile Phone Number <span className="text-red-500">*</span>
                   </label>
                 </div>

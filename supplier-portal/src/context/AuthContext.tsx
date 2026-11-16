@@ -137,8 +137,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     // If this is a new registration with org info, persist it in the registry
-    if (customOrgName && customName) {
-      saveRegisteredUser(userIdOrEmail, customOrgName, customName);
+    if (customOrgName) {
+      saveRegisteredUser(userIdOrEmail, customOrgName, customName || '');
     }
 
     let found = demoUsers.find(
@@ -182,6 +182,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const activeUser = found || DEFAULT_DEMO_USERS[0];
     setCurrentUser(activeUser);
     localStorage.setItem('active_supplier_user', JSON.stringify(activeUser));
+
+    // Restore custom supplier master profile if available in localStorage
+    if (activeUser.organizationName && activeUser.organizationName !== 'Acme Industrial Tech Inc.' && activeUser.organizationName !== 'Verified Supplier') {
+      try {
+        const orgKey = `verisource_profile_${activeUser.organizationName.toLowerCase().replace(/\s+/g, '_')}`;
+        const savedOrgProfile = localStorage.getItem(orgKey);
+        if (savedOrgProfile) {
+          localStorage.setItem('verisource_master_profile', savedOrgProfile);
+        }
+      } catch {}
+    }
   };
 
   const logout = () => {

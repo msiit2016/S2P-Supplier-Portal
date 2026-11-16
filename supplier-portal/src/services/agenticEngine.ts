@@ -167,49 +167,85 @@ How can I assist with your buyer onboarding today?`;
 function synthesizeOnboardingDetailAgent(context: Record<string, any> = {}): AgenticBriefing {
   let storedMaster: any = null;
   let isNewReg = false;
+  let activeUserOrg: string | null = null;
   if (typeof window !== 'undefined') {
     try {
       const raw = localStorage.getItem('verisource_master_profile');
       if (raw) storedMaster = JSON.parse(raw);
       isNewReg = localStorage.getItem('is_new_registration') === 'true';
+      const savedUser = localStorage.getItem('active_supplier_user');
+      if (savedUser && savedUser !== 'LOGGED_OUT') {
+        const u = JSON.parse(savedUser);
+        if (u?.organizationName && u.organizationName !== 'Verified Supplier') {
+          activeUserOrg = u.organizationName;
+        }
+      }
     } catch (e) {}
   }
-  const isNonAcme = (storedMaster?.legalName && storedMaster?.legalName !== 'Acme Industrial Tech Inc.') || isNewReg;
 
-  const buyer = context.buyerName || 'Apex Global Enterprises';
-  const code = context.invitationCode || 'INV-APEX-2026';
-  const progress = context.progressPercent !== undefined ? context.progressPercent : (isNonAcme ? 11 : 89);
-  const completed = context.completedStepsCount !== undefined ? context.completedStepsCount : (isNonAcme ? 1 : 8);
+  // Determine if active user is a custom registered supplier
+  const isCustomSupplier = Boolean(
+    (context.legalName && context.legalName !== 'Acme Industrial Tech Inc.') ||
+    (activeUserOrg && activeUserOrg !== 'Acme Industrial Tech Inc.') ||
+    (storedMaster?.legalName && storedMaster?.legalName !== 'Acme Industrial Tech Inc.') ||
+    isNewReg
+  );
+
+  // Dynamically resolve Buyer and Invitation Code based on context
+  let buyer = context.buyerName;
+  let code = context.invitationCode;
+  const buyerOrg = context.buyerOrgId;
+
+  if (!buyer || !code) {
+    if (buyerOrg === 'buyer-org-2' || (code && code.includes('NOVATECH')) || (buyer && buyer.includes('NovaTech'))) {
+      buyer = 'NovaTech Aerospace & Defense';
+      code = 'INV-NOVATECH-8820';
+    } else if (buyerOrg === 'buyer-org-3' || (code && code.includes('MERIDIAN')) || (buyer && buyer.includes('Meridian'))) {
+      buyer = 'Meridian Health Network';
+      code = 'INV-MERIDIAN-4011';
+    } else {
+      buyer = 'Apex Global Enterprises';
+      code = 'INV-APEX-2026';
+    }
+  }
+
+  // Progress resolution: use exact live page progress when provided
+  const progress = context.progressPercent !== undefined 
+    ? context.progressPercent 
+    : (isCustomSupplier ? 11 : 89);
+  const completed = context.completedStepsCount !== undefined 
+    ? context.completedStepsCount 
+    : (isCustomSupplier ? 1 : 8);
   const activeStep = context.activeStep ?? 1;
 
   // Real page values from live context with dynamic fallbacks
-  const legalName = (context.legalName !== undefined && context.legalName !== '')
+  const legalName = (context.legalName && context.legalName.trim() !== '')
     ? context.legalName
-    : (storedMaster?.legalName || (isNonAcme ? 'New Registered Supplier' : 'Acme Industrial Tech Inc.'));
+    : (activeUserOrg || storedMaster?.legalName || (isCustomSupplier ? 'Registered Supplier' : 'Acme Industrial Tech Inc.'));
 
   const tradeName = context.tradeName !== undefined
     ? context.tradeName
-    : (isNonAcme ? (storedMaster?.tradeName || '') : (storedMaster?.tradeName || 'Acme Tech Solutions'));
+    : (isCustomSupplier ? (storedMaster?.tradeName || '') : (storedMaster?.tradeName || 'Acme Tech Solutions'));
 
   const formerlyKnownAs = context.formerlyKnownAs !== undefined
     ? context.formerlyKnownAs
-    : (isNonAcme ? (storedMaster?.formerlyKnownAs || '') : 'Acme Hardware & Sensors');
+    : (isCustomSupplier ? (storedMaster?.formerlyKnownAs || '') : 'Acme Hardware & Sensors');
 
   const hasDuns = context.hasDuns !== undefined
     ? context.hasDuns
-    : (isNonAcme ? Boolean(storedMaster?.hasDuns && storedMaster?.dunsNumber) : true);
+    : (isCustomSupplier ? Boolean(storedMaster?.hasDuns && storedMaster?.dunsNumber) : true);
 
   const dunsNumber = context.dunsNumber !== undefined
     ? context.dunsNumber
-    : (isNonAcme ? (storedMaster?.dunsNumber || '') : (storedMaster?.dunsNumber || '09-842-1928'));
+    : (isCustomSupplier ? (storedMaster?.dunsNumber || '') : (storedMaster?.dunsNumber || '09-842-1928'));
 
   const partnerStatus = context.partnerStatus || 'INVITED';
   const supplierManager = context.supplierManager || 'Sarah Jenkins (Senior Category Manager - Cloud & IT)';
-  const annualRevenue = context.annualRevenue || (isNonAcme ? '' : '38.4');
+  const annualRevenue = context.annualRevenue || (isCustomSupplier ? '' : '38.4');
   const reportingCurrency = context.reportingCurrency || 'USD ($) - US Dollar';
-  const registeredAddress = context.registeredAddress || (isNonAcme ? '' : '100 Industrial Parkway, Suite 400, Austin, TX 78701');
-  const website = context.website || (isNonAcme ? '' : 'https://acmeindustrialtech.example.com');
-  const subcategories: string[] = context.subcategories || (isNonAcme ? [] : [
+  const registeredAddress = context.registeredAddress || (isCustomSupplier ? '' : '100 Industrial Parkway, Suite 400, Austin, TX 78701');
+  const website = context.website || (isCustomSupplier ? '' : 'https://acmeindustrialtech.example.com');
+  const subcategories: string[] = context.subcategories || (isCustomSupplier ? [] : [
     '41111900 - Industrial Sensors & Transducers',
     '43222600 - Network and Telemetry Equipment',
     '43232800 - Embedded System Software / Firmware'

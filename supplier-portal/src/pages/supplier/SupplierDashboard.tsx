@@ -20,6 +20,8 @@ import { BuyerRevenueDonutChart } from '../../components/dashboard/BuyerRevenueD
 import { OrderToCashFunnelChart } from '../../components/dashboard/OrderToCashFunnelChart.js';
 import { OperationalSlaTrendChart } from '../../components/dashboard/OperationalSlaTrendChart.js';
 import { PriorityActionCenter } from '../../components/dashboard/PriorityActionCenter.js';
+import { RICH_DEFAULT_ORDERS } from './SupplierOrders.js';
+import { RICH_DEFAULT_INVOICES } from './SupplierInvoices.js';
 import { 
   LayoutDashboard,
   Building2, 
@@ -52,7 +54,9 @@ import {
   RotateCw,
   Filter,
   FileCheck2,
-  ArrowUpRight
+  ArrowUpRight,
+  X,
+  AlertCircle
 } from 'lucide-react';
 
 const DEFAULT_BUYERS: BuyerSpecificProfile[] = [
@@ -160,6 +164,14 @@ export const SupplierDashboard: React.FC = () => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSyncedTime, setLastSyncedTime] = useState<string>('Just Now');
 
+  // Enterprise Client Scope Filter (Multi-Buyer vs Dedicated Buyer View)
+  const [selectedBuyerFilter, setSelectedBuyerFilter] = useState<string>('ALL');
+
+  // 1-Click PO-to-Invoice Flip Modal State
+  const [showPoFlipModal, setShowPoFlipModal] = useState(false);
+  const [selectedFlipPoId, setSelectedFlipPoId] = useState<string>('');
+  const [flipInvoiceNumber, setFlipInvoiceNumber] = useState<string>('');
+
   const { tasks: sharedTasks, pendingTasks: sharedPendingTasks } = useSharedTasks();
   const { events: rfpEvents } = useSharedRfps();
   const { settings } = useSupplierSettings();
@@ -168,6 +180,56 @@ export const SupplierDashboard: React.FC = () => {
   const priorityTasks = sharedPendingTasks.filter(t => t.priority === 'URGENT' || t.priority === 'HIGH' || t.category === 'RFP');
   const activeRfpCount = rfpEvents.length;
   const totalRfpPipeline = rfpEvents.reduce((acc, e) => acc + (e.estimatedValue || 0), 0);
+
+  // Fallback resilient data sources
+  const effectiveOrders = orders.length > 0 ? orders : RICH_DEFAULT_ORDERS;
+  const effectiveInvoices = invoices.length > 0 ? invoices : RICH_DEFAULT_INVOICES;
+
+  // Active buyer-filtered data slices
+  const filteredOrders = selectedBuyerFilter === 'ALL'
+    ? effectiveOrders
+    : effectiveOrders.filter(o => o.buyerOrgId === selectedBuyerFilter);
+
+  const filteredInvoices = selectedBuyerFilter === 'ALL'
+    ? effectiveInvoices
+    : effectiveInvoices.filter(i => i.buyerOrgId === selectedBuyerFilter);
+
+  const filteredAsns = selectedBuyerFilter === 'ALL'
+    ? asns
+    : asns.filter(a => a.buyerOrgId === selectedBuyerFilter);
+
+  const filteredBuyers = selectedBuyerFilter === 'ALL'
+    ? buyers
+    : buyers.filter(b => b.buyerOrgId === selectedBuyerFilter);
+
+  // Eligible POs for 1-Click PO Flip
+  const flippableOrders = effectiveOrders.filter(
+    (o: any) => o.status === 'ISSUED' || o.status === 'ACKNOWLEDGED' || o.status === 'IN_FULFILLMENT' || o.status === 'SHIPPED' || o.status === 'CONFIRMED' || o.status === 'OPEN' || !o.status
+  );
+
+  const currentFlipPo = flippableOrders.find(o => o.id === selectedFlipPoId) || flippableOrders[0];
+
+  useEffect(() => {
+    if (currentFlipPo) {
+      const cleanNum = currentFlipPo.poNumber.replace('PO-2026-', '').replace('PO-', '');
+      setFlipInvoiceNumber(`INV-2026-${cleanNum || '9450'}`);
+    }
+  }, [selectedFlipPoId, currentFlipPo]);
+
+  const handleExecutePoFlip = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentFlipPo) return;
+    setShowPoFlipModal(false);
+    setToastMessage(`🎉 1-Click PO Flip Complete: Invoice ${flipInvoiceNumber} generated with 100% 3-Way Match ready.`);
+    setTimeout(() => {
+      navigate('/invoices', {
+        invoiceNumber: flipInvoiceNumber,
+        poNumber: currentFlipPo.poNumber,
+        buyerOrgId: currentFlipPo.buyerOrgId,
+        timestamp: Date.now()
+      });
+    }, 700);
+  };
 
   const handleExecuteTaskAction = (task: TaskItem) => {
     switch (task.actionType) {
@@ -293,22 +355,35 @@ export const SupplierDashboard: React.FC = () => {
     return i.totalAmount || 0;
   };
 
-  // Calculations with resilient defaults for Acme Industrial Tech Inc.
-  const totalReceivables = invoices.length > 0
-    ? invoices.filter(i => i.paymentStatus !== 'PAID').reduce((sum, i) => sum + getInvoiceGross(i), 0)
-    : 78570.00;
+  // Calculations scoped dynamically by the active Enterprise Client Scope
+  const totalReceivables = filteredInvoices.length > 0
+    ? filteredInvoices.filter(i => i.paymentStatus !== 'PAID').reduce((sum, i) => sum + getInvoiceGross(i), 0)
+    : (selectedBuyerFilter === 'ALL' ? 78570.00 : 28400.00);
 
-  const totalPOValue = orders.length > 0
-    ? orders.reduce((sum, o) => sum + (o.totalAmount || 0), 0)
-    : 214380.00;
+  const totalPOValue = filteredOrders.length > 0
+    ? filteredOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0)
+    : (selectedBuyerFilter === 'ALL' ? 214380.00 : 64000.00);
 
-  const inTransitAsnCount = asns.filter(a => a.status === 'IN_TRANSIT').length || 2;
+  const inTransitAsnCount = filteredAsns.filter(a => a.status === 'IN_TRANSIT').length || (selectedBuyerFilter === 'ALL' ? 2 : 1);
 
-  const rawAccelerated = invoices
+  const rawAccelerated = filteredInvoices
     .filter(i => i.earlyPaymentOffer?.eligible && i.paymentStatus !== 'PAID')
     .reduce((sum, i) => sum + (i.earlyPaymentOffer?.acceleratedPayoutAmount || 0), 0);
 
-  const acceleratedCashAvailable = rawAccelerated > 0 ? rawAccelerated : 51594.30;
+  const acceleratedCashAvailable = rawAccelerated > 0 
+    ? rawAccelerated 
+    : (selectedBuyerFilter === 'ALL' ? 51594.30 : Math.round(totalReceivables * 0.7));
+
+  // Match hold invoices detection for 3-way match exception warnings
+  const matchHoldInvoices = filteredInvoices.filter(
+    i => i.matchStatus === '2_WAY_MATCHED' || i.paymentStatus === 'DRAFT' || i.invoiceNumber === 'INV-2026-202'
+  );
+  const hasMatchHold = matchHoldInvoices.length > 0;
+
+  // Filter tasks dynamically by selected buyer scope
+  const scopedPriorityTasks = selectedBuyerFilter === 'ALL'
+    ? priorityTasks
+    : priorityTasks.filter(t => t.buyerOrgId === selectedBuyerFilter);
 
   if (loading) {
     return (
@@ -334,7 +409,7 @@ export const SupplierDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Top Banner (Minimal, Balanced, Clean) */}
+      {/* Top Banner (Executive Multi-Buyer Scope & 1-Click Action Bar) */}
       <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         {/* Left: Icon, Title & Subtitle */}
         <div className="flex items-center gap-3.5">
@@ -349,8 +424,33 @@ export const SupplierDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Right: Telemetry Sync Status & Master Profile Quick Action */}
-        <div className="flex items-center gap-2.5 self-end sm:self-auto shrink-0">
+        {/* Right: Client Scope Dropdown, 1-Click PO Flip, Telemetry Sync Status & Master Profile Quick Action */}
+        <div className="flex items-center flex-wrap gap-2.5 self-end sm:self-auto shrink-0">
+          {/* 1. Enterprise Client Scope Selector */}
+          <div className="w-44 sm:w-52">
+            <FilterSelect
+              value={selectedBuyerFilter}
+              onChange={(e: any) => setSelectedBuyerFilter(typeof e === 'string' ? e : e?.target?.value || 'ALL')}
+              options={[
+                { value: 'ALL', label: 'All Enterprise Buyers (3)' },
+                { value: 'buyer-org-1', label: 'Apex Global Enterprises' },
+                { value: 'buyer-org-2', label: 'NovaTech Aerospace & Defense' },
+                { value: 'buyer-org-3', label: 'Meridian Health Network' }
+              ]}
+              className="h-8 text-xs font-semibold rounded-lg bg-slate-50 border-slate-200"
+            />
+          </div>
+
+          {/* 2. 1-Click PO Flip Quick Action */}
+          <button
+            onClick={() => setShowPoFlipModal(true)}
+            className="px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center gap-1.5 cursor-pointer shrink-0"
+            title="Flip confirmed purchase order into invoice with 1-click 3-way match"
+          >
+            <Zap className="w-3.5 h-3.5 text-amber-300" />
+            <span>1-Click PO Flip</span>
+          </button>
+
           <button
             onClick={handleManualSync}
             disabled={isSyncing}
@@ -373,6 +473,25 @@ export const SupplierDashboard: React.FC = () => {
         </div>
       </div>
 
+      {/* Active Buyer Scope Indicator Chip (When Filtered) */}
+      {selectedBuyerFilter !== 'ALL' && (
+        <div className="bg-emerald-50/70 border border-emerald-200/80 px-3.5 py-1.5 rounded-xl flex items-center justify-between text-xs text-emerald-900 animate-in fade-in">
+          <div className="flex items-center gap-2">
+            <Filter className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            <span>
+              Scoped Enterprise View: <strong>{buyers.find(b => b.buyerOrgId === selectedBuyerFilter)?.buyerName || selectedBuyerFilter}</strong> (All KPIs, pipeline funnel, and cash projections focused)
+            </span>
+          </div>
+          <button
+            onClick={() => setSelectedBuyerFilter('ALL')}
+            className="text-xs font-semibold text-emerald-700 hover:text-emerald-900 flex items-center gap-1 hover:underline cursor-pointer"
+          >
+            <X className="w-3.5 h-3.5" />
+            <span>Clear Scope (Show All Buyers)</span>
+          </button>
+        </div>
+      )}
+
       {/* Minimal 4-KPI Metric Strip with Sparklines */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
         {/* KPI 1: Active Receivables */}
@@ -382,7 +501,22 @@ export const SupplierDashboard: React.FC = () => {
           title="View all active receivables & invoice ledger"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Active Receivables</span>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Active Receivables</span>
+              {hasMatchHold && (
+                <span
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate('/invoices', { matchFilter: '2_WAY_MATCHED', timestamp: Date.now() });
+                  }}
+                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-50 text-amber-800 border border-amber-300 hover:bg-amber-100 transition cursor-pointer shadow-2xs"
+                  title="1 invoice has a 3-way match exception hold. Click to review in invoice ledger."
+                >
+                  <AlertCircle className="w-2.5 h-2.5 text-amber-600" />
+                  <span>1 Match Hold</span>
+                </span>
+              )}
+            </div>
             <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 ring-1 ring-emerald-500/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
               <Receipt className="w-3.5 h-3.5" />
             </div>
@@ -392,9 +526,9 @@ export const SupplierDashboard: React.FC = () => {
           </div>
           <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
             <span className="text-[11px] text-slate-500 group-hover:text-emerald-700 font-medium truncate transition">
-              {invoices.length} active invoices
+              {filteredInvoices.length} active invoices
             </span>
-            <Sparkline data={[52000, 58000, 61000, 69000, 72000, 78570]} color="#10b981" width={68} height={20} />
+            <Sparkline data={[52000, 58000, 61000, 69000, 72000, totalReceivables]} color="#10b981" width={68} height={20} />
           </div>
         </div>
 
@@ -411,13 +545,13 @@ export const SupplierDashboard: React.FC = () => {
             </div>
           </div>
           <div className="text-base font-bold text-slate-900 mt-1 font-mono">
-            {orders.length} <span className="text-xs font-normal text-slate-500 font-sans">Orders</span>
+            {filteredOrders.length} <span className="text-xs font-normal text-slate-500 font-sans">Orders</span>
           </div>
           <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
             <span className="text-[11px] text-slate-500 group-hover:text-sky-700 font-medium mt-0.5 truncate transition">
               ${Math.round(totalPOValue / 1000)}k pipeline
             </span>
-            <Sparkline data={[3, 4, 4, 5, 5, 6]} color="#0284c7" width={68} height={20} />
+            <Sparkline data={[3, 4, 4, 5, 5, filteredOrders.length]} color="#0284c7" width={68} height={20} />
           </div>
         </div>
 
@@ -440,7 +574,7 @@ export const SupplierDashboard: React.FC = () => {
             <span className="text-[11px] text-slate-500 group-hover:text-teal-700 font-medium mt-0.5 truncate transition">
               On schedule
             </span>
-            <Sparkline data={[1, 2, 1, 3, 2, 2]} color="#0d9488" width={68} height={20} />
+            <Sparkline data={[1, 2, 1, 3, 2, inTransitAsnCount]} color="#0d9488" width={68} height={20} />
           </div>
         </div>
 
@@ -464,7 +598,7 @@ export const SupplierDashboard: React.FC = () => {
               <span className="text-[11px] text-amber-700 group-hover:text-amber-800 font-medium mt-0.5 truncate transition">
                 Instant eligible
               </span>
-              <Sparkline data={[28000, 34000, 39000, 44000, 51594]} color="#d97706" width={68} height={20} />
+              <Sparkline data={[28000, 34000, 39000, 44000, acceleratedCashAvailable]} color="#d97706" width={68} height={20} />
             </div>
           </div>
         ) : (
@@ -497,10 +631,10 @@ export const SupplierDashboard: React.FC = () => {
           ========================================================================= */}
       <OrderToCashFunnelChart 
         onNavigate={(route, params) => navigate(route, params)}
-        orderCount={orders.length || 6}
+        orderCount={filteredOrders.length}
         totalOrderValue={totalPOValue}
         inTransitAsnCount={inTransitAsnCount}
-        invoiceCount={invoices.length || 4}
+        invoiceCount={filteredInvoices.length}
         totalReceivables={totalReceivables}
       />
 
@@ -520,7 +654,7 @@ export const SupplierDashboard: React.FC = () => {
         {/* Right (5 cols): Compact, Ergonomic Priority Action Center */}
         <div className="lg:col-span-5">
           <PriorityActionCenter
-            tasks={priorityTasks}
+            tasks={scopedPriorityTasks}
             onExecuteAction={handleExecuteTaskAction}
             onNavigateToTasks={() => navigate('/tasks')}
           />
@@ -543,13 +677,212 @@ export const SupplierDashboard: React.FC = () => {
         {/* Right (5 cols): Buyer Concentration & DSO Donut Chart */}
         <div className="lg:col-span-5">
           <BuyerRevenueDonutChart 
-            buyers={buyers}
+            buyers={filteredBuyers}
             onNavigateToOrders={(buyerOrgId) => navigate('/orders', buyerOrgId ? { buyerOrgId } : undefined)}
             onNavigateToAsns={(buyerOrgId) => navigate('/asns', buyerOrgId ? { buyerOrgId } : undefined)}
             onNavigateToInvoices={(buyerOrgId) => navigate('/invoices', buyerOrgId ? { buyerOrgId } : undefined)}
           />
         </div>
       </div>
+
+      {/* =========================================================================
+          SECTION 3: OPERATIONS & MASTER VAULTS (BALANCED 4-CARD LAUNCHPAD)
+          ========================================================================= */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+        {/* Buyer Onboarding Card */}
+        <div 
+          onClick={() => navigate('/onboarding')}
+          className="bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-2xs hover:border-slate-300 transition cursor-pointer group flex items-center gap-3.5"
+        >
+          <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 ring-1 ring-emerald-500/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <FileCheck2 className="w-4 h-4" />
+          </div>
+          <div className="min-w-0">
+            <h3 className="text-xs font-semibold text-slate-900 group-hover:text-slate-950 transition">
+              Buyer Onboarding Requests
+            </h3>
+            <p className="text-[11px] text-emerald-700 font-medium">3 Active • 1 Action Required</p>
+          </div>
+        </div>
+
+        {/* Sourcing RFPs & Bids Card */}
+        <div 
+          onClick={() => navigate('/rfps')}
+          className="bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-2xs hover:border-slate-300 transition cursor-pointer group flex items-center gap-3.5"
+        >
+          <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 ring-1 ring-purple-500/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <Layers className="w-4 h-4" />
+          </div>
+          <div className="min-w-0">
+            <h3 className="text-xs font-semibold text-slate-900 group-hover:text-slate-950 transition">
+              Sourcing RFPs &amp; Bids
+            </h3>
+            <p className="text-[11px] text-purple-700 font-medium">
+              {activeRfpCount} Active • ${Math.round(totalRfpPipeline / 1000)}k Pipeline
+            </p>
+          </div>
+        </div>
+
+        {/* Document Vault Card */}
+        <div 
+          onClick={() => navigate('/documents')}
+          className="bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-2xs hover:border-slate-300 transition cursor-pointer group flex items-center gap-3.5"
+        >
+          <div className="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 ring-1 ring-sky-500/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <FolderLock className="w-4 h-4" />
+          </div>
+          <div className="min-w-0">
+            <h3 className="text-xs font-semibold text-slate-900 group-hover:text-slate-950 transition">
+              Document Vault
+            </h3>
+            <p className="text-[11px] text-sky-700 font-medium">6 Verified Credentials</p>
+          </div>
+        </div>
+
+        {/* Catalog Items Card */}
+        <div 
+          onClick={() => navigate('/catalog')}
+          className="bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-2xs hover:border-slate-300 transition cursor-pointer group flex items-center gap-3.5"
+        >
+          <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 ring-1 ring-indigo-500/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <Package className="w-4 h-4" />
+          </div>
+          <div className="min-w-0">
+            <h3 className="text-xs font-semibold text-slate-900 group-hover:text-slate-950 transition">
+              Catalog Items
+            </h3>
+            <p className="text-[11px] text-indigo-700 font-medium">5 Standard Item Codes</p>
+          </div>
+        </div>
+      </div>
+
+      {/* =========================================================================
+          MODAL: 1-CLICK PO-TO-INVOICE FLIP ENGINE (COUPA / SAP ARIBA BENCHMARK)
+          ========================================================================= */}
+      {showPoFlipModal && currentFlipPo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-xl w-full border border-slate-200 shadow-2xl overflow-hidden animate-in zoom-in-95">
+            {/* Header */}
+            <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-emerald-50/50 via-teal-50/30 to-white">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs">
+                  <Zap className="w-4 h-4 text-amber-300" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">1-Click Purchase Order Flip</h3>
+                  <p className="text-[11px] text-slate-500">Transform confirmed PO into commercial invoice with automated 3-way match.</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowPoFlipModal(false)}
+                className="w-7 h-7 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 flex items-center justify-center transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <form onSubmit={handleExecutePoFlip} className="p-5 space-y-4 text-xs text-slate-700">
+              {/* Select Purchase Order */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-700">Select Purchase Order to Flip</label>
+                <FilterSelect
+                  value={currentFlipPo.id}
+                  onChange={(e: any) => setSelectedFlipPoId(typeof e === 'string' ? e : e?.target?.value || '')}
+                  options={flippableOrders.map(o => ({
+                    value: o.id,
+                    label: `${o.poNumber} — ${(o as any).buyerName || o.companyName || 'Enterprise Buyer'} ($${(o.totalAmount || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })})`
+                  }))}
+                  className="w-full text-xs font-semibold rounded-lg"
+                />
+              </div>
+
+              {/* Order Metadata Strip */}
+              <div className="grid grid-cols-3 gap-2.5 p-3 bg-slate-50 rounded-xl border border-slate-200/80">
+                <div>
+                  <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Buyer</span>
+                  <div className="font-semibold text-slate-900 mt-0.5 truncate">{(currentFlipPo as any).buyerName || currentFlipPo.companyName || 'Apex Global Enterprises'}</div>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Payment Terms</span>
+                  <div className="font-semibold text-emerald-700 mt-0.5">{currentFlipPo.paymentTerms || '2/10 Net 30'}</div>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Pre-Match Status</span>
+                  <div className="font-semibold text-teal-700 mt-0.5 flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3 text-teal-600" />
+                    <span>100% 3-Way Verified</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Line Items Preview */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500">
+                  <span>PO Line Items Included (Auto-populated)</span>
+                  <span>{(currentFlipPo as any).lines?.length || currentFlipPo.lineItems?.length || 3} Lines</span>
+                </div>
+                <div className="border border-slate-200 rounded-xl max-h-36 overflow-y-auto divide-y divide-slate-100 bg-white">
+                  {(((currentFlipPo as any).lines || currentFlipPo.lineItems || []).length > 0 ? ((currentFlipPo as any).lines || currentFlipPo.lineItems) : [
+                    { lineNumber: 1, description: 'Industrial Telemetry Sensor Node Series 900', quantity: 200, unitPrice: 42.50 },
+                    { lineNumber: 2, description: 'Mil-Spec Ruggedized Wire Harness', quantity: 50, unitPrice: 85.00 },
+                    { lineNumber: 3, description: 'Factory Calibration & Testing Certificate', quantity: 1, unitPrice: 1450.00 }
+                  ]).map((line: any, idx: number) => (
+                    <div key={idx} className="p-2.5 flex items-center justify-between text-[11px]">
+                      <div className="min-w-0 pr-2">
+                        <div className="font-semibold text-slate-900 truncate">Line {line.lineNumber || idx + 1}: {line.description}</div>
+                        <div className="text-slate-400 text-[10px]">Qty: {line.quantity} × ${Number(line.unitPrice || 0).toFixed(2)}</div>
+                      </div>
+                      <div className="font-mono font-bold text-slate-800 shrink-0">
+                        ${((line.quantity || 1) * (line.unitPrice || 0)).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Invoice Number & Totals */}
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                <div>
+                  <label className="text-xs font-semibold text-slate-700">Commercial Invoice Number</label>
+                  <input
+                    type="text"
+                    required
+                    value={flipInvoiceNumber}
+                    onChange={(e) => setFlipInvoiceNumber(e.target.value)}
+                    className="w-full mt-1 px-3 py-1.5 font-mono text-xs border border-slate-300 rounded-lg focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600"
+                    placeholder="INV-2026-9450"
+                  />
+                </div>
+                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80 flex flex-col justify-center text-right">
+                  <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Gross Invoice Amount</span>
+                  <span className="font-mono font-bold text-base text-slate-900 mt-0.5">
+                    ${(currentFlipPo.totalAmount || 14200.00).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-2 flex items-center justify-end gap-2.5 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setShowPoFlipModal(false)}
+                  className="px-3.5 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold rounded-lg shadow-sm transition flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Zap className="w-3.5 h-3.5 text-amber-300" />
+                  <span>Execute 1-Click Flip</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* =========================================================================
           SECTION 3: OPERATIONS & MASTER VAULTS (BALANCED 4-CARD LAUNCHPAD)
