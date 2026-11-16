@@ -96,7 +96,7 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
     };
   }, [otpSent, otpTimer]);
 
-  // 3D Constellation Sphere Animation (Canvas 2D pure math, 60fps)
+  // 3D Constellation Sphere Animation (Canvas 2D pure math, 60fps, High-DPI Retina/Windows support)
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -104,18 +104,25 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
     if (!ctx) return;
 
     let animationFrameId: number;
-    let width = (canvas.width = canvas.parentElement?.clientWidth || 540);
-    let height = (canvas.height = canvas.parentElement?.clientHeight || 640);
+    const dpr = typeof window !== 'undefined' ? Math.min(window.devicePixelRatio || 1, 2) : 1;
+    let width = canvas.parentElement?.clientWidth || 480;
+    let height = canvas.parentElement?.clientHeight || 280;
 
-    const handleResize = () => {
+    const updateSize = () => {
       if (!canvas || !canvas.parentElement) return;
-      width = canvas.width = canvas.parentElement.clientWidth;
-      height = canvas.height = canvas.parentElement.clientHeight;
+      width = canvas.parentElement.clientWidth;
+      height = canvas.parentElement.clientHeight;
+      canvas.width = Math.floor(width * dpr);
+      canvas.height = Math.floor(height * dpr);
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      ctx.scale(dpr, dpr);
     };
-    window.addEventListener('resize', handleResize);
+    updateSize();
+    window.addEventListener('resize', updateSize);
 
-    const numPoints = 420;
-    const radius = Math.min(width, height) * 0.42;
+    const numPoints = 360;
+    const radius = Math.min(width, height) * 0.38;
     const points: { x: number; y: number; z: number; baseAlpha: number }[] = [];
     const phi = Math.PI * (3 - Math.sqrt(5)); // Golden angle
 
@@ -139,7 +146,7 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
     const render = () => {
       ctx.clearRect(0, 0, width, height);
 
-      rotY += 0.0032;
+      rotY += 0.003;
       rotX = 0.2 + Math.sin(rotY * 0.5) * 0.08;
 
       const cosY = Math.cos(rotY);
@@ -148,8 +155,8 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
       const sinX = Math.sin(rotX);
 
       const cx = width * 0.48;
-      const cy = height * 0.52;
-      const fov = 420;
+      const cy = height * 0.5;
+      const fov = 380;
 
       const projected = points.map((p) => {
         const x1 = p.x * cosY - p.z * sinY;
@@ -217,7 +224,7 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
 
     return () => {
       cancelAnimationFrame(animationFrameId);
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('resize', updateSize);
     };
   }, []);
 
@@ -430,104 +437,108 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
     <div className="min-h-screen bg-[#060a12] flex flex-col lg:flex-row font-sans text-slate-100 select-none overflow-x-hidden">
       {/* =========================================================================
           LEFT HERO PANEL: Clean Bold Headline, 3D Constellation Globe & Social Proof
-          (No duplicate logo, no "Supplier OS", purely inspiring value proposition)
+          (Balanced typography, responsive across Windows, MacBook, and mobile screens)
          ========================================================================= */}
-      <div className="lg:w-1/2 relative bg-gradient-to-br from-[#060a12] via-[#091024] to-[#040810] flex flex-col justify-between p-8 sm:p-12 lg:p-16 border-b lg:border-b-0 lg:border-r border-slate-800/80 overflow-hidden">
+      <div className="lg:w-1/2 relative bg-gradient-to-br from-[#060a12] via-[#091024] to-[#040810] flex flex-col justify-between p-6 sm:p-8 lg:p-8 xl:p-12 border-b lg:border-b-0 lg:border-r border-slate-800/80 overflow-hidden lg:h-screen lg:max-h-screen">
         {/* Ambient atmospheric gradients */}
         <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-emerald-600/10 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[550px] h-[550px] bg-sky-600/10 rounded-full blur-[140px] pointer-events-none" />
 
         {/* Hero Headline & Subhead */}
-        <div className="relative z-20 max-w-xl pt-2 sm:pt-4">
-          <h1 className="text-3xl sm:text-4xl lg:text-[44px] font-extrabold tracking-tight text-white leading-[1.12]">
-            Chosen by Over <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-sky-400">120,000+</span> Suppliers Worldwide
+        <div className="relative z-20 max-w-xl pt-1 sm:pt-2">
+          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-semibold tracking-wide uppercase mb-2.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            Autonomous Supplier Network
+          </div>
+          <h1 className="text-2xl sm:text-3xl lg:text-[32px] xl:text-[36px] font-bold tracking-tight text-white leading-[1.2]">
+            Chosen by Over <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-sky-400 font-extrabold">120,000+</span> Suppliers Worldwide
           </h1>
-          <p className="mt-3.5 sm:mt-4 text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
+          <p className="mt-2.5 text-xs sm:text-sm text-slate-300/90 leading-relaxed max-w-lg font-normal">
             Join the family of verified enterprise partners driving multi-buyer growth, instant 3-way invoice match, and frictionless automated compliance.
           </p>
         </div>
 
         {/* 3D Rotating Constellation Canvas with Testimonial Chips */}
-        <div className="relative my-6 sm:my-8 h-80 sm:h-96 lg:h-[400px] flex items-center justify-center z-10">
+        <div className="relative my-3 sm:my-4 flex-1 min-h-[220px] max-h-[300px] lg:max-h-[320px] flex items-center justify-center z-10">
           <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
 
           {/* Testimonial Chip 1 (Top-Right) */}
-          <div className="absolute top-4 right-2 sm:right-6 max-w-[270px] bg-slate-900/85 backdrop-blur-md border border-slate-700/70 p-3 rounded-2xl shadow-2xl shadow-black/60 transform hover:scale-105 transition-all duration-300">
-            <div className="flex items-center space-x-3">
-              <div className="relative">
+          <div className="absolute top-1 sm:top-2 right-1 sm:right-4 max-w-[240px] bg-slate-900/85 backdrop-blur-md border border-slate-700/70 p-2.5 rounded-xl shadow-xl shadow-black/60 transform hover:scale-105 transition-all duration-300">
+            <div className="flex items-center space-x-2.5">
+              <div className="relative shrink-0">
                 <img
                   src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80"
                   alt="Ryo K."
-                  className="w-10 h-10 rounded-full object-cover border-2 border-emerald-500/60 shadow-md"
+                  className="w-8 h-8 rounded-full object-cover border border-emerald-500/60 shadow-sm"
                 />
-                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 rounded-full border border-slate-900" />
+                <span className="absolute bottom-0 right-0 w-2 h-2 bg-emerald-400 rounded-full border border-slate-900" />
               </div>
               <div className="flex-1 min-w-0">
-                <span className="text-xs font-bold text-white tracking-tight">$1.2M Business Gained</span>
-                <p className="text-[11px] text-slate-400 truncate">Ryo K. · Tokyo • Precision Robotics</p>
+                <div className="text-xs font-bold text-white tracking-tight truncate">$1.2M Business Gained</div>
+                <p className="text-[10px] text-slate-400 truncate">Ryo K. · Precision Robotics</p>
               </div>
             </div>
-            <div className="mt-2 text-[10px] text-emerald-400/90 font-medium flex items-center gap-1 bg-emerald-950/40 px-2 py-0.5 rounded-lg border border-emerald-800/40">
-              <TrendingUp className="w-3 h-3 text-emerald-400" />
-              <span>Closed 4 Tier-1 RFPs in 60 days</span>
+            <div className="mt-1.5 text-[9.5px] text-emerald-400 font-medium flex items-center gap-1 bg-emerald-950/40 px-1.5 py-0.5 rounded border border-emerald-800/40">
+              <TrendingUp className="w-3 h-3 text-emerald-400 shrink-0" />
+              <span className="truncate">Closed 4 Tier-1 RFPs in 60 days</span>
             </div>
           </div>
 
           {/* Testimonial Chip 2 (Bottom-Left) */}
-          <div className="absolute bottom-6 left-2 sm:left-4 max-w-[280px] bg-slate-900/85 backdrop-blur-md border border-slate-700/70 p-3 rounded-2xl shadow-2xl shadow-black/60 transform hover:scale-105 transition-all duration-300">
-            <div className="flex items-center space-x-3">
-              <div className="relative">
+          <div className="absolute bottom-1 sm:bottom-2 left-1 sm:left-4 max-w-[240px] bg-slate-900/85 backdrop-blur-md border border-slate-700/70 p-2.5 rounded-xl shadow-xl shadow-black/60 transform hover:scale-105 transition-all duration-300">
+            <div className="flex items-center space-x-2.5">
+              <div className="relative shrink-0">
                 <img
                   src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80"
                   alt="Jack H."
-                  className="w-10 h-10 rounded-full object-cover border-2 border-sky-500/60 shadow-md"
+                  className="w-8 h-8 rounded-full object-cover border border-sky-500/60 shadow-sm"
                 />
-                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-sky-400 rounded-full border border-slate-900" />
+                <span className="absolute bottom-0 right-0 w-2 h-2 bg-sky-400 rounded-full border border-slate-900" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-xs font-bold text-white tracking-tight">Won 3 Auctions This Month</div>
-                <p className="text-[11px] text-slate-400 truncate">Jack H. · Sydney • Global Logistics</p>
+                <div className="text-xs font-bold text-white tracking-tight truncate">Won 3 Auctions This Month</div>
+                <p className="text-[10px] text-slate-400 truncate">Jack H. · Global Logistics</p>
               </div>
             </div>
-            <div className="mt-2 text-[10px] text-sky-400/90 font-medium flex items-center gap-1 bg-sky-950/40 px-2 py-0.5 rounded-lg border border-sky-800/40">
-              <Zap className="w-3 h-3 text-sky-400" />
-              <span>Counter-signed PO-2026 in 4 minutes</span>
+            <div className="mt-1.5 text-[9.5px] text-sky-400 font-medium flex items-center gap-1 bg-sky-950/40 px-1.5 py-0.5 rounded border border-sky-800/40">
+              <Zap className="w-3 h-3 text-sky-400 shrink-0" />
+              <span className="truncate">Counter-signed PO in 4 min</span>
             </div>
           </div>
 
-          {/* Testimonial Chip 3 (Bottom-Right) */}
-          <div className="hidden sm:flex absolute -bottom-1 right-8 max-w-[280px] bg-slate-900/90 backdrop-blur-md border border-slate-700/80 p-3 rounded-2xl shadow-2xl shadow-black/60 transform hover:scale-105 transition-all duration-300">
-            <div className="flex items-center space-x-3">
-              <div className="relative">
+          {/* Testimonial Chip 3 (Bottom-Right / Visible on wider screens) */}
+          <div className="hidden xl:flex absolute bottom-1 right-4 max-w-[230px] bg-slate-900/90 backdrop-blur-md border border-slate-700/80 p-2.5 rounded-xl shadow-xl shadow-black/60 transform hover:scale-105 transition-all duration-300">
+            <div className="flex items-center space-x-2.5">
+              <div className="relative shrink-0">
                 <img
                   src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=120&auto=format&fit=crop&q=80"
                   alt="Elena R."
-                  className="w-10 h-10 rounded-full object-cover border-2 border-teal-500/60 shadow-md"
+                  className="w-8 h-8 rounded-full object-cover border border-teal-500/60 shadow-sm"
                 />
-                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 rounded-full border border-slate-900" />
+                <span className="absolute bottom-0 right-0 w-2 h-2 bg-emerald-400 rounded-full border border-slate-900" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-xs font-bold text-white tracking-tight">100% 3-Way Match & Liquidity</div>
-                <p className="text-[11px] text-slate-400 truncate">Elena R. · Austin • Acme Industrial</p>
+                <div className="text-xs font-bold text-white tracking-tight truncate">100% 3-Way Match & Liquidity</div>
+                <p className="text-[10px] text-slate-400 truncate">Elena R. · Acme Industrial</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Live Network Metrics Bar (Renamed to 0-Day Faster Onboarding) */}
-        <div className="relative z-20 pt-6 border-t border-slate-800/80">
-          <div className="grid grid-cols-3 gap-4 text-left">
+        {/* Live Network Metrics Bar */}
+        <div className="relative z-20 pt-4 pb-0.5 border-t border-slate-800/80">
+          <div className="grid grid-cols-3 gap-3 text-left">
             <div>
-              <div className="text-lg sm:text-xl font-extrabold text-white font-mono">$4.8B+</div>
-              <div className="text-[11px] text-slate-400 mt-0.5">PO & Invoice Volume</div>
+              <div className="text-base sm:text-lg lg:text-xl font-extrabold text-white font-mono">$4.8B+</div>
+              <div className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">PO & Invoice Volume</div>
             </div>
             <div>
-              <div className="text-lg sm:text-xl font-extrabold text-emerald-400 font-mono">0-Day</div>
-              <div className="text-[11px] text-slate-400 mt-0.5">Faster Onboarding</div>
+              <div className="text-base sm:text-lg lg:text-xl font-extrabold text-emerald-400 font-mono">0-Day</div>
+              <div className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">Faster Onboarding</div>
             </div>
             <div>
-              <div className="text-lg sm:text-xl font-extrabold text-sky-400 font-mono">100%</div>
-              <div className="text-[11px] text-slate-400 mt-0.5">3-Way Match SLA</div>
+              <div className="text-base sm:text-lg lg:text-xl font-extrabold text-sky-400 font-mono">100%</div>
+              <div className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">3-Way Match SLA</div>
             </div>
           </div>
         </div>
@@ -536,9 +547,9 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
       {/* =========================================================================
           RIGHT AUTH PANEL: Single Verisource Logo, High-Converting Login/Signup UI
          ========================================================================= */}
-      <div className="lg:w-1/2 bg-white text-slate-900 flex flex-col justify-between p-6 sm:p-10 lg:p-12 overflow-y-auto min-h-screen">
+      <div className="lg:w-1/2 bg-white text-slate-900 flex flex-col justify-between p-5 sm:p-7 lg:p-8 xl:p-10 overflow-y-auto lg:h-screen">
         {/* Top Header Bar: The Single Verisource Brand Logo + Tab Switcher */}
-        <div className="flex items-center justify-between pb-6 border-b border-slate-100">
+        <div className="flex items-center justify-between pb-4 border-b border-slate-100">
           {/* Verisource Brand Logo */}
           <VerisourceLogo size="md" theme="light" showTagline={true} taglineText="Autonomous Supplier Network" />
 
@@ -554,7 +565,7 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
                     setErrorMsg('');
                     setOtpSent(false);
                   }}
-                  className="font-bold text-emerald-600 hover:text-emerald-700 hover:underline"
+                  className="font-bold text-emerald-600 hover:text-emerald-700 hover:underline cursor-pointer"
                 >
                   Create Account
                 </button>
@@ -569,7 +580,7 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
                     setErrorMsg('');
                     setOtpSent(false);
                   }}
-                  className="font-bold text-emerald-600 hover:text-emerald-700 hover:underline"
+                  className="font-bold text-emerald-600 hover:text-emerald-700 hover:underline cursor-pointer"
                 >
                   Sign In
                 </button>
@@ -579,7 +590,7 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
         </div>
 
         {/* Central Form Container */}
-        <div className="py-6 sm:py-8 max-w-md w-full mx-auto space-y-6">
+        <div className="py-4 sm:py-5 max-w-md w-full mx-auto space-y-4 sm:space-y-5">
           {/* Segmented Sign In vs Create Account Tab */}
           <div className="bg-slate-100 p-1 rounded-xl flex items-center border border-slate-200">
             <button
@@ -589,9 +600,9 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
                 setErrorMsg('');
                 setOtpSent(false);
               }}
-              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
+              className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                 activeTab === 'LOGIN'
-                  ? 'bg-white text-slate-900 shadow-sm'
+                  ? 'bg-white text-slate-900 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -604,9 +615,9 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
                 setErrorMsg('');
                 setOtpSent(false);
               }}
-              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
+              className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                 activeTab === 'SIGNUP'
-                  ? 'bg-white text-slate-900 shadow-sm'
+                  ? 'bg-white text-slate-900 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -633,10 +644,10 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
               VIEW 1: SUPPLIER SIGN IN (Email OTP / Password / Mobile)
              ========================================================= */}
           {activeTab === 'LOGIN' && (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-5">
               <div>
-                <h2 className="text-2xl font-bold tracking-tight text-slate-900">Supplier Login</h2>
-                <p className="text-xs text-slate-500 mt-1">
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">Supplier Login</h2>
+                <p className="text-xs text-slate-500 mt-0.5">
                   Access active purchase orders, invoices, RFPs, and connected enterprise buyers.
                 </p>
               </div>
@@ -1029,27 +1040,27 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
               Clean, professional enterprise form without DUNS, invite code, or master banner
              ========================================================= */}
           {activeTab === 'SIGNUP' && (
-            <div className="space-y-5">
+            <div className="space-y-4">
               <div>
-                <h2 className="text-2xl font-bold tracking-tight text-slate-900">Create Supplier Account</h2>
-                <p className="text-xs text-slate-500 mt-1">
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">Create Supplier Account</h2>
+                <p className="text-xs text-slate-500 mt-0.5">
                   Register your organization to collaborate and transact with enterprise buyers.
                 </p>
               </div>
 
-              <form onSubmit={handleSignup} className="space-y-4 text-xs">
+              <form onSubmit={handleSignup} className="space-y-3 text-xs">
                 {/* Legal Company Name */}
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">Legal Company Name *</label>
                   <div className="relative">
-                    <Building2 className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                    <Building2 className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
                     <input
                       type="text"
                       required
                       placeholder="e.g. Apex Industrial Systems LLC"
                       value={companyName}
                       onChange={(e) => setCompanyName(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 pl-9 pr-3 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"
+                      className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2 pl-9 pr-3 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"
                     />
                   </div>
                 </div>
@@ -1059,28 +1070,28 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
                   <div>
                     <label className="block font-semibold text-slate-700 mb-1">First Name *</label>
                     <div className="relative">
-                      <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                      <User className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
                       <input
                         type="text"
                         required
                         placeholder="Alex"
                         value={signupFirstName}
                         onChange={(e) => setSignupFirstName(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 pl-9 pr-3 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2 pl-9 pr-3 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"
                       />
                     </div>
                   </div>
                   <div>
                     <label className="block font-semibold text-slate-700 mb-1">Last Name *</label>
                     <div className="relative">
-                      <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                      <User className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
                       <input
                         type="text"
                         required
                         placeholder="Morgan"
                         value={signupLastName}
                         onChange={(e) => setSignupLastName(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 pl-9 pr-3 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2 pl-9 pr-3 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"
                       />
                     </div>
                   </div>
@@ -1090,14 +1101,14 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">Work Email *</label>
                   <div className="relative">
-                    <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                    <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
                     <input
                       type="email"
                       required
                       placeholder="alex@apexsystems.com"
                       value={signupEmail}
                       onChange={(e) => setSignupEmail(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 pl-9 pr-3 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"
+                      className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2 pl-9 pr-3 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"
                     />
                   </div>
                 </div>
@@ -1120,19 +1131,19 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
                   <div>
                     <label className="block font-semibold text-slate-700 mb-1">Password *</label>
                     <div className="relative">
-                      <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                      <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
                       <input
                         type={showSignupPassword ? 'text' : 'password'}
                         required
                         placeholder="Min. 8 characters"
                         value={signupPassword}
                         onChange={(e) => setSignupPassword(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 pl-9 pr-9 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2 pl-9 pr-9 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"
                       />
                       <button
                         type="button"
                         onClick={() => setShowSignupPassword(!showSignupPassword)}
-                        className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+                        className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 cursor-pointer"
                       >
                         {showSignupPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                       </button>
@@ -1141,14 +1152,14 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
                   <div>
                     <label className="block font-semibold text-slate-700 mb-1">Confirm Password *</label>
                     <div className="relative">
-                      <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                      <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
                       <input
                         type={showSignupConfirmPassword ? 'text' : 'password'}
                         required
                         placeholder="Re-enter password"
                         value={signupConfirmPassword}
                         onChange={(e) => setSignupConfirmPassword(e.target.value)}
-                        className={`w-full bg-slate-50 border rounded-xl py-2.5 pl-9 pr-9 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:bg-white transition ${
+                        className={`w-full bg-slate-50 border rounded-xl py-2 pl-9 pr-9 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:bg-white transition ${
                           signupConfirmPassword && signupPassword !== signupConfirmPassword
                             ? 'border-red-400 focus:ring-red-400'
                             : 'border-slate-300 focus:ring-emerald-500'
@@ -1157,7 +1168,7 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
                       <button
                         type="button"
                         onClick={() => setShowSignupConfirmPassword(!showSignupConfirmPassword)}
-                        className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+                        className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 cursor-pointer"
                       >
                         {showSignupConfirmPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                       </button>
@@ -1171,7 +1182,7 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
                 </div>
 
                 {/* Terms Agreement Checkbox */}
-                <div className="flex items-center space-x-2 pt-1">
+                <div className="flex items-center space-x-2 pt-0.5">
                   <input
                     type="checkbox"
                     id="terms"
@@ -1196,7 +1207,7 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
                 <button
                   type="submit"
                   disabled={loading || !termsAccepted || (!!signupConfirmPassword && signupPassword !== signupConfirmPassword)}
-                  className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-md shadow-emerald-700/20 transition flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-50"
+                  className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-md shadow-emerald-700/20 transition flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-50"
                 >
                   {loading ? (
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -1213,29 +1224,29 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
         </div>
 
         {/* Enterprise Trust Badges & Clean Footer */}
-        <div className="pt-6 border-t border-slate-100 text-slate-500 text-[11px] space-y-3">
+        <div className="pt-3 border-t border-slate-100 text-slate-500 text-[11px] space-y-2">
           <div className="flex flex-wrap items-center justify-between gap-3 text-slate-600">
             <div className="flex items-center space-x-4">
-              <span className="flex items-center gap-1 font-semibold text-slate-700">
-                <Shield className="w-3.5 h-3.5 text-emerald-600" />
+              <span className="flex items-center gap-1.5 font-semibold text-slate-700">
+                <Shield className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                 <span>SOC 2 Type II Certified</span>
               </span>
               <span className="text-slate-300">•</span>
-              <span className="flex items-center gap-1 font-semibold text-slate-700">
-                <FileCheck className="w-3.5 h-3.5 text-sky-600" />
+              <span className="flex items-center gap-1.5 font-semibold text-slate-700">
+                <FileCheck className="w-3.5 h-3.5 text-sky-600 shrink-0" />
                 <span>ISO 27001 Certified</span>
               </span>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-2 text-slate-400 pt-1">
-            <div className="flex items-center space-x-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-slate-400 pt-0.5">
+            <div className="flex items-center space-x-3 text-[10.5px]">
               <a href="#terms" className="hover:text-slate-600 transition">Legal Terms</a>
               <a href="#privacy" className="hover:text-slate-600 transition">Privacy Policy</a>
               <a href="#cookies" className="hover:text-slate-600 transition">Cookie Policy</a>
               <a href="#contact" className="hover:text-slate-600 transition">Contact</a>
             </div>
-            <div>© 2026 Verisource Technologies Inc. All rights reserved.</div>
+            <div className="text-[10.5px]">© 2026 Verisource Technologies Inc. All rights reserved.</div>
           </div>
         </div>
       </div>
