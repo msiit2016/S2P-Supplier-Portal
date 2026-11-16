@@ -2042,7 +2042,10 @@ export const OnboardingRequest: React.FC = () => {
         missing.push({ id: 'primaryLanguage', label: 'Primary Language', stepNum: 1, sectionTitle: 'Basic Details', message: 'Select operating business language' });
       }
       if (!subcategories || subcategories.length === 0) {
-        missing.push({ id: 'subcategories', label: 'Subcategory (Procurement UNSPSC)', stepNum: 1, sectionTitle: 'Basic Details', message: 'Map at least one procurement commodity code' });
+        missing.push({ id: 'subcategories', label: 'Subcategory', stepNum: 1, sectionTitle: 'Basic Details', message: 'Map at least one procurement commodity code' });
+      }
+      if (!serviceLocations || serviceLocations.length === 0) {
+        missing.push({ id: 'serviceLocations', label: 'Service Locations', stepNum: 1, sectionTitle: 'Basic Details', message: 'Map at least one operational service location' });
       }
       return {
         stepNum: 1,
@@ -2073,6 +2076,9 @@ export const OnboardingRequest: React.FC = () => {
       }
       if (!businessUnits || businessUnits.length === 0) {
         missing.push({ id: 'businessUnits', label: 'Target Business Units', stepNum: 2, sectionTitle: 'Business Information', message: 'Select at least one operating business unit' });
+      }
+      if (!operatingLanguages || operatingLanguages.length === 0) {
+        missing.push({ id: 'operatingLanguages', label: 'Supported Languages', stepNum: 2, sectionTitle: 'Business Information', message: 'Select at least one operating language' });
       }
       return {
         stepNum: 2,
@@ -5470,16 +5476,16 @@ export const OnboardingRequest: React.FC = () => {
                       />
                     </div>
 
-                    {/* Subcategory (UNSPSC) */}
+                    {/* Subcategory */}
                     <div id="subcategories" className={`space-y-2 lg:col-span-3 rounded-xl transition ${
                       isFieldHighlighted('subcategories') ? 'ring-2 ring-rose-500 border border-rose-400 p-1 rounded-xl bg-rose-50/30' : ''
                     }`}>
-                      <div className="h-6 flex items-center justify-between gap-1">
-                        <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
-                          Subcategory (Procurement UNSPSC) <span className="text-red-500">*</span>
+                      <div className="h-6 flex items-center justify-between gap-1.5 min-w-0">
+                        <label className="text-xs font-semibold text-slate-700 truncate" title="Subcategory">
+                          Subcategory <span className="text-red-500">*</span>
                         </label>
-                        <span className="text-[10px] font-bold text-slate-500 font-mono bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 whitespace-nowrap shrink-0">
-                          {subcategories.length} mapped
+                        <span className="text-[10px] font-bold text-slate-500 font-mono bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 shrink-0">
+                          {subcategories.length}
                         </span>
                       </div>
 
@@ -5540,14 +5546,16 @@ export const OnboardingRequest: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Org. Entity Service Locations */}
-                    <div className="space-y-2 lg:col-span-3">
-                      <div className="h-6 flex items-center justify-between gap-1">
-                        <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
-                          Org. Entity Service Locations <span className="text-red-500">*</span>
+                    {/* Service Locations */}
+                    <div id="serviceLocations" className={`space-y-2 lg:col-span-3 rounded-xl transition ${
+                      isFieldHighlighted('serviceLocations') ? 'ring-2 ring-rose-500 border border-rose-400 p-1 rounded-xl bg-rose-50/30' : ''
+                    }`}>
+                      <div className="h-6 flex items-center justify-between gap-1.5 min-w-0">
+                        <label className="text-xs font-semibold text-slate-700 truncate" title="Service Locations">
+                          Service Locations <span className="text-red-500">*</span>
                         </label>
-                        <span className="text-[10px] font-bold text-slate-500 font-mono bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 whitespace-nowrap shrink-0">
-                          {serviceLocations.length} locations
+                        <span className="text-[10px] font-bold text-slate-500 font-mono bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 shrink-0">
+                          {serviceLocations.length}
                         </span>
                       </div>
 
@@ -5802,12 +5810,12 @@ export const OnboardingRequest: React.FC = () => {
                     <div id="businessUnits" className={`space-y-2 lg:col-span-3 rounded-xl transition ${
                       isFieldHighlighted('businessUnits') ? 'ring-2 ring-rose-500 border border-rose-400 p-1 rounded-xl bg-rose-50/30' : ''
                     }`}>
-                      <div className="h-6 flex items-center justify-between gap-1">
-                        <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
+                      <div className="h-6 flex items-center justify-between gap-1.5 min-w-0">
+                        <label className="text-xs font-semibold text-slate-700 truncate" title="Target Business Units">
                           Target Business Units <span className="text-red-500">*</span>
                         </label>
-                        <span className="text-[10px] font-bold text-slate-500 font-mono bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 whitespace-nowrap shrink-0">
-                          {businessUnits.length} assigned
+                        <span className="text-[10px] font-bold text-slate-500 font-mono bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 shrink-0">
+                          {businessUnits.length}
                         </span>
                       </div>
 
@@ -5857,13 +5865,15 @@ export const OnboardingRequest: React.FC = () => {
                     </div>
 
                     {/* Supported Languages */}
-                    <div className="space-y-2 lg:col-span-3">
-                      <div className="h-6 flex items-center justify-between gap-1">
-                        <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
+                    <div id="operatingLanguages" className={`space-y-2 lg:col-span-3 rounded-xl transition ${
+                      isFieldHighlighted('operatingLanguages') ? 'ring-2 ring-rose-500 border border-rose-400 p-1 rounded-xl bg-rose-50/30' : ''
+                    }`}>
+                      <div className="h-6 flex items-center justify-between gap-1.5 min-w-0">
+                        <label className="text-xs font-semibold text-slate-700 truncate" title="Supported Languages">
                           Supported Languages <span className="text-red-500">*</span>
                         </label>
-                        <span className="text-[10px] text-slate-500 font-mono font-bold bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 whitespace-nowrap">
-                          {operatingLanguages.length} active
+                        <span className="text-[10px] text-slate-500 font-mono font-bold bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 shrink-0">
+                          {operatingLanguages.length}
                         </span>
                       </div>
 
