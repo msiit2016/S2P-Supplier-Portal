@@ -71,13 +71,16 @@ function synthesizeOnboardingAgent(context: Record<string, any> = {}): AgenticBr
     ? `${pending} Action Required: NovaTech Aerospace ITAR attestation pending start (Due in 10 days).`
     : `All ${total} buyer onboarding requests in progress or conformed.`;
 
+  const inProgressSummary = context.inProgressSummary || 'Apex Global • 89% completed, Meridian Health • 44% completed';
+  const underReviewSummary = context.underReviewSummary ? `${context.underReviewSummary} • In Adjudication` : (underReview > 0 ? 'Meridian Health • In Adjudication' : 'None in review');
+
   const greeting = `Hi! I'm **Ava**.
 
 Here is your live buyer onboarding pipeline:
 • **Total Active Requests:** ${total} enterprise buyers
 • **Action Required:** ${pending} pending start (NovaTech Aerospace • ITAR Defense Attestation)
-• **In Progress:** ${inProgress} in drafting (Apex Global • 67% completed)
-• **Under Review:** ${underReview} submitted (Meridian Health • In Adjudication)
+• **In Progress:** ${inProgress} in drafting (${inProgressSummary})
+• **Under Review:** ${underReview} submitted (${underReviewSummary})
 
 **Priority Focus:** ${bottleneck}
 

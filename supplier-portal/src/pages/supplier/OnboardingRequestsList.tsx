@@ -4,6 +4,11 @@ import { onPageAction, broadcastPageContext, PageAction } from '../../services/p
 import { FilterSelect } from '../../components/common/FilterSelect.js';
 import { Sparkline } from '../../components/dashboard/Sparkline.js';
 import { 
+  getBuyerOnboardingProgressMap, 
+  DEFAULT_ONBOARDING_PROGRESS, 
+  BuyerOnboardingProgressState 
+} from '../../services/onboardingStateService.js';
+import { 
   FileCheck2, 
   Search, 
   Eye, 
@@ -33,7 +38,7 @@ interface OnboardingRequestCard {
   deadline: string;
   progressPercent: number;
   stageLabel: string;
-  statusKey: 'ACTION_REQUIRED' | 'IN_PROGRESS' | 'UNDER_REVIEW' | 'ACTIVE';
+  statusKey: 'ACTION_REQUIRED' | 'IN_PROGRESS' | 'UNDER_REVIEW' | 'ACTIVE' | 'APPROVED';
   statusLabel: string;
   statusBadgeBg: string;
   complianceScope: string;
@@ -54,94 +59,26 @@ export const OnboardingRequestsList: React.FC = () => {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteCodeInput, setInviteCodeInput] = useState('');
 
-  // Canonical Mock Data for Onboarding Requests (Dynamic for new supplier registrations vs demo Acme)
-  const isNew = typeof window !== 'undefined' && localStorage.getItem('is_new_registration') === 'true';
-  const storedMasterRaw = typeof window !== 'undefined' ? localStorage.getItem('verisource_master_profile') : null;
-  const storedMaster = storedMasterRaw ? JSON.parse(storedMasterRaw) : null;
-  const isNonAcme = (storedMaster?.legalName && storedMaster?.legalName !== 'Acme Industrial Tech Inc.') || isNew;
+  // Dynamic Live Progress State Synchronized with Detail Questionnaires
+  const [progressMap, setProgressMap] = useState<Record<string, BuyerOnboardingProgressState>>(getBuyerOnboardingProgressMap);
 
-  const requestCardsData: OnboardingRequestCard[] = isNonAcme ? [
-    {
-      id: 'inv-apex-01',
-      orgId: 'buyer-org-1',
-      buyerName: 'Apex Global Enterprises',
-      initials: 'AP',
-      color: 'from-emerald-600 to-teal-700',
-      invitationCode: 'INV-APEX-2026',
-      program: 'Cloud Infrastructure & High-Performance Hardware Supply',
-      category: 'Enterprise Cloud Infrastructure & Hardware',
-      invitedBy: 'Marcus Vance (VP Strategic Procurement)',
-      invitedDate: 'Today',
-      deadline: 'Nov 30, 2026 (20d left)',
-      progressPercent: 11,
-      stageLabel: 'Stage 2 of 5: Form Submission',
-      statusKey: 'IN_PROGRESS',
-      statusLabel: 'In Progress (11%)',
-      statusBadgeBg: 'bg-sky-50 text-sky-800 border-sky-200/80',
-      complianceScope: 'IRS Form W-9, FedACH Remittance, Commercial COI, SOC 2 Type II',
-      ctaText: 'Continue'
-    },
-    {
-      id: 'inv-novatech-02',
-      orgId: 'buyer-org-2',
-      buyerName: 'NovaTech Aerospace & Defense',
-      initials: 'NO',
-      color: 'from-indigo-600 to-blue-700',
-      invitationCode: 'INV-NOVATECH-8820',
-      program: 'Defense Avionics & High-Tolerance Telemetry',
-      category: 'Mission-Critical Aerospace Telemetry',
-      invitedBy: 'Sarah Lin (S2P Vendor Operations)',
-      invitedDate: 'Yesterday',
-      deadline: 'Nov 20, 2026 (10d left)',
-      progressPercent: 0,
-      stageLabel: 'Stage 1 of 5: Registration Completed',
-      statusKey: 'ACTION_REQUIRED',
-      statusLabel: 'Action Needed',
-      statusBadgeBg: 'bg-amber-50 text-amber-800 border-amber-200/80',
-      complianceScope: 'ITAR Defense Attestation, NIST SP 800-171, Mil-Spec Quality Cert',
-      ctaText: 'Start'
-    },
-    {
-      id: 'inv-meridian-03',
-      orgId: 'buyer-org-3',
-      buyerName: 'Meridian Health Network',
-      initials: 'ME',
-      color: 'from-teal-600 to-cyan-700',
-      invitationCode: 'INV-MERIDIAN-4011',
-      program: 'Clinical Diagnostic & Hospital Lab Automation',
-      category: 'Clinical Diagnostic & Lab Automation',
-      invitedBy: 'David Chen (Global Procurement Lead)',
-      invitedDate: '3 days ago',
-      deadline: 'Dec 15, 2026',
-      progressPercent: 0,
-      stageLabel: 'Stage 1 of 5: Registration Completed',
-      statusKey: 'ACTION_REQUIRED',
-      statusLabel: 'Action Needed',
-      statusBadgeBg: 'bg-amber-50 text-amber-800 border-amber-200/80',
-      complianceScope: 'HIPAA Business Associate (BAA), $5M Malpractice COI, FDA QSR',
-      ctaText: 'Start'
-    }
-  ] : [
-    {
-      id: 'inv-novatech-02',
-      orgId: 'buyer-org-2',
-      buyerName: 'NovaTech Aerospace & Defense',
-      initials: 'NO',
-      color: 'from-indigo-600 to-blue-700',
-      invitationCode: 'INV-NOVATECH-8820',
-      program: 'Defense Avionics & High-Tolerance Telemetry',
-      category: 'Mission-Critical Aerospace Telemetry',
-      invitedBy: 'Sarah Lin (S2P Vendor Operations)',
-      invitedDate: 'Yesterday',
-      deadline: 'Nov 20, 2026 (10d left)',
-      progressPercent: 15,
-      stageLabel: 'Stage 1 of 5: Registration Completed',
-      statusKey: 'ACTION_REQUIRED',
-      statusLabel: 'Action Needed',
-      statusBadgeBg: 'bg-amber-50 text-amber-800 border-amber-200/80',
-      complianceScope: 'ITAR Defense Attestation, NIST SP 800-171, Mil-Spec Quality Cert',
-      ctaText: 'Start'
-    },
+  useEffect(() => {
+    const handleUpdate = () => {
+      setProgressMap(getBuyerOnboardingProgressMap());
+    };
+    window.addEventListener('verisource_onboarding_states_updated', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+    return () => {
+      window.removeEventListener('verisource_onboarding_states_updated', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
+  }, []);
+
+  const apexProg = progressMap['inv-apex-01'] || DEFAULT_ONBOARDING_PROGRESS['inv-apex-01'];
+  const novatechProg = progressMap['inv-novatech-02'] || DEFAULT_ONBOARDING_PROGRESS['inv-novatech-02'];
+  const meridianProg = progressMap['inv-meridian-03'] || DEFAULT_ONBOARDING_PROGRESS['inv-meridian-03'];
+
+  const requestCardsData: OnboardingRequestCard[] = [
     {
       id: 'inv-apex-01',
       orgId: 'buyer-org-1',
@@ -154,13 +91,15 @@ export const OnboardingRequestsList: React.FC = () => {
       invitedBy: 'Marcus Vance (VP Strategic Procurement)',
       invitedDate: 'Jan 14, 2026',
       deadline: 'Nov 30, 2026 (20d left)',
-      progressPercent: 67,
-      stageLabel: 'Stage 2 of 5: Form Submission',
-      statusKey: 'IN_PROGRESS',
-      statusLabel: 'In Progress (67%)',
-      statusBadgeBg: 'bg-sky-50 text-sky-800 border-sky-200/80',
+      progressPercent: apexProg.progressPercent,
+      stageLabel: apexProg.stageLabel,
+      statusKey: apexProg.statusKey,
+      statusLabel: apexProg.statusLabel,
+      statusBadgeBg: apexProg.statusKey === 'UNDER_REVIEW'
+        ? 'bg-emerald-50 text-emerald-800 border-emerald-200/80'
+        : 'bg-sky-50 text-sky-800 border-sky-200/80',
       complianceScope: 'IRS Form W-9, FedACH Remittance, Commercial COI, SOC 2 Type II',
-      ctaText: 'Resume'
+      ctaText: apexProg.isSubmitted ? 'View Dossier' : 'Continue'
     },
     {
       id: 'inv-meridian-03',
@@ -173,14 +112,40 @@ export const OnboardingRequestsList: React.FC = () => {
       category: 'Clinical Diagnostic & Lab Automation',
       invitedBy: 'David Chen (Global Procurement Lead)',
       invitedDate: '3 days ago',
-      deadline: 'Under Buyer SLA Review',
-      progressPercent: 100,
-      stageLabel: 'Stage 3 of 5: Buyer Review & Adjudication',
-      statusKey: 'UNDER_REVIEW',
-      statusLabel: 'Under Buyer Review',
-      statusBadgeBg: 'bg-teal-50 text-teal-800 border-teal-200/80',
+      deadline: meridianProg.isSubmitted ? 'Under Buyer SLA Review' : 'Dec 15, 2026',
+      progressPercent: meridianProg.progressPercent,
+      stageLabel: meridianProg.stageLabel,
+      statusKey: meridianProg.statusKey,
+      statusLabel: meridianProg.statusLabel,
+      statusBadgeBg: meridianProg.statusKey === 'UNDER_REVIEW'
+        ? 'bg-emerald-50 text-emerald-800 border-emerald-200/80'
+        : meridianProg.statusKey === 'ACTION_REQUIRED'
+        ? 'bg-amber-50 text-amber-800 border-amber-200/80'
+        : 'bg-sky-50 text-sky-800 border-sky-200/80',
       complianceScope: 'HIPAA Business Associate (BAA), $5M Malpractice COI, FDA QSR',
-      ctaText: 'View Details'
+      ctaText: meridianProg.isSubmitted ? 'View Dossier' : 'Continue'
+    },
+    {
+      id: 'inv-novatech-02',
+      orgId: 'buyer-org-2',
+      buyerName: 'NovaTech Aerospace & Defense',
+      initials: 'NO',
+      color: 'from-indigo-600 to-blue-700',
+      invitationCode: 'INV-NOVATECH-8820',
+      program: 'Defense Avionics & High-Tolerance Telemetry',
+      category: 'Mission-Critical Aerospace Telemetry',
+      invitedBy: 'Sarah Lin (S2P Vendor Operations)',
+      invitedDate: 'Yesterday',
+      deadline: 'Nov 20, 2026 (10d left)',
+      progressPercent: novatechProg.progressPercent,
+      stageLabel: novatechProg.stageLabel,
+      statusKey: novatechProg.statusKey,
+      statusLabel: novatechProg.statusLabel,
+      statusBadgeBg: novatechProg.statusKey === 'IN_PROGRESS'
+        ? 'bg-sky-50 text-sky-800 border-sky-200/80'
+        : 'bg-amber-50 text-amber-800 border-amber-200/80',
+      complianceScope: 'ITAR Defense Attestation, NIST SP 800-171, Mil-Spec Quality Cert',
+      ctaText: novatechProg.progressPercent > 0 ? 'Continue' : 'Start'
     }
   ];
 
@@ -201,7 +166,7 @@ export const OnboardingRequestsList: React.FC = () => {
     return true;
   }).sort((a, b) => {
     if (sortBy === 'PRIORITY') {
-      const order = { ACTION_REQUIRED: 1, IN_PROGRESS: 2, UNDER_REVIEW: 3, ACTIVE: 4 };
+      const order: Record<string, number> = { ACTION_REQUIRED: 1, IN_PROGRESS: 2, UNDER_REVIEW: 3, ACTIVE: 4, APPROVED: 5 };
       return (order[a.statusKey] || 99) - (order[b.statusKey] || 99);
     }
     if (sortBy === 'PROGRESS_DESC') {
@@ -248,19 +213,39 @@ export const OnboardingRequestsList: React.FC = () => {
     });
   };
 
+  const totalCount = requestCardsData.length;
+  const actionReqList = requestCardsData.filter(r => r.statusKey === 'ACTION_REQUIRED');
+  const inProgressList = requestCardsData.filter(r => r.statusKey === 'IN_PROGRESS');
+  const underReviewList = requestCardsData.filter(r => r.statusKey === 'UNDER_REVIEW');
+
+  const actionReqSubtext = actionReqList.length > 0
+    ? `${actionReqList[0].buyerName.split(' ')[0]} • Due in 10d`
+    : 'All Conformed';
+
+  const inProgressSubtext = inProgressList.length > 0
+    ? inProgressList.map(r => `${r.buyerName.split(' ')[0]} (${r.progressPercent}%)`).join(' • ')
+    : 'None in draft';
+
+  const underReviewSubtext = underReviewList.length > 0
+    ? `${underReviewList.map(r => r.buyerName.split(' ')[0]).join(', ')} • Under SLA`
+    : '0 in review';
+
   // Broadcast live Onboarding context to Ava
   useEffect(() => {
     broadcastPageContext({
       page: 'onboarding',
       totalRequests: requestCardsData.length,
-      pendingCount: requestCardsData.filter(r => r.statusKey === 'ACTION_REQUIRED').length,
-      inProgressCount: requestCardsData.filter(r => r.statusKey === 'IN_PROGRESS').length,
-      underReviewCount: requestCardsData.filter(r => r.statusKey === 'UNDER_REVIEW').length,
+      pendingCount: actionReqList.length,
+      inProgressCount: inProgressList.length,
+      underReviewCount: underReviewList.length,
+      inProgressSummary: inProgressList.map(r => `${r.buyerName.split(' ')[0]} • ${r.progressPercent}% completed`).join(', '),
+      underReviewSummary: underReviewList.map(r => r.buyerName.split(' ')[0]).join(', '),
       requests: requestCardsData.map(r => ({
         id: r.id,
         buyerOrgId: r.orgId,
         buyerName: r.buyerName,
         status: r.statusKey,
+        progressPercent: r.progressPercent,
         deadlineDays: 10
       }))
     });
@@ -335,11 +320,11 @@ export const OnboardingRequestsList: React.FC = () => {
             </div>
           </div>
           <div className="text-base font-bold font-mono text-slate-900 mt-1">
-            3 <span className="text-xs font-normal text-slate-500 font-sans">Active</span>
+            {totalCount} <span className="text-xs font-normal text-slate-500 font-sans">Active</span>
           </div>
           <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
             <span className="text-[11px] text-slate-500 group-hover:text-slate-700 font-medium truncate transition">
-              Across 3 enterprise buyers
+              Across {totalCount} enterprise buyers
             </span>
             <Sparkline data={[1, 2, 2, 3, 3, 3]} color="#64748b" width={68} height={20} />
           </div>
@@ -362,11 +347,11 @@ export const OnboardingRequestsList: React.FC = () => {
             </div>
           </div>
           <div className="text-base font-bold font-mono text-slate-900 mt-1">
-            1 <span className="text-xs font-normal text-slate-500 font-sans">Pending</span>
+            {actionReqList.length} <span className="text-xs font-normal text-slate-500 font-sans">Pending</span>
           </div>
           <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
             <span className="text-[11px] text-amber-700 group-hover:text-amber-800 font-medium truncate transition">
-              NovaTech • Due in 10d
+              {actionReqSubtext}
             </span>
             <Sparkline data={[3, 2, 2, 2, 1, 1]} color="#d97706" width={68} height={20} />
           </div>
@@ -389,13 +374,13 @@ export const OnboardingRequestsList: React.FC = () => {
             </div>
           </div>
           <div className="text-base font-bold font-mono text-slate-900 mt-1">
-            1 <span className="text-xs font-normal text-slate-500 font-sans">In Draft</span>
+            {inProgressList.length} <span className="text-xs font-normal text-slate-500 font-sans">In Draft</span>
           </div>
           <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
-            <span className="text-[11px] text-slate-500 group-hover:text-sky-700 font-medium truncate transition">
-              Apex Global • 67% done
+            <span className="text-[11px] text-slate-600 group-hover:text-sky-700 font-medium truncate transition" title={inProgressSubtext}>
+              {inProgressSubtext}
             </span>
-            <Sparkline data={[35, 45, 52, 60, 67, 67]} color="#0284c7" width={68} height={20} />
+            <Sparkline data={[35, 45, 52, 60, 67, 89]} color="#0284c7" width={68} height={20} />
           </div>
         </div>
 
@@ -416,11 +401,11 @@ export const OnboardingRequestsList: React.FC = () => {
             </div>
           </div>
           <div className="text-base font-bold font-mono text-slate-900 mt-1">
-            1 <span className="text-xs font-normal text-slate-500 font-sans">Submitted</span>
+            {underReviewList.length} <span className="text-xs font-normal text-slate-500 font-sans">Submitted</span>
           </div>
           <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
             <span className="text-[11px] text-teal-700 group-hover:text-teal-800 font-medium truncate transition">
-              Meridian • Nov 4
+              {underReviewSubtext}
             </span>
             <Sparkline data={[0, 0, 1, 1, 1, 1]} color="#0d9488" width={68} height={20} />
           </div>

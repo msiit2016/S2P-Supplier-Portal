@@ -71,6 +71,7 @@ import { MasterProfileSyncModal, SyncStrategy } from '../../components/onboardin
 import { VerificationIndicator } from '../../components/common/VerificationIndicator.js';
 import { SearchableSelect } from '../../components/common/SearchableSelect.js';
 import { FilterSelect } from '../../components/common/FilterSelect.js';
+import { saveBuyerOnboardingProgress } from '../../services/onboardingStateService.js';
 import { formatDateMMDDYYYY } from '../../utils/dateUtils.js';
 import { 
   GepIdentificationItem, 
@@ -1977,6 +1978,48 @@ export const OnboardingRequest: React.FC = () => {
     isStep9Done
   ].filter(Boolean).length;
   const progressPercent = Math.round((completedStepsCount / 9) * 100);
+
+  // Synchronize dynamic progress state with OnboardingRequestsList
+  useEffect(() => {
+    if (activeInvitation?.id) {
+      saveBuyerOnboardingProgress(activeInvitation.id, {
+        id: activeInvitation.id,
+        buyerName: activeInvitation.buyerName,
+        invitationCode: activeInvitation.invitationCode,
+        completedStepsCount,
+        totalSteps: 9,
+        progressPercent,
+        stageLabel: currentSub.isSubmitted
+          ? 'Stage 3 of 5: Buyer Review & Adjudication'
+          : progressPercent > 0
+          ? 'Stage 2 of 5: Form Submission'
+          : 'Stage 1 of 5: Registration Completed',
+        stageNum: currentSub.isSubmitted ? 3 : progressPercent > 0 ? 2 : 1,
+        statusKey: currentSub.isSubmitted
+          ? 'UNDER_REVIEW'
+          : progressPercent > 0
+          ? 'IN_PROGRESS'
+          : 'ACTION_REQUIRED',
+        statusLabel: currentSub.isSubmitted
+          ? 'Under Buyer Review'
+          : progressPercent > 0
+          ? `In Progress (${progressPercent}%)`
+          : 'Action Needed',
+        isSubmitted: Boolean(currentSub.isSubmitted),
+        isEditing: Boolean(currentSub.isEditing),
+        submittedAt: currentSub.submittedAt
+      });
+    }
+  }, [
+    activeInvitation?.id,
+    activeInvitation?.buyerName,
+    activeInvitation?.invitationCode,
+    completedStepsCount,
+    progressPercent,
+    currentSub.isSubmitted,
+    currentSub.isEditing,
+    currentSub.submittedAt
+  ]);
 
   // Broadcast live detailed questionnaire context to Ava Copilot
   useEffect(() => {
@@ -4092,19 +4135,19 @@ export const OnboardingRequest: React.FC = () => {
                   return (
                     <div key={phase.id} className="space-y-1">
                       {/* Milestone Phase Header */}
-                      <div className="flex items-center justify-between px-1.5 pt-0.5 pb-0.5 select-none">
-                        <span className={`text-[10px] font-semibold uppercase tracking-wider ${
-                          isPhaseActive ? 'text-slate-800' : 'text-slate-400'
+                      <div className="flex items-center justify-between px-1.5 pt-1 pb-0.5 select-none">
+                        <span className={`text-[10px] font-bold uppercase tracking-wider ${
+                          isPhaseActive ? 'text-slate-900' : 'text-slate-500'
                         }`}>
                           {phase.title}
                         </span>
                         {isPhaseDone ? (
-                          <span className="text-[9px] font-medium text-slate-500 bg-slate-100 border border-slate-200/80 px-1.5 py-0.2 rounded-full flex items-center gap-0.5">
-                            <Check className="w-2.5 h-2.5 stroke-[2]" />
+                          <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-full flex items-center gap-1 shadow-2xs">
+                            <Check className="w-2.5 h-2.5 stroke-[2.5]" />
                             <span>Done</span>
                           </span>
                         ) : (
-                          <span className="text-[9px] font-mono font-medium text-slate-400">
+                          <span className="text-[10px] font-mono font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded-md">
                             {phaseDoneCount}/{phase.stepNums.length}
                           </span>
                         )}
@@ -4123,24 +4166,24 @@ export const OnboardingRequest: React.FC = () => {
                               onClick={() => setActiveStep(s.num)}
                               className={`w-full p-2 rounded-xl text-left transition flex items-center space-x-2.5 border cursor-pointer ${
                                 isCurrent
-                                  ? 'bg-slate-100 border-slate-300 shadow-2xs font-medium text-slate-900'
+                                  ? 'bg-slate-100 border-slate-300 shadow-2xs font-semibold text-slate-900 ring-1 ring-slate-300/50'
                                   : isDone
-                                  ? 'bg-white border-transparent hover:bg-slate-50 text-slate-700 font-normal'
-                                  : 'bg-white border-transparent hover:bg-slate-50 text-slate-500 font-normal'
+                                  ? 'bg-white border-transparent hover:bg-slate-50 text-slate-800 font-medium'
+                                  : 'bg-white border-transparent hover:bg-slate-50 text-slate-700 font-medium'
                               }`}
                             >
                               {/* Minimalist Circular Step Indicator */}
                               <div className={`w-5.5 h-5.5 rounded-full flex items-center justify-center font-medium text-xs shrink-0 transition ${
                                 isCurrent
-                                  ? 'bg-slate-900 text-white shadow-2xs text-[11px]'
+                                  ? 'bg-slate-900 text-white shadow-2xs text-[11px] font-bold'
                                   : isDone
-                                  ? 'bg-emerald-50 text-emerald-600 border border-emerald-200/60'
-                                  : 'bg-slate-100 text-slate-500 text-[11px]'
+                                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-300 font-bold'
+                                  : 'bg-white text-slate-700 border border-slate-300 text-[11px] font-semibold'
                               }`}>
                                 {isCurrent ? (
                                   <span>{s.num}</span>
                                 ) : isDone ? (
-                                  <Check className="w-3 h-3 stroke-[2]" />
+                                  <Check className="w-3 h-3 stroke-[2.5]" />
                                 ) : (
                                   <span>{s.num}</span>
                                 )}
@@ -4148,23 +4191,36 @@ export const OnboardingRequest: React.FC = () => {
 
                               {/* Clean Section Name - No Subtitles */}
                               <div className="flex-1 min-w-0">
-                                <span className="text-xs truncate block">
+                                <span className={`text-xs truncate block ${
+                                  isCurrent ? 'font-semibold text-slate-900' : isDone ? 'text-slate-800' : 'text-slate-700'
+                                }`}>
                                   {s.title}
                                 </span>
                               </div>
 
-                              {/* Subtle Active Indicator or Incomplete Badge */}
+                              {/* High-Visibility Industry-Standard Status Badges */}
                               {isCurrent ? (
                                 !isFormEditable ? (
-                                  <span title="Viewing section in read-only mode" className="shrink-0 flex items-center">
-                                    <Eye className="w-3.5 h-3.5 text-slate-400" />
+                                  <span title="Viewing section in read-only mode" className="shrink-0 flex items-center text-slate-400">
+                                    <Eye className="w-3.5 h-3.5" />
                                   </span>
-                                ) : null
-                              ) : !isDone ? (
-                                <span className="text-[9px] font-medium text-slate-500 bg-slate-100 px-1.5 py-0.2 rounded shrink-0">
-                                  Pending
+                                ) : (
+                                  <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-100/80 border border-emerald-300 px-2 py-0.5 rounded-md flex items-center gap-1 shrink-0 shadow-2xs">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse shrink-0"></span>
+                                    <span>Active</span>
+                                  </span>
+                                )
+                              ) : isDone ? (
+                                <span className="text-[10px] font-medium text-emerald-700 bg-emerald-50 border border-emerald-200/90 px-1.5 py-0.5 rounded-md flex items-center gap-1 shrink-0">
+                                  <Check className="w-2.5 h-2.5 text-emerald-600 shrink-0 stroke-[2.5]" />
+                                  <span>Done</span>
                                 </span>
-                              ) : null}
+                              ) : (
+                                <span className="text-[10px] font-semibold text-amber-800 bg-amber-50 border border-amber-300/80 px-2 py-0.5 rounded-md flex items-center gap-1.5 shrink-0 shadow-2xs font-sans">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
+                                  <span>Pending</span>
+                                </span>
+                              )}
                             </button>
                           );
                         })}
