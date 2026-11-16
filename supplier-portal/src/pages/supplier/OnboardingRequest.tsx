@@ -4386,7 +4386,7 @@ export const OnboardingRequest: React.FC = () => {
             (Hidden only in FULL agent view)
            ======================================================== */}
         {!isFull && !sidebarCollapsed && (
-          <aside className="w-56 xl:w-64 bg-white border-r border-slate-200 flex flex-col justify-between p-3 shrink-0 h-full overflow-y-auto transition-all duration-200">
+          <aside className="w-60 xl:w-64 bg-white border-r border-slate-200 flex flex-col justify-between p-3 shrink-0 h-full overflow-y-auto transition-all duration-200">
             <div className="space-y-3">
               
               {/* Header with Title & ChatGPT-style Minimize Button */}
@@ -4480,6 +4480,7 @@ export const OnboardingRequest: React.FC = () => {
                             <button
                               key={s.id}
                               onClick={() => setActiveStep(s.num)}
+                              title={`${s.num}. ${s.title} (${isDone ? 'Completed' : isCurrent ? 'Active · In Progress' : 'Pending Details'})`}
                               className={`w-full p-2 rounded-xl text-left transition flex items-center space-x-2.5 border cursor-pointer ${
                                 isCurrent
                                   ? 'bg-slate-100 border-slate-300 shadow-2xs font-semibold text-slate-900 ring-1 ring-slate-300/50'
@@ -4488,13 +4489,13 @@ export const OnboardingRequest: React.FC = () => {
                                   : 'bg-white border-transparent hover:bg-slate-50 text-slate-700 font-medium'
                               }`}
                             >
-                              {/* Refined Stepper Indicator (Optimized Proportions & Font) */}
+                              {/* Semantic Stepper Indicator: Emerald (Done), Dark (Current), Amber (Pending) */}
                               <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] shrink-0 transition ${
                                 isDone
                                   ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 shadow-2xs'
                                   : isCurrent
                                   ? 'bg-slate-900 text-white font-bold shadow-2xs'
-                                  : 'bg-slate-100 text-slate-500 font-medium'
+                                  : 'bg-amber-50 text-amber-800 border border-amber-300/90 font-bold shadow-2xs'
                               }`}>
                                 {isDone ? (
                                   <Check className="w-3 h-3 stroke-[2.5]" />
@@ -4506,7 +4507,7 @@ export const OnboardingRequest: React.FC = () => {
                               {/* Clean Section Name - Full Width Without Truncation */}
                               <div className="flex-1 min-w-0">
                                 <span className={`text-xs truncate block ${
-                                  isCurrent ? 'font-semibold text-slate-900' : isDone ? 'text-slate-800' : 'text-slate-600'
+                                  isCurrent ? 'font-semibold text-slate-900' : isDone ? 'text-slate-800' : 'text-slate-700'
                                 }`}>
                                   {s.title}
                                 </span>
