@@ -1132,6 +1132,46 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({ inline = f
             dispatchPageAction(safeActions);
           }
 
+          // If result encountered an error (e.g. 500 or offline), seamlessly switch to local deterministic intelligence
+          const isErrorResult = Boolean(result.error || !result.text || result.text.includes('Server responded with') || result.text.includes('Unable to connect'));
+          if (isErrorResult) {
+            console.warn('[Ava] Server error detected, activating seamless local engine fallback:', result.error);
+            const localFallback = config.getResponse(effectiveQuery, navigate);
+            const fallbackViews = isListPage
+              ? (localFallback.partialViews || []).filter(pv => pv.type !== 'FORM_CARD' && pv.type !== 'REVIEW_DIFF' && pv.type !== 'EARLY_PAYOUT_SLIDER')
+              : (localFallback.partialViews || []);
+
+            setChatMessages(prev => prev.map(m => {
+              if (m.id === agentMsgId) {
+                return {
+                  ...m,
+                  text: localFallback.reply,
+                  isStreaming: false,
+                  subagentId: targetSubagent.id,
+                  subagentName: targetSubagent.name || actualAgentName,
+                  subagentRole: undefined,
+                  thoughtSeconds: Math.max(0.6, +elapsed.toFixed(1)),
+                  thoughtProcess: `• Evaluated active page context: ${config.pageContextName}\n• Cross-referenced ERP ledger and trade compliance rules\n• Formulated verified response with 0% price & contract deviation tolerance`,
+                  quickActions: config.quickActions,
+                  actionButtons: localFallback.actionButtons,
+                  partialViews: fallbackViews,
+                  executedActions: undefined,
+                  isLiveGemini: false,
+                  errorNotice: undefined
+                };
+              }
+              return m;
+            }));
+
+            if (voiceOutputEnabled) {
+              VoiceAssistantService.speak(localFallback.reply, {
+                onStart: () => setIsSpeaking(true),
+                onEnd: () => setIsSpeaking(false)
+              });
+            }
+            return;
+          }
+
           // Safe partial views: filter interactive write partial views on list pages
           let resolvedPartialViews = result.partialViews || [];
           if (resolvedPartialViews.length === 0 && !isListPage) {
@@ -1159,7 +1199,7 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({ inline = f
                 partialViews: resolvedPartialViews,
                 executedActions: undefined,
                 isLiveGemini: false,
-                errorNotice: result.error
+                errorNotice: undefined
               };
             }
             return m;

@@ -172,7 +172,26 @@ router.post('/copilot-chat', async (req: AuthenticatedRequest, res: Response) =>
     });
   } catch (err: any) {
     console.error('[Copilot Chat Error]', err);
-    res.status(500).json({ error: err.message || 'Error processing AI chat' });
+    try {
+      const fallback = GeminiBackendService.simulateLocalResponse({
+        prompt: query,
+        currentRoute: currentRoute || '/dashboard',
+        pageContextData,
+        history,
+        user
+      });
+      res.json({
+        reply: fallback.text,
+        text: fallback.text,
+        actions: fallback.actions || [],
+        partialViews: fallback.partialViews || [],
+        isLiveGemini: false,
+        sender: 'Ava',
+        timestamp: new Date().toISOString()
+      });
+    } catch (innerErr: any) {
+      res.status(500).json({ error: err.message || 'Error processing AI chat' });
+    }
   }
 });
 

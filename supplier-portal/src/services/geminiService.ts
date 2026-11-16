@@ -116,6 +116,12 @@ export async function sendGeminiPromptStream(
     if (!response.ok || !response.body) {
       // Fallback to non-streaming if stream not accepted
       const nonStreamResult = await sendGeminiPrompt(options);
+      if (nonStreamResult.error) {
+        if (callbacks.onError) {
+          callbacks.onError(new Error(nonStreamResult.error));
+          return;
+        }
+      }
       callbacks.onChunk(nonStreamResult.text, nonStreamResult.text);
       callbacks.onDone(nonStreamResult);
       return;
@@ -174,6 +180,10 @@ export async function sendGeminiPromptStream(
     console.warn('[Copilot Service] Streaming failed, falling back to synchronous prompt:', err);
     try {
       const fallbackResult = await sendGeminiPrompt(options);
+      if (fallbackResult.error && callbacks.onError) {
+        callbacks.onError(new Error(fallbackResult.error));
+        return;
+      }
       callbacks.onChunk(fallbackResult.text, fallbackResult.text);
       callbacks.onDone(fallbackResult);
     } catch (fallbackErr: any) {

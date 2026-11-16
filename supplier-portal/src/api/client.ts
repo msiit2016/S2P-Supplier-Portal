@@ -2,7 +2,9 @@ const API_ORIGIN = (import.meta as any).env?.VITE_API_URL
   ? ((import.meta as any).env.VITE_API_URL.startsWith('http')
       ? (import.meta as any).env.VITE_API_URL
       : `https://${(import.meta as any).env.VITE_API_URL}`)
-  : '';
+  : (typeof window !== 'undefined' && (window.location.port === '3003' || window.location.port === '5173')
+      ? 'http://localhost:3001'
+      : '');
 
 export const BASE_URL = `${API_ORIGIN}/api/v1`;
 
