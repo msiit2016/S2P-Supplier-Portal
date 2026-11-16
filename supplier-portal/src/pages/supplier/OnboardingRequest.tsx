@@ -4458,16 +4458,14 @@ export const OnboardingRequest: React.FC = () => {
                         }`}>
                           {phase.title}
                         </span>
-                        {isPhaseDone ? (
-                          <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-full flex items-center gap-1 shadow-2xs">
-                            <Check className="w-2.5 h-2.5 stroke-[2.5]" />
-                            <span>Done</span>
-                          </span>
-                        ) : (
-                          <span className="text-[10px] font-mono font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded-md">
-                            {phaseDoneCount}/{phase.stepNums.length}
-                          </span>
-                        )}
+                        {/* Milestone Ratio Pill: Consistent numeric ratio (no text noise) */}
+                        <span className={`text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded-md border ${
+                          isPhaseDone
+                            ? 'text-emerald-700 bg-emerald-50 border-emerald-200/80 shadow-2xs'
+                            : 'text-slate-600 bg-slate-100 border-slate-200'
+                        }`}>
+                          {phaseDoneCount}/{phase.stepNums.length}
+                        </span>
                       </div>
 
                       {/* Phase Steps */}
