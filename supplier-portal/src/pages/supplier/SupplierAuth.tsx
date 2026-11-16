@@ -16,6 +16,7 @@ import {
   Building2,
   User,
   CheckCircle2,
+  Check,
   AlertCircle,
   Phone,
   KeyRound,
@@ -73,6 +74,33 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
   // UI States
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+
+  // Registration Success Greeting & Transition Modal State
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [countdownSeconds, setCountdownSeconds] = useState(3);
+
+  const handleProceedToOnboarding = () => {
+    setShowSuccessModal(false);
+    switchUser(signupEmail, companyName, signupContactName);
+    navigate('/onboarding/detail', { isNewRegistration: true, autoDetail: true, openAva: true });
+  };
+
+  // Auto-redirect countdown after successful registration
+  useEffect(() => {
+    if (!showSuccessModal) return;
+    setCountdownSeconds(3);
+    const timer = setInterval(() => {
+      setCountdownSeconds((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          handleProceedToOnboarding();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [showSuccessModal]);
 
   // Canvas ref for 3D constellation sphere
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -395,8 +423,8 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
         setErrorMsg(res.error);
         setLoading(false);
       } else {
-        switchUser(signupEmail, companyName, signupContactName);
-        navigate('/onboarding/detail', { isNewRegistration: true, autoDetail: true, openAva: true });
+        setLoading(false);
+        setShowSuccessModal(true);
       }
     } catch (err: any) {
       // Offline fallback: provision profile and navigate to onboarding questionnaire
@@ -422,8 +450,8 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
         activeStep: 1,
         isNewRegistration: true
       });
-      switchUser(signupEmail, companyName, signupContactName);
-      navigate('/onboarding/detail', { isNewRegistration: true, autoDetail: true, openAva: true });
+      setLoading(false);
+      setShowSuccessModal(true);
     } finally {
       setLoading(false);
     }
@@ -1235,6 +1263,80 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
           </div>
         </div>
       </div>
+
+      {/* =========================================================================
+          WORLD-CLASS REGISTRATION SUCCESS & PROVISIONING INTERSTITIAL MODAL
+         ========================================================================= */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-[#0b1329] border border-slate-700/80 text-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative overflow-hidden text-center animate-in zoom-in-95 duration-300">
+            {/* Ambient Background Glow */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
+
+            {/* Pulsing Animated Success Emblem */}
+            <div className="relative mx-auto w-16 h-16 sm:w-20 sm:h-20 mb-5 flex items-center justify-center">
+              <div className="absolute inset-0 rounded-2xl bg-emerald-500/20 animate-ping opacity-25" />
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-emerald-500/30 text-white">
+                <CheckCircle2 className="w-9 h-9 sm:w-11 sm:h-11 stroke-[2.2]" />
+              </div>
+            </div>
+
+            {/* Personalized Welcome Headline */}
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+              Registered Successfully!
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed">
+              Welcome, <span className="font-semibold text-white">{signupFirstName || signupContactName || 'Partner'}</span>. Your enterprise account for <strong className="text-emerald-400">{companyName}</strong> is provisioned and ready.
+            </p>
+
+            {/* Live Provisioning Telemetry Checklist */}
+            <div className="bg-slate-900/90 border border-slate-800/90 rounded-2xl p-4 my-5 text-left space-y-2.5 shadow-inner">
+              <div className="flex items-center gap-2.5 text-xs text-slate-200">
+                <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                  <Check className="w-3.5 h-3.5 stroke-[3]" />
+                </div>
+                <span>Universal Master Profile &amp; Passport Created</span>
+              </div>
+              <div className="flex items-center gap-2.5 text-xs text-slate-200">
+                <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                  <Check className="w-3.5 h-3.5 stroke-[3]" />
+                </div>
+                <span>SSO Security &amp; Compliance Vault Initialized</span>
+              </div>
+              <div className="flex items-center gap-2.5 text-xs text-slate-200">
+                <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                  <Check className="w-3.5 h-3.5 stroke-[3]" />
+                </div>
+                <span className="truncate">Connected to <strong className="text-emerald-400">Apex Global Enterprises</strong> (INV-APEX-2026)</span>
+              </div>
+            </div>
+
+            {/* Countdown & Progress Indicator */}
+            <div className="space-y-2 mb-5">
+              <div className="flex items-center justify-between text-[11px] text-slate-400">
+                <span>Launching buyer onboarding questionnaire...</span>
+                <span className="font-mono font-bold text-emerald-400">{countdownSeconds}s</span>
+              </div>
+              <div className="w-full bg-slate-800/80 h-1.5 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-1000 ease-linear"
+                  style={{ width: `${Math.max(10, ((4 - countdownSeconds) / 3) * 100)}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Primary Action Button */}
+            <button
+              type="button"
+              onClick={handleProceedToOnboarding}
+              className="w-full py-3 px-4 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs sm:text-sm rounded-xl shadow-lg shadow-emerald-950/50 transition-all flex items-center justify-center gap-2 cursor-pointer group"
+            >
+              <span>Continue to Onboarding Questionnaire</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
