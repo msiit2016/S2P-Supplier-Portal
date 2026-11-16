@@ -4504,15 +4504,14 @@ export const OnboardingRequest: React.FC = () => {
                   return (
                     <div key={phase.id} className="space-y-1">
                       {/* Milestone Phase Header */}
-                      <div className="flex items-center justify-between px-1.5 pt-1 pb-0.5 select-none">
+                      <div className="flex items-center gap-1.5 px-1.5 pt-1 pb-0.5 select-none">
                         <span className={`text-[10px] font-bold uppercase tracking-wider ${
                           isPhaseActive ? 'text-slate-900' : 'text-slate-500'
                         }`}>
                           {phase.title}
                         </span>
-                        {/* Milestone Ratio Pill: Consistent neutral numeric ratio */}
-                        <span className="text-[10px] font-mono font-medium text-slate-500 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded-md">
-                          {phaseDoneCount}/{phase.stepNums.length}
+                        <span className="text-[10px] font-mono font-normal text-slate-400">
+                          ({phaseDoneCount}/{phase.stepNums.length})
                         </span>
                       </div>
 
