@@ -1139,8 +1139,10 @@ export const OnboardingRequest: React.FC = () => {
     return () => clearTimeout(timer);
   }, [softValidationToast]);
 
-  // Real-time UI highlight state
+  // Real-time UI highlight state (Supports simultaneous highlighting of all missing mandatory fields)
   const [highlightField, setHighlightField] = useState<string | null>(null);
+  const [highlightedFields, setHighlightedFields] = useState<string[]>([]);
+  const highlightTimeoutRef = useRef<any>(null);
 
   // Real-time Ava Agent action notification toast
   const [agentActionToast, setAgentActionToast] = useState<{ title: string; message: string } | null>(null);
@@ -2497,12 +2499,42 @@ export const OnboardingRequest: React.FC = () => {
     }
   };
 
-  // Helper to trigger temporary UI pulse highlight on updated field
+  // Helper to trigger temporary UI pulse highlight on updated field(s)
   const triggerFieldPulse = (fieldName: string) => {
-    setHighlightField(fieldName);
-    setTimeout(() => {
+    triggerMultipleFieldsPulse([fieldName], 4000);
+  };
+
+  const triggerMultipleFieldsPulse = (fieldNames: string[], durationMs: number = 8000) => {
+    if (highlightTimeoutRef.current) {
+      clearTimeout(highlightTimeoutRef.current);
+    }
+    setHighlightField(fieldNames.length === 1 ? fieldNames[0] : null);
+    setHighlightedFields(fieldNames);
+    highlightTimeoutRef.current = setTimeout(() => {
       setHighlightField(null);
-    }, 3200);
+      setHighlightedFields([]);
+    }, durationMs);
+  };
+
+  const isFieldHighlighted = (fieldKey: string): boolean => {
+    if (!fieldKey) return false;
+    // Direct single field pulse (e.g. from AI Copilot or Master Profile sync)
+    if (highlightField === fieldKey || highlightField === `field-${fieldKey}`) {
+      return true;
+    }
+    // Multiple fields pulse from mandatory validation checks
+    if (highlightedFields.includes(fieldKey) || highlightedFields.includes(`field-${fieldKey}`)) {
+      const validation = getSectionValidation(activeStep);
+      return validation.missingFields.some(f => f.id === fieldKey || f.id === `field-${fieldKey}`);
+    }
+    return false;
+  };
+
+  const clearFieldHighlight = (fieldId: string) => {
+    setHighlightedFields(prev => prev.filter(f => f !== fieldId && f !== `field-${fieldId}`));
+    if (highlightField === fieldId || highlightField === `field-${fieldId}`) {
+      setHighlightField(null);
+    }
   };
 
   // =========================================================================
@@ -3189,10 +3221,9 @@ export const OnboardingRequest: React.FC = () => {
       });
       mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
 
-      // Highlight the first missing field in current section
-      if (currentValidation.missingFields[0]) {
-        triggerFieldPulse(currentValidation.missingFields[0].id);
-      }
+      // Highlight ALL missing mandatory fields in the current section
+      const missingIds = currentValidation.missingFields.map(f => f.id);
+      triggerMultipleFieldsPulse(missingIds, 10000);
       return;
     }
 
@@ -3200,6 +3231,8 @@ export const OnboardingRequest: React.FC = () => {
     setSectionInlineWarning(null);
     setWarnedStepNum(null);
     setSoftValidationToast(null);
+    setHighlightedFields([]);
+    setHighlightField(null);
 
     setSaving(true);
     handleSaveDraft();
@@ -3221,9 +3254,16 @@ export const OnboardingRequest: React.FC = () => {
       message: `Action Required: Please complete "${field.label}" to satisfy buyer submission requirements.`
     });
     
+    // In target section, highlight ALL missing fields in that section, focusing the target field
+    const targetValidation = getSectionValidation(field.stepNum);
+    const sectionMissingIds = targetValidation.missingFields.map(f => f.id);
+    if (!sectionMissingIds.includes(field.id)) {
+      sectionMissingIds.push(field.id);
+    }
+    triggerMultipleFieldsPulse(sectionMissingIds, 10000);
+
     // Smoothly scroll and trigger pulse
     setTimeout(() => {
-      triggerFieldPulse(field.id);
       const targetEl = document.getElementById(`field-${field.id}`) || document.getElementById(field.id);
       if (targetEl) {
         targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -3251,6 +3291,10 @@ export const OnboardingRequest: React.FC = () => {
         stepNum: 9,
         message: `Submission Blocked: ${validation.totalMissing} mandatory fields across ${validation.sectionErrors.length} sections must be completed before submitting to ${activeInvitation.buyerName}.`
       });
+
+      // Highlight all missing fields across sections
+      const allMissingIds = validation.sectionErrors.flatMap(s => s.missingFields.map(f => f.id));
+      triggerMultipleFieldsPulse(allMissingIds, 10000);
       return;
     }
 
@@ -5154,8 +5198,8 @@ export const OnboardingRequest: React.FC = () => {
                         className={`w-full px-3 py-2 text-xs font-medium rounded-lg border transition ${
                           isFormReadOnly
                             ? 'bg-slate-50 text-slate-700 border-slate-200 cursor-default'
-                            : (highlightField === 'legalName' || highlightField === 'field-legalName')
-                            ? 'ring-2 ring-rose-500 border-rose-500 bg-rose-50/50 animate-pulse'
+                            : isFieldHighlighted('legalName')
+                            ? 'ring-2 ring-rose-500 border-rose-500 bg-rose-50/50'
                             : 'bg-white text-slate-900 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600'
                         }`}
                       />
@@ -5178,7 +5222,7 @@ export const OnboardingRequest: React.FC = () => {
                         className={`w-full px-3 py-2 text-xs rounded-lg border transition ${
                           isFormReadOnly
                             ? 'bg-slate-50 text-slate-700 border-slate-200 cursor-default'
-                            : (highlightField === 'tradeName' || highlightField === 'field-tradeName')
+                            : isFieldHighlighted('tradeName')
                             ? 'ring-2 ring-emerald-500 border-emerald-500 bg-emerald-50/50'
                             : 'bg-white text-slate-900 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600'
                         }`}
@@ -5202,7 +5246,7 @@ export const OnboardingRequest: React.FC = () => {
                         className={`w-full px-3 py-2 text-xs rounded-lg border transition ${
                           isFormReadOnly
                             ? 'bg-slate-50 text-slate-700 border-slate-200 cursor-default'
-                            : (highlightField === 'formerlyKnownAs' || highlightField === 'field-formerlyKnownAs')
+                            : isFieldHighlighted('formerlyKnownAs')
                             ? 'ring-2 ring-emerald-500 border-emerald-500 bg-emerald-50/50'
                             : 'bg-white text-slate-900 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600'
                         }`}
@@ -5226,7 +5270,7 @@ export const OnboardingRequest: React.FC = () => {
 
                     {/* Partner Status */}
                     <div id="partnerStatus" className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'} rounded-xl transition ${
-                      (highlightField === 'partnerStatus' || highlightField === 'field-partnerStatus') ? 'ring-2 ring-rose-500 p-1 bg-rose-50/30 animate-pulse' : ''
+                      isFieldHighlighted('partnerStatus') ? 'ring-2 ring-rose-500 border border-rose-400 p-1 rounded-xl bg-rose-50/30' : ''
                     }`}>
                       <div className="flex items-center justify-between min-h-[20px]">
                         <label className="text-xs font-semibold text-slate-700 truncate" title="Partner Status">
@@ -5244,7 +5288,7 @@ export const OnboardingRequest: React.FC = () => {
 
                     {/* Supplier Manager Name */}
                     <div id="supplierManager" className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'} rounded-xl transition ${
-                      (highlightField === 'supplierManager' || highlightField === 'field-supplierManager') ? 'ring-2 ring-rose-500 p-1 bg-rose-50/30 animate-pulse' : ''
+                      isFieldHighlighted('supplierManager') ? 'ring-2 ring-rose-500 border border-rose-400 p-1 rounded-xl bg-rose-50/30' : ''
                     }`}>
                       <div className="flex items-center justify-between min-h-[20px]">
                         <label className="text-xs font-semibold text-slate-700 truncate" title="Supplier Manager Name">
@@ -5296,8 +5340,8 @@ export const OnboardingRequest: React.FC = () => {
                             className={`w-full px-3 py-2 text-xs font-mono rounded-lg border transition ${
                               isFormReadOnly
                                 ? 'bg-slate-50 text-slate-700 border-slate-200 cursor-default'
-                                : (highlightField === 'dunsNumber' || highlightField === 'field-dunsNumber')
-                                ? 'ring-2 ring-rose-500 border-rose-500 bg-rose-50/50 animate-pulse'
+                                : isFieldHighlighted('dunsNumber')
+                                ? 'ring-2 ring-rose-500 border-rose-500 bg-rose-50/50'
                                 : 'bg-white text-slate-900 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600'
                             }`}
                           />
@@ -5345,8 +5389,8 @@ export const OnboardingRequest: React.FC = () => {
                           className={`w-full pl-3 pr-28 py-2 text-xs font-mono rounded-lg border transition ${
                             isFormReadOnly
                               ? 'bg-slate-50 text-slate-700 border-slate-200 cursor-default font-semibold'
-                              : (highlightField === 'taxId' || highlightField === 'field-taxId')
-                              ? 'ring-2 ring-rose-500 border-rose-500 bg-rose-50/50 animate-pulse'
+                              : isFieldHighlighted('taxId')
+                              ? 'ring-2 ring-rose-500 border-rose-500 bg-rose-50/50'
                               : 'bg-white text-slate-900 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600'
                           }`}
                         />
@@ -5399,8 +5443,8 @@ export const OnboardingRequest: React.FC = () => {
                           className={`flex-1 min-w-0 px-3 py-2 text-xs font-medium rounded-lg border transition ${
                             isFormReadOnly
                               ? 'bg-slate-50 text-slate-700 border-slate-200 cursor-default'
-                              : (highlightField === 'mobilePhone' || highlightField === 'field-mobilePhone')
-                              ? 'ring-2 ring-rose-500 border-rose-500 bg-rose-50/50 animate-pulse'
+                              : isFieldHighlighted('mobilePhone')
+                              ? 'ring-2 ring-rose-500 border-rose-500 bg-rose-50/50'
                               : 'bg-white text-slate-900 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600'
                           }`}
                         />
@@ -5409,7 +5453,7 @@ export const OnboardingRequest: React.FC = () => {
 
                     {/* Primary Language */}
                     <div id="primaryLanguage" className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-6' : 'lg:col-span-2'} rounded-xl transition ${
-                      (highlightField === 'primaryLanguage' || highlightField === 'field-primaryLanguage') ? 'ring-2 ring-rose-500 p-1 bg-rose-50/30 animate-pulse' : ''
+                      isFieldHighlighted('primaryLanguage') ? 'ring-2 ring-rose-500 border border-rose-400 p-1 rounded-xl bg-rose-50/30' : ''
                     }`}>
                       <div className="flex items-center justify-between min-h-[20px]">
                         <label className="text-xs font-semibold text-slate-700 truncate" title="Primary Language">
@@ -5428,7 +5472,7 @@ export const OnboardingRequest: React.FC = () => {
 
                     {/* Subcategory (UNSPSC) */}
                     <div id="subcategories" className={`space-y-2 lg:col-span-3 rounded-xl transition ${
-                      (highlightField === 'subcategories' || highlightField === 'field-subcategories') ? 'ring-2 ring-rose-500 p-1 bg-rose-50/30 animate-pulse' : ''
+                      isFieldHighlighted('subcategories') ? 'ring-2 ring-rose-500 border border-rose-400 p-1 rounded-xl bg-rose-50/30' : ''
                     }`}>
                       <div className="h-6 flex items-center justify-between gap-1">
                         <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
@@ -5561,7 +5605,7 @@ export const OnboardingRequest: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 sm:gap-4.5">
                     {/* Currency */}
                     <div id="reportingCurrency" className={`space-y-1.5 lg:col-span-2 rounded-xl transition ${
-                      (highlightField === 'reportingCurrency' || highlightField === 'field-reportingCurrency') ? 'ring-2 ring-rose-500 p-1 bg-rose-50/30 animate-pulse' : ''
+                      isFieldHighlighted('reportingCurrency') ? 'ring-2 ring-rose-500 border border-rose-400 p-1 rounded-xl bg-rose-50/30' : ''
                     }`}>
                       <div className="flex items-center justify-between min-h-[20px] h-5">
                         <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
@@ -5600,8 +5644,8 @@ export const OnboardingRequest: React.FC = () => {
                           className={`w-full ${currentCurrencySymbol.length > 2 ? 'pl-11' : currentCurrencySymbol.length > 1 ? 'pl-9' : 'pl-7'} pr-14 py-2 text-xs font-semibold rounded-lg border transition ${
                             isFormReadOnly
                               ? 'bg-slate-50 text-slate-700 border-slate-200 cursor-default'
-                              : (highlightField === 'annualRevenue' || highlightField === 'field-annualRevenue')
-                              ? 'ring-2 ring-rose-500 border-rose-500 bg-rose-50/50 animate-pulse'
+                              : isFieldHighlighted('annualRevenue')
+                              ? 'ring-2 ring-rose-500 border-rose-500 bg-rose-50/50'
                               : 'bg-white text-slate-900 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600'
                           }`}
                         />
@@ -5628,8 +5672,8 @@ export const OnboardingRequest: React.FC = () => {
                         className={`w-full px-3 py-2 text-xs rounded-lg border transition ${
                           isFormReadOnly
                             ? 'bg-slate-50 text-slate-700 border-slate-200 cursor-default'
-                            : (highlightField === 'totalEmployees' || highlightField === 'field-totalEmployees')
-                            ? 'ring-2 ring-rose-500 border-rose-500 bg-rose-50/50 animate-pulse'
+                            : isFieldHighlighted('totalEmployees')
+                            ? 'ring-2 ring-rose-500 border-rose-500 bg-rose-50/50'
                             : 'bg-white text-slate-900 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600'
                         }`}
                       />
@@ -5659,7 +5703,7 @@ export const OnboardingRequest: React.FC = () => {
 
                     {/* Country / Jurisdiction (ISO 3166-1) */}
                     <div id="country" className={`space-y-1.5 lg:col-span-2 rounded-xl transition ${
-                      (highlightField === 'country' || highlightField === 'field-country') ? 'ring-2 ring-rose-500 p-1 bg-rose-50/30 animate-pulse' : ''
+                      isFieldHighlighted('country') ? 'ring-2 ring-rose-500 border border-rose-400 p-1 rounded-xl bg-rose-50/30' : ''
                     }`}>
                       <div className="flex items-center justify-between min-h-[20px] h-5 gap-1">
                         <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
@@ -5716,8 +5760,8 @@ export const OnboardingRequest: React.FC = () => {
                           className={`w-full px-3 py-2 text-xs rounded-lg border transition ${
                             isFormReadOnly
                               ? 'bg-slate-50 text-slate-700 border-slate-200 cursor-default'
-                              : (highlightField === 'registeredAddress' || highlightField === 'field-registeredAddress')
-                              ? 'ring-2 ring-rose-500 border-rose-500 bg-rose-50/50 animate-pulse'
+                              : isFieldHighlighted('registeredAddress')
+                              ? 'ring-2 ring-rose-500 border-rose-500 bg-rose-50/50'
                               : 'bg-white text-slate-900 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600'
                           }`}
                         />
@@ -5747,8 +5791,8 @@ export const OnboardingRequest: React.FC = () => {
                         className={`w-full px-3 py-2 text-xs rounded-lg border transition resize-none ${
                           isFormReadOnly
                             ? 'bg-slate-50 text-slate-700 border-slate-200 cursor-default'
-                            : (highlightField === 'descriptionOfServices' || highlightField === 'field-descriptionOfServices')
-                            ? 'ring-2 ring-rose-500 border-rose-500 bg-rose-50/50 animate-pulse'
+                            : isFieldHighlighted('descriptionOfServices')
+                            ? 'ring-2 ring-rose-500 border-rose-500 bg-rose-50/50'
                             : 'bg-white text-slate-900 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600'
                         }`}
                       />
@@ -5756,7 +5800,7 @@ export const OnboardingRequest: React.FC = () => {
 
                     {/* Target Business Units */}
                     <div id="businessUnits" className={`space-y-2 lg:col-span-3 rounded-xl transition ${
-                      (highlightField === 'businessUnits' || highlightField === 'field-businessUnits') ? 'ring-2 ring-rose-500 p-1 bg-rose-50/30 animate-pulse' : ''
+                      isFieldHighlighted('businessUnits') ? 'ring-2 ring-rose-500 border border-rose-400 p-1 rounded-xl bg-rose-50/30' : ''
                     }`}>
                       <div className="h-6 flex items-center justify-between gap-1">
                         <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
@@ -5873,7 +5917,7 @@ export const OnboardingRequest: React.FC = () => {
               {/* SECTION 3: IDENTIFICATION INFORMATION GRID */}
               {activeStep === 3 && (
                 <div id="identifications" className={`rounded-xl transition ${
-                  (highlightField === 'identifications' || highlightField === 'field-identifications') ? 'ring-2 ring-rose-500 p-1 rounded-xl bg-rose-50/20 animate-pulse' : ''
+                  isFieldHighlighted('identifications') ? 'ring-2 ring-rose-500 border border-rose-400 p-1 rounded-xl bg-rose-50/20' : ''
                 }`}>
                   <GepIdentificationGrid items={identifications} onChange={setIdentifications} readOnly={isFormReadOnly} openAddTrigger={openAddTrigger} />
                 </div>
@@ -5882,7 +5926,7 @@ export const OnboardingRequest: React.FC = () => {
               {/* SECTION 4: CONTACT INFORMATION */}
               {activeStep === 4 && (
                 <div id="contacts" className={`rounded-xl transition ${
-                  (highlightField === 'contacts' || highlightField === 'field-contacts') ? 'ring-2 ring-rose-500 p-1 rounded-xl bg-rose-50/20 animate-pulse' : ''
+                  isFieldHighlighted('contacts') ? 'ring-2 ring-rose-500 border border-rose-400 p-1 rounded-xl bg-rose-50/20' : ''
                 }`}>
                   <GepContactMatrix contacts={contacts} onChange={setContacts} readOnly={isFormReadOnly} openAddTrigger={openAddTrigger} />
                 </div>
@@ -5891,7 +5935,7 @@ export const OnboardingRequest: React.FC = () => {
               {/* SECTION 5: LOCATION */}
               {activeStep === 5 && (
                 <div id="locations" className={`rounded-xl transition ${
-                  (highlightField === 'locations' || highlightField === 'field-locations') ? 'ring-2 ring-rose-500 p-1 rounded-xl bg-rose-50/20 animate-pulse' : ''
+                  isFieldHighlighted('locations') ? 'ring-2 ring-rose-500 border border-rose-400 p-1 rounded-xl bg-rose-50/20' : ''
                 }`}>
                   <GepLocationGrid locations={locations} onChange={setLocations} readOnly={isFormReadOnly} openAddTrigger={openAddTrigger} />
                 </div>
@@ -5900,7 +5944,7 @@ export const OnboardingRequest: React.FC = () => {
               {/* SECTION 6: BANKING INFORMATION */}
               {activeStep === 6 && (
                 <div id="bankAccounts" className={`rounded-xl transition ${
-                  (highlightField === 'bankAccounts' || highlightField === 'field-bankAccounts') ? 'ring-2 ring-rose-500 p-1 rounded-xl bg-rose-50/20 animate-pulse' : ''
+                  isFieldHighlighted('bankAccounts') ? 'ring-2 ring-rose-500 border border-rose-400 p-1 rounded-xl bg-rose-50/20' : ''
                 }`}>
                   <GepBankingGrid bankAccounts={bankAccounts} locations={locations} onChange={setBankAccounts} readOnly={isFormReadOnly} openAddTrigger={openAddTrigger} />
                 </div>
@@ -5909,7 +5953,7 @@ export const OnboardingRequest: React.FC = () => {
               {/* SECTION 7: PAYMENT TERMS */}
               {activeStep === 7 && (
                 <div id="paymentTerms" className={`rounded-xl transition ${
-                  (highlightField === 'paymentTerms' || highlightField === 'field-paymentTerms' || highlightField === 'matchingType') ? 'ring-2 ring-rose-500 p-1 rounded-xl bg-rose-50/20 animate-pulse' : ''
+                  (isFieldHighlighted('paymentTerms') || isFieldHighlighted('matchingType')) ? 'ring-2 ring-rose-500 border border-rose-400 p-1 rounded-xl bg-rose-50/20' : ''
                 }`}>
                   <GepCommercialTerms settings={commercialSettings} onChange={setCommercialSettings} readOnly={isFormReadOnly} />
                 </div>
@@ -5918,7 +5962,7 @@ export const OnboardingRequest: React.FC = () => {
               {/* SECTION 8: DIVERSITY & CERTIFICATES */}
               {activeStep === 8 && (
                 <div id="certificates" className={`rounded-xl transition ${
-                  (highlightField === 'certificates' || highlightField === 'field-certificates') ? 'ring-2 ring-rose-500 p-1 rounded-xl bg-rose-50/20 animate-pulse' : ''
+                  isFieldHighlighted('certificates') ? 'ring-2 ring-rose-500 border border-rose-400 p-1 rounded-xl bg-rose-50/20' : ''
                 }`}>
                   <GepCertificatesGrid certificates={certificates} onChange={setCertificates} readOnly={isFormReadOnly} openAddTrigger={openAddTrigger} />
                 </div>
