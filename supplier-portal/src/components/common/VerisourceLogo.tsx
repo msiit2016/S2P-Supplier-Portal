@@ -25,7 +25,7 @@ export const VerisourceLogo: React.FC<VerisourceLogoProps> = ({
   markStyle = 'tile',
   theme = 'dark',
   showTagline = false,
-  taglineText = 'Autonomous Supplier Network',
+  taglineText = 'AI-Native Supplier Network',
   className = '',
   onClick
 }) => {

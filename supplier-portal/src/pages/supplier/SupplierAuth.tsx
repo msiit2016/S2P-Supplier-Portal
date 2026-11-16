@@ -446,10 +446,6 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
 
         {/* Hero Headline & Subhead */}
         <div className="relative z-20 max-w-xl pt-1 sm:pt-2">
-          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-semibold tracking-wide uppercase mb-2.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            Autonomous Supplier Network
-          </div>
           <h1 className="text-2xl sm:text-3xl lg:text-[32px] xl:text-[36px] font-bold tracking-tight text-white leading-[1.2]">
             Chosen by Over <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-sky-400 font-extrabold">120,000+</span> Suppliers Worldwide
           </h1>
@@ -551,7 +547,7 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
         {/* Top Header Bar: The Single Verisource Brand Logo + Tab Switcher */}
         <div className="flex items-center justify-between pb-4 border-b border-slate-100">
           {/* Verisource Brand Logo */}
-          <VerisourceLogo size="md" theme="light" showTagline={true} taglineText="Autonomous Supplier Network" />
+          <VerisourceLogo size="md" theme="light" showTagline={true} taglineText="AI-Native Supplier Network" />
 
           {/* Header Switch Action */}
           <div className="text-xs text-slate-500">
