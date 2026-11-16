@@ -28,8 +28,34 @@ import {
   Zap,
   FileCheck,
   ArrowLeft,
-  Sparkles
+  Sparkles,
+  Info
 } from 'lucide-react';
+
+const FieldTooltip: React.FC<{ content: string }> = ({ content }) => {
+  const [visible, setVisible] = useState(false);
+  return (
+    <div className="relative inline-flex items-center ml-1 group">
+      <button
+        type="button"
+        onMouseEnter={() => setVisible(true)}
+        onMouseLeave={() => setVisible(false)}
+        onFocus={() => setVisible(true)}
+        onBlur={() => setVisible(false)}
+        className="text-slate-400 hover:text-emerald-700 focus:outline-none transition p-0.5 rounded cursor-pointer"
+        aria-label="Field information"
+      >
+        <Info className="w-3.5 h-3.5" />
+      </button>
+      {visible && (
+        <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1.5 z-40 w-64 p-2.5 bg-slate-900/95 backdrop-blur-xs text-white text-[11px] leading-relaxed rounded-xl shadow-xl pointer-events-none animate-in fade-in zoom-in-95 duration-150 border border-slate-700">
+          {content}
+          <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-900/95" />
+        </div>
+      )}
+    </div>
+  );
+};
 
 interface SupplierAuthProps {
   initialTab?: 'LOGIN' | 'SIGNUP';
@@ -1118,7 +1144,10 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
               <form onSubmit={handleSignup} className="space-y-3 text-xs">
                 {/* Legal Company Name */}
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Legal Company Name *</label>
+                  <div className="flex items-center mb-1">
+                    <label className="font-semibold text-slate-700">Legal Company Name *</label>
+                    <FieldTooltip content="Enter your organization's statutory legal entity name exactly as registered with government authorities or shown on your tax certificate / W-9." />
+                  </div>
                   <div className="relative">
                     <Building2 className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
                     <input
@@ -1166,7 +1195,10 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
 
                 {/* Work Email */}
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Work Email *</label>
+                  <div className="flex items-center mb-1">
+                    <label className="font-semibold text-slate-700">Work Email *</label>
+                    <FieldTooltip content="Please use your corporate domain email (e.g. name@company.com). Used for buyer procurement verifications, PO delivery, and enterprise SSO." />
+                  </div>
                   <div className="relative">
                     <Mail className={`w-4 h-4 absolute left-3 top-2.5 transition-colors ${signupEmailTouched && signupEmail && !isValidEmail(signupEmail) ? 'text-rose-400' : 'text-slate-400'}`} />
                     <input
@@ -1196,7 +1228,10 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
 
                 {/* Country / HQ */}
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Country of Registration *</label>
+                  <div className="flex items-center mb-1">
+                    <label className="font-semibold text-slate-700">Country of Registration *</label>
+                    <FieldTooltip content="Select the country or legal jurisdiction where your business entity is officially incorporated." />
+                  </div>
                   <SearchableSelect
                     value={signupCountry}
                     onChange={(val) => setSignupCountry(val)}
@@ -1210,7 +1245,10 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
                 {/* Password & Confirm Password */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-semibold text-slate-700 mb-1">Password *</label>
+                    <div className="flex items-center mb-1">
+                      <label className="font-semibold text-slate-700">Password *</label>
+                      <FieldTooltip content="Must be at least 8 characters. Secures your Verisource multi-enterprise supplier portal." />
+                    </div>
                     <div className="relative">
                       <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
                       <input

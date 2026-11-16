@@ -59,7 +59,8 @@ import {
   Plus,
   Trash2,
   LayoutGrid,
-  AlertCircle
+  AlertCircle,
+  Compass
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { GepIdentificationGrid } from '../../components/onboarding/GepIdentificationGrid.js';
@@ -929,6 +930,22 @@ export const OnboardingRequest: React.FC = () => {
   const initProfile = getInitialSupplierMaster();
   const initIsNewReg = (typeof window !== 'undefined' && localStorage.getItem('is_new_registration') === 'true') || Boolean(routeState?.isNewRegistration);
   const initIsNonAcme = (initProfile?.legalName && initProfile?.legalName !== 'Acme Industrial Tech Inc.') || initIsNewReg;
+
+  // Guided Tour State for New Registration Onboarding Experience
+  const [showTour, setShowTour] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    const tourDismissed = localStorage.getItem('verisource_supplier_tour_completed') === 'true';
+    const isNew = (localStorage.getItem('is_new_registration') === 'true') || Boolean(routeState?.isNewRegistration);
+    return Boolean(isNew && !tourDismissed);
+  });
+  const [tourStep, setTourStep] = useState<number>(1);
+
+  const handleDismissTour = () => {
+    setShowTour(false);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('verisource_supplier_tour_completed', 'true');
+    }
+  };
 
   // Active Buyer Invitation Context & Multi-Buyer Support
   const [invitations] = useState<BuyerInvitation[]>(() => {
@@ -4363,6 +4380,20 @@ export const OnboardingRequest: React.FC = () => {
             <span className="md:hidden">Sync</span>
           </button>
 
+          {/* Quick Guide Tour Trigger (Accessible to All Users On-Demand) */}
+          <button
+            type="button"
+            onClick={() => {
+              setTourStep(1);
+              setShowTour(true);
+            }}
+            className="text-xs text-slate-700 hover:text-slate-900 font-semibold flex items-center gap-1.5 cursor-pointer bg-white hover:bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-300 transition shadow-2xs"
+            title="Open onboarding quick guide"
+          >
+            <Compass className="w-3.5 h-3.5 text-emerald-600" />
+            <span className="hidden sm:inline">Guide</span>
+          </button>
+
           {/* Standard Pre-Submission Actions: Save Draft and Submit Profile */}
           {!isSubmitted && (
             <>
@@ -6727,6 +6758,131 @@ export const OnboardingRequest: React.FC = () => {
                 >
                   <span>Start with Section {validationSummary.sectionErrors[0].stepNum}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          LIGHTWEIGHT GUIDED TOUR POPOVER (For New Registrations / On-Demand Guide)
+         ========================================================================= */}
+      {showTour && (
+        <div className="fixed bottom-5 right-5 sm:right-7 z-50 max-w-sm w-[calc(100%-2.5rem)] sm:w-[380px] bg-[#0c1427]/95 backdrop-blur-md text-white border border-slate-700/80 rounded-2xl shadow-2xl p-4 sm:p-5 animate-in slide-in-from-bottom-3 fade-in duration-200">
+          {/* Subtle Ambient Glow */}
+          <div className="absolute top-0 right-1/4 w-32 h-16 bg-emerald-500/15 rounded-full blur-xl pointer-events-none" />
+
+          {/* Top Bar: Icon + Badge + Close Button */}
+          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div className="flex items-center space-x-2">
+              <div className={`w-7 h-7 rounded-lg border flex items-center justify-center shrink-0 ${
+                tourStep === 1 
+                  ? 'text-emerald-400 bg-emerald-500/20 border-emerald-400/30' 
+                  : tourStep === 2 
+                  ? 'text-amber-300 bg-amber-500/20 border-amber-400/30' 
+                  : 'text-teal-300 bg-teal-500/20 border-teal-400/30'
+              }`}>
+                {tourStep === 1 && <Layers className="w-4 h-4" />}
+                {tourStep === 2 && <Sparkles className="w-4 h-4" />}
+                {tourStep === 3 && <CheckCircle2 className="w-4 h-4" />}
+              </div>
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 font-mono">
+                  {tourStep === 1 && 'Step 1 of 3 • Section Navigator'}
+                  {tourStep === 2 && 'Step 2 of 3 • Speed & Automation'}
+                  {tourStep === 3 && 'Step 3 of 3 • Review & Submit'}
+                </span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleDismissTour}
+              className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800/80 transition cursor-pointer"
+              title="Close guide"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Step Body */}
+          <div className="py-3.5 space-y-2">
+            <h4 className="text-sm font-bold text-white tracking-tight">
+              {tourStep === 1 && '9 Compliance Sections'}
+              {tourStep === 2 && 'Auto-Fill with Ava AI or Master Profile'}
+              {tourStep === 3 && 'Save Draft & Submit to Buyer'}
+            </h4>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              {tourStep === 1 && 'Work through each section on the left sidebar at your own pace. All answers, selections, and attachments auto-save in real time.'}
+              {tourStep === 2 && 'Save up to 80% time by clicking "Sync with Master Profile" in the top bar, or use Ava AI in the right drawer to extract details from your W-9/tax forms.'}
+              {tourStep === 3 && 'Need to pause? Click "Save Draft" and resume anytime with your invitation code. Once all mandatory fields are verified, submit directly for enterprise review.'}
+            </p>
+            <div className="p-2 rounded-lg bg-slate-800/60 border border-slate-700/60 text-[11px] text-emerald-300/90 flex items-start gap-1.5 mt-2">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
+              <span>
+                {tourStep === 1 && 'Green checkmarks indicate fully verified & completed sections.'}
+                {tourStep === 2 && 'Ava can populate forms and answer buyer compliance questions.'}
+                {tourStep === 3 && 'You will receive an instant email update once the buyer reviews your dossier.'}
+              </span>
+            </div>
+          </div>
+
+          {/* Footer Controls: Progress Dots & Actions */}
+          <div className="pt-3 border-t border-slate-800/90 flex items-center justify-between">
+            {/* Step Dots & Skip */}
+            <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-1">
+                {[1, 2, 3].map((stepIdx) => (
+                  <button
+                    key={stepIdx}
+                    type="button"
+                    onClick={() => setTourStep(stepIdx)}
+                    className={`h-1.5 rounded-full transition-all cursor-pointer ${
+                      tourStep === stepIdx
+                        ? 'w-5 bg-emerald-400'
+                        : 'w-1.5 bg-slate-700 hover:bg-slate-500'
+                    }`}
+                    title={`Go to step ${stepIdx}`}
+                  />
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={handleDismissTour}
+                className="text-[11px] text-slate-400 hover:text-slate-200 transition font-medium cursor-pointer ml-1"
+              >
+                Skip
+              </button>
+            </div>
+
+            {/* Next / Back Controls */}
+            <div className="flex items-center space-x-2">
+              {tourStep > 1 && (
+                <button
+                  type="button"
+                  onClick={() => setTourStep((prev) => Math.max(1, prev - 1))}
+                  className="px-2.5 py-1 text-xs text-slate-300 hover:text-white font-semibold transition cursor-pointer"
+                >
+                  Back
+                </button>
+              )}
+              {tourStep < 3 ? (
+                <button
+                  type="button"
+                  onClick={() => setTourStep((prev) => Math.min(3, prev + 1))}
+                  className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-1 cursor-pointer"
+                >
+                  <span>Next</span>
+                  <ArrowRight className="w-3 h-3" />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleDismissTour}
+                  className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-1 cursor-pointer"
+                >
+                  <span>Get Started</span>
+                  <Check className="w-3 h-3" />
                 </button>
               )}
             </div>
