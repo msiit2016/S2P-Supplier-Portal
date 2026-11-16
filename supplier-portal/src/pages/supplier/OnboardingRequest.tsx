@@ -4386,7 +4386,7 @@ export const OnboardingRequest: React.FC = () => {
             (Hidden only in FULL agent view)
            ======================================================== */}
         {!isFull && !sidebarCollapsed && (
-          <aside className="w-60 xl:w-64 bg-white border-r border-slate-200 flex flex-col justify-between p-3 shrink-0 h-full overflow-y-auto transition-all duration-200">
+          <aside className="w-64 xl:w-72 bg-white border-r border-slate-200 flex flex-col justify-between p-3 shrink-0 h-full overflow-y-auto transition-all duration-200">
             <div className="space-y-3">
               
               {/* Header with Title & ChatGPT-style Minimize Button */}
@@ -4489,35 +4489,34 @@ export const OnboardingRequest: React.FC = () => {
                                   : 'bg-white border-transparent hover:bg-slate-50 text-slate-700 font-medium'
                               }`}
                             >
-                              {/* Persistent Stepper Number Circle: 1 to 9 always visible */}
+                              {/* Left Step Number: Continuous 1 to 9 sequence */}
                               <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] shrink-0 transition font-mono ${
                                 isCurrent
                                   ? 'bg-slate-900 text-white font-bold shadow-2xs'
-                                  : isDone
-                                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-300/90 font-bold shadow-2xs'
-                                  : 'bg-slate-100 text-slate-600 border border-slate-200/90 font-semibold'
+                                  : 'bg-slate-100 text-slate-500 font-semibold border border-slate-200/80'
                               }`}>
                                 <span>{s.num}</span>
                               </div>
 
-                              {/* Section Title - Full Width Without Truncation */}
+                              {/* Section Title */}
                               <div className="flex-1 min-w-0 pr-1">
                                 <span className={`text-xs truncate block ${
-                                  isCurrent ? 'font-semibold text-slate-900' : isDone ? 'text-slate-800' : 'text-slate-600'
+                                  isCurrent ? 'font-semibold text-slate-900' : isDone ? 'text-slate-800' : 'text-slate-700'
                                 }`}>
                                   {s.title}
                                 </span>
                               </div>
 
-                              {/* Trailing Status Indicator: Checkmark for Done, Pip for Pending */}
+                              {/* Right Status: Green Check for Complete, Amber Pill for Pending */}
                               {isDone ? (
-                                <div className="w-4 h-4 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-200/90 shadow-2xs" title="Completed">
-                                  <Check className="w-2.5 h-2.5 stroke-[3]" />
+                                <div className="w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-200/90 shadow-2xs" title="Completed">
+                                  <Check className="w-3 h-3 stroke-[2.5]" />
                                 </div>
-                              ) : isCurrent ? (
-                                <div className="w-1.5 h-1.5 rounded-full bg-slate-900 shrink-0" title="Active Step" />
                               ) : (
-                                <div className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" title="Pending Details" />
+                                <span className="text-[10px] font-semibold text-amber-800 bg-amber-50 border border-amber-300/80 px-2 py-0.5 rounded-md flex items-center gap-1.5 shrink-0 shadow-2xs font-sans">
+                                  <span className={`w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0 ${isCurrent ? 'animate-pulse' : ''}`}></span>
+                                  <span>Pending</span>
+                                </span>
                               )}
                             </button>
                           );
