@@ -5,6 +5,8 @@ import { ApiClient } from '../../api/client.js';
 import { createBlankSupplierProfile } from './SupplierMultiProfile.js';
 import { resetPageContext } from '../../services/pageActionBridge.js';
 import { VerisourceLogo } from '../../components/common/VerisourceLogo.js';
+import { FilterSelect } from '../../components/common/FilterSelect.js';
+import { SearchableSelect } from '../../components/common/SearchableSelect.js';
 import {
   ShieldCheck,
   Lock,
@@ -890,18 +892,20 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
                           Mobile Number
                         </label>
                         <div className="flex gap-2">
-                          <select
+                          <FilterSelect
                             value={phoneCountry}
-                            onChange={(e) => setPhoneCountry(e.target.value)}
-                            className="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs text-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                          >
-                            <option value="+1">🇺🇸 +1</option>
-                            <option value="+44">🇬🇧 +44</option>
-                            <option value="+91">🇮🇳 +91</option>
-                            <option value="+81">🇯🇵 +81</option>
-                            <option value="+49">🇩🇪 +49</option>
-                            <option value="+61">🇦🇺 +61</option>
-                          </select>
+                            onChange={(e: any) => setPhoneCountry(typeof e === 'string' ? e : e?.target?.value || '+1')}
+                            options={[
+                              { value: '+1', triggerLabel: '🇺🇸 +1', label: '🇺🇸 +1 (US / Canada)' },
+                              { value: '+44', triggerLabel: '🇬🇧 +44', label: '🇬🇧 +44 (United Kingdom)' },
+                              { value: '+91', triggerLabel: '🇮🇳 +91', label: '🇮🇳 +91 (India)' },
+                              { value: '+81', triggerLabel: '🇯🇵 +81', label: '🇯🇵 +81 (Japan)' },
+                              { value: '+49', triggerLabel: '🇩🇪 +49', label: '🇩🇪 +49 (Germany)' },
+                              { value: '+61', triggerLabel: '🇦🇺 +61', label: '🇦🇺 +61 (Australia)' },
+                            ]}
+                            className="!bg-slate-50 !border-slate-300 rounded-xl px-3 py-2.5 text-xs text-slate-700 font-semibold h-[42px]"
+                            wrapperClassName="shrink-0"
+                          />
                           <div className="relative flex-1">
                             <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                             <input
@@ -1100,20 +1104,22 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
                 {/* Country / HQ */}
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">Country of Registration *</label>
-                  <select
+                  <SearchableSelect
                     value={signupCountry}
-                    onChange={(e) => setSignupCountry(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 px-3 text-xs text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"
-                  >
-                    <option value="United States">🇺🇸 United States</option>
-                    <option value="United Kingdom">🇬🇧 United Kingdom</option>
-                    <option value="Germany">🇩🇪 Germany</option>
-                    <option value="Japan">🇯🇵 Japan</option>
-                    <option value="India">🇮🇳 India</option>
-                    <option value="Canada">🇨🇦 Canada</option>
-                    <option value="Australia">🇦🇺 Australia</option>
-                    <option value="Singapore">🇸🇬 Singapore</option>
-                  </select>
+                    onChange={(val) => setSignupCountry(val)}
+                    options={[
+                      'United States',
+                      'United Kingdom',
+                      'Germany',
+                      'Japan',
+                      'India',
+                      'Canada',
+                      'Australia',
+                      'Singapore'
+                    ]}
+                    placeholder="Select Country of Registration..."
+                    searchPlaceholder="Search country..."
+                  />
                 </div>
 
                 {/* Password & Confirm Password */}

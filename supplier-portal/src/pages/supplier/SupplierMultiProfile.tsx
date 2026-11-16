@@ -14,6 +14,7 @@ import { onPageAction, broadcastPageContext, PageAction } from '../../services/p
 import { useAuth } from '../../context/AuthContext.js';
 import { usePortal } from '../../context/PortalContext.js';
 import { SearchableSelect } from '../../components/common/SearchableSelect.js';
+import { FilterSelect } from '../../components/common/FilterSelect.js';
 import { VerificationIndicator } from '../../components/common/VerificationIndicator.js';
 import { 
   AiFilledBadge, 
@@ -2581,18 +2582,28 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
                   </label>
                 </div>
                 <div className="flex gap-1.5 sm:gap-2 min-w-0">
-                  <select
+                  <FilterSelect
                     disabled={!isEditing}
                     value={profile.phoneCountryCode || '+1'}
-                    onChange={(e) => updateFormField('phoneCountryCode', e.target.value)}
-                    className="w-20 sm:w-24 px-2 py-2 text-xs rounded-lg border bg-slate-50 text-slate-800 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 font-medium shrink-0 cursor-pointer disabled:cursor-default"
-                  >
-                    {AVAILABLE_PHONE_COUNTRY_CODES.map((c) => (
-                      <option key={c.code} value={c.code}>
-                        {c.flag} {c.code}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(e: any) => updateFormField('phoneCountryCode', typeof e === 'string' ? e : e?.target?.value || '+1')}
+                    options={AVAILABLE_PHONE_COUNTRY_CODES.map((c) => ({
+                      value: c.code,
+                      triggerLabel: `${c.flag} ${c.code}`,
+                      label: (
+                        <span className="flex items-center gap-2">
+                          <span>{c.flag}</span>
+                          <span className="font-semibold text-slate-800">{c.code}</span>
+                          <span className="text-slate-400 text-[11px] truncate">{c.label}</span>
+                        </span>
+                      ),
+                    }))}
+                    className={`h-[38px] w-20 sm:w-24 text-xs font-semibold rounded-lg border transition ${
+                      !isEditing
+                        ? '!bg-slate-50 !text-slate-700 !border-slate-200 !cursor-default !opacity-100'
+                        : '!bg-slate-50 hover:!bg-slate-100 !text-slate-800 !border-slate-300'
+                    }`}
+                    wrapperClassName="shrink-0"
+                  />
                   <input
                     type="tel"
                     disabled={!isEditing}
@@ -2615,22 +2626,14 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
                     Primary Language <span className="text-red-500">*</span>
                   </label>
                 </div>
-                <select
+                <SearchableSelect
                   disabled={!isEditing}
                   value={profile.primaryLanguage || 'English'}
-                  onChange={(e) => updateFormField('primaryLanguage', e.target.value)}
-                  className={`w-full px-3 py-2 text-xs font-medium rounded-lg border transition ${
-                    !isEditing
-                      ? 'bg-slate-50 text-slate-700 border-slate-200 cursor-default font-semibold'
-                      : 'bg-white text-slate-900 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600 cursor-pointer'
-                  }`}
-                >
-                  {AVAILABLE_LANGUAGES.map((lang) => (
-                    <option key={lang} value={lang}>
-                      {lang}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(val) => updateFormField('primaryLanguage', val)}
+                  placeholder="Select Primary Language..."
+                  searchPlaceholder="Search language..."
+                  options={AVAILABLE_LANGUAGES}
+                />
               </div>
 
               {/* Subcategory (UNSPSC) */}

@@ -4,6 +4,7 @@ import { ChevronDown, Check } from 'lucide-react';
 export interface FilterSelectOption {
   value: string;
   label: React.ReactNode;
+  triggerLabel?: React.ReactNode;
   disabled?: boolean;
 }
 
@@ -61,6 +62,7 @@ export const FilterSelect: React.FC<FilterSelectProps> = ({
         list.push({
           value: val,
           label: lbl,
+          triggerLabel: (child.props as any)['data-trigger-label'] ?? (child.props as any).triggerLabel,
           disabled: child.props.disabled,
         });
       }
@@ -158,7 +160,7 @@ export const FilterSelect: React.FC<FilterSelectProps> = ({
             </span>
           )}
           <span className="truncate">
-            {selectedOption ? selectedOption.label : placeholder}
+            {selectedOption ? (selectedOption.triggerLabel ?? selectedOption.label) : placeholder}
           </span>
         </span>
         <ChevronDown
