@@ -4676,51 +4676,41 @@ export const OnboardingRequest: React.FC = () => {
 
             {/* Soft Validation Guidance Banner (Triggered on Save & Next when advancing sections) */}
             {softValidationToast && (
-              <div className={`rounded-xl p-3 sm:px-4 sm:py-2.5 shadow-2xs flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-1 border transition-all ${
+              <div className={`rounded-xl px-3.5 py-2 shadow-2xs flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-1 border transition-all ${
                 softValidationToast.type === 'INCOMPLETE'
                   ? 'bg-amber-50/90 border-amber-200 text-slate-800'
                   : 'bg-emerald-50/90 border-emerald-200 text-slate-800'
               }`}>
                 <div className="flex items-center space-x-2.5 min-w-0">
-                  <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+                  <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${
                     softValidationToast.type === 'INCOMPLETE'
                       ? 'bg-amber-100 text-amber-800 border border-amber-300'
                       : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                   }`}>
                     {softValidationToast.type === 'INCOMPLETE' ? (
-                      <AlertCircle className="w-4 h-4 stroke-[2.5]" />
+                      <AlertCircle className="w-3.5 h-3.5 stroke-[2.5]" />
                     ) : (
-                      <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
+                      <CheckCircle2 className="w-3.5 h-3.5 stroke-[2.5]" />
                     )}
                   </div>
-                  <div className="min-w-0">
-                    <div className="text-xs font-bold flex items-center gap-2">
-                      <span>
-                        {softValidationToast.type === 'INCOMPLETE'
-                          ? 'Draft Saved • Soft Validation Notice'
-                          : 'Section Saved Successfully'}
-                      </span>
-                      {softValidationToast.type === 'INCOMPLETE' ? (
-                        <span className="text-[10px] font-mono font-bold bg-amber-200/80 text-amber-900 px-2 py-0.2 rounded">
-                          {softValidationToast.missingCount} REQUIRED FIELD{softValidationToast.missingCount > 1 ? 'S' : ''} REMAINING
+                  <div className="flex items-center gap-2 flex-wrap min-w-0 text-xs">
+                    {softValidationToast.type === 'INCOMPLETE' ? (
+                      <>
+                        <span className="font-bold text-slate-900">Saved as Draft</span>
+                        <span className="text-slate-300">•</span>
+                        <span className="text-slate-700">
+                          <strong>{softValidationToast.sectionTitle}</strong> has <strong className="text-amber-900">{softValidationToast.missingCount} remaining required field{softValidationToast.missingCount > 1 ? 's' : ''}</strong>. Complete before final submission.
                         </span>
-                      ) : (
-                        <span className="text-[10px] font-mono font-bold bg-emerald-200/80 text-emerald-900 px-2 py-0.2 rounded">
-                          100% COMPLETE
+                      </>
+                    ) : (
+                      <>
+                        <span className="font-bold text-slate-900">Section Saved</span>
+                        <span className="text-slate-300">•</span>
+                        <span className="text-slate-700">
+                          All mandatory fields in <strong>{softValidationToast.sectionTitle}</strong> verified.
                         </span>
-                      )}
-                    </div>
-                    <div className="text-[11px] text-slate-600 mt-0.5 truncate">
-                      {softValidationToast.type === 'INCOMPLETE' ? (
-                        <span>
-                          Progress in <strong>{softValidationToast.sectionTitle}</strong> saved as draft. You can continue filling other sections and return anytime before final submission.
-                        </span>
-                      ) : (
-                        <span>
-                          All mandatory fields in <strong>{softValidationToast.sectionTitle}</strong> are verified.
-                        </span>
-                      )}
-                    </div>
+                      </>
+                    )}
                   </div>
                 </div>
 
@@ -4729,18 +4719,18 @@ export const OnboardingRequest: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => handleJumpToField(softValidationToast.missingFields[0])}
-                      className="text-xs font-bold text-amber-900 hover:text-amber-950 underline underline-offset-2 px-2 py-1 cursor-pointer transition hidden sm:inline"
+                      className="text-xs font-semibold text-amber-800 hover:text-amber-950 underline underline-offset-2 px-1.5 py-0.5 cursor-pointer transition"
                     >
-                      Return to Fix
+                      Fix Now →
                     </button>
                   )}
                   <button
                     type="button"
                     onClick={() => setSoftValidationToast(null)}
-                    className="p-1 rounded-lg hover:bg-slate-200/70 text-slate-500 hover:text-slate-800 transition cursor-pointer"
+                    className="p-1 rounded-lg hover:bg-slate-200/70 text-slate-400 hover:text-slate-700 transition cursor-pointer"
                     title="Dismiss"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
@@ -5928,23 +5918,19 @@ export const OnboardingRequest: React.FC = () => {
                 <div className="space-y-5">
                   {/* Minimal & Streamlined Mandatory Validation Status Strip */}
                   {validateAllSections().totalMissing > 0 ? (
-                    <div className="px-3.5 py-2.5 bg-amber-50/80 border border-amber-200/90 rounded-xl flex items-center justify-between gap-3 text-slate-800 shadow-2xs animate-fadeIn">
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-6 h-6 rounded-lg bg-amber-100 border border-amber-300 text-amber-800 flex items-center justify-center shrink-0">
-                          <AlertCircle className="w-3.5 h-3.5 stroke-[2.5]" />
-                        </div>
-                        <div className="flex items-center gap-2 flex-wrap min-w-0">
-                          <span className="text-xs font-bold text-slate-900">
-                            Mandatory Fields Incomplete
-                          </span>
-                          <span className="text-[10.5px] font-mono font-bold bg-amber-100 text-amber-900 border border-amber-300/80 px-2 py-0.5 rounded">
-                            {validateAllSections().totalMissing} Required Fields Missing
-                          </span>
-                          <span className="text-slate-300 hidden sm:inline">•</span>
-                          <span className="text-[11px] text-slate-500 hidden sm:inline truncate">
-                            Required by {activeInvitation.buyerName} prior to final submission.
-                          </span>
-                        </div>
+                    <div className="px-3.5 py-2 bg-amber-50/90 border border-amber-200/90 rounded-xl flex items-center justify-between gap-3 text-slate-800 shadow-2xs animate-fadeIn">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 stroke-[2.2]" />
+                        <span className="text-xs font-bold text-slate-900">
+                          Incomplete Application
+                        </span>
+                        <span className="text-[10px] font-mono font-bold bg-amber-200/80 text-amber-900 border border-amber-300/80 px-1.5 py-0.2 rounded">
+                          {validateAllSections().totalMissing} required fields missing
+                        </span>
+                        <span className="text-slate-300 hidden md:inline">•</span>
+                        <span className="text-[11px] text-slate-500 hidden md:inline truncate">
+                          Must be completed before submitting to {activeInvitation.buyerName}.
+                        </span>
                       </div>
                       <button
                         type="button"
@@ -5956,33 +5942,29 @@ export const OnboardingRequest: React.FC = () => {
                           });
                           setValidationModalOpen(true);
                         }}
-                        className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-semibold shadow-2xs transition flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
+                        className="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-semibold shadow-2xs transition flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
                       >
                         <span>Fix Missing Fields</span>
                         <ArrowRight className="w-3 h-3" />
                       </button>
                     </div>
                   ) : (
-                    <div className="px-3.5 py-2.5 bg-emerald-50/80 border border-emerald-200 rounded-xl flex items-center justify-between gap-3 text-slate-800 shadow-2xs">
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
-                          <CheckCircle2 className="w-3.5 h-3.5 stroke-[2.5]" />
-                        </div>
-                        <div className="flex items-center gap-2 flex-wrap min-w-0">
-                          <span className="text-xs font-bold text-slate-900">
-                            All Mandatory Fields Verified
-                          </span>
-                          <span className="text-[10.5px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300/80 px-2 py-0.5 rounded">
-                            100% Ready
-                          </span>
-                          <span className="text-slate-300 hidden sm:inline">•</span>
-                          <span className="text-[11px] text-slate-500 hidden sm:inline truncate">
-                            Ready for final submission to {activeInvitation.buyerName}.
-                          </span>
-                        </div>
+                    <div className="px-3.5 py-2 bg-emerald-50/90 border border-emerald-200 rounded-xl flex items-center justify-between gap-3 text-slate-800 shadow-2xs">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 stroke-[2.2]" />
+                        <span className="text-xs font-bold text-slate-900">
+                          Ready for Submission
+                        </span>
+                        <span className="text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300/80 px-1.5 py-0.2 rounded">
+                          100% verified
+                        </span>
+                        <span className="text-slate-300 hidden md:inline">•</span>
+                        <span className="text-[11px] text-slate-500 hidden md:inline truncate">
+                          All mandatory governance, tax, and banking fields complete.
+                        </span>
                       </div>
                       <span className="text-[11px] font-semibold text-emerald-700 shrink-0">
-                        Verified ✓
+                        Ready ✓
                       </span>
                     </div>
                   )}
@@ -6566,102 +6548,96 @@ export const OnboardingRequest: React.FC = () => {
       />
 
       {/* =========================================================================
-          SMART MANDATORY FIELD VALIDATION & ERROR AUDIT MODAL
+          MINIMAL & PREMIUM MANDATORY FIELD AUDIT MODAL
          ========================================================================= */}
       {validationModalOpen && validationSummary && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white border border-slate-200 rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-200 text-slate-900">
-            {/* Modal Header */}
-            <div className="p-5 pb-4 border-b border-slate-100 flex items-start justify-between gap-3 bg-slate-50/70">
-              <div className="flex items-start space-x-3.5">
-                <div className="w-10 h-10 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center shrink-0 shadow-xs">
-                  <AlertCircle className="w-5 h-5 stroke-[2.5]" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full shadow-2xl overflow-hidden flex flex-col max-h-[82vh] animate-in zoom-in-95 duration-150 text-slate-900">
+            {/* Minimal Header */}
+            <div className="px-4 py-3.5 border-b border-slate-100 flex items-center justify-between gap-3 bg-slate-50/70">
+              <div className="flex items-center space-x-2.5 min-w-0">
+                <div className="w-7 h-7 rounded-lg bg-amber-100 border border-amber-300 text-amber-800 flex items-center justify-center shrink-0">
+                  <AlertCircle className="w-4 h-4 stroke-[2.5]" />
                 </div>
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                    <span>Mandatory Fields Required</span>
-                    <span className="text-[10px] font-mono font-bold bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full">
-                      {validationSummary.totalMissing} Missing
+                <div className="min-w-0">
+                  <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <span>Missing Required Fields</span>
+                    <span className="text-[10px] font-mono font-bold bg-amber-100 text-amber-800 border border-amber-300/80 px-1.5 py-0.2 rounded-full">
+                      {validationSummary.totalMissing} remaining
                     </span>
                   </h3>
-                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                    {activeInvitation.buyerName} requires all statutory, commercial, and compliance fields before submission can proceed.
+                  <p className="text-[11px] text-slate-500 mt-0.5 truncate">
+                    Complete these fields before submitting to {activeInvitation.buyerName}.
                   </p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setValidationModalOpen(false)}
-                className="p-1.5 rounded-xl hover:bg-slate-200/70 text-slate-400 hover:text-slate-700 transition cursor-pointer"
+                className="p-1 rounded-lg hover:bg-slate-200/70 text-slate-400 hover:text-slate-700 transition cursor-pointer"
                 title="Close"
               >
-                <X className="w-4.5 h-4.5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Incomplete Sections List */}
-            <div className="p-4 sm:p-5 overflow-y-auto space-y-3.5 flex-1 min-h-0 bg-slate-50/40">
+            {/* Clean, Non-Text-Heavy Missing Fields List */}
+            <div className="p-3.5 overflow-y-auto space-y-2.5 flex-1 min-h-0 bg-slate-50/40">
               {validationSummary.sectionErrors.map((sec) => (
-                <div key={sec.stepNum} className="border border-slate-200 rounded-2xl bg-white shadow-2xs overflow-hidden">
-                  <div className="bg-slate-50/90 px-3.5 py-2.5 border-b border-slate-200/80 flex items-center justify-between">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-5 h-5 rounded-full bg-slate-900 text-white font-mono text-[10px] font-bold flex items-center justify-center shrink-0">
+                <div key={sec.stepNum} className="border border-slate-200 rounded-xl bg-white shadow-2xs overflow-hidden">
+                  <div className="bg-slate-50/90 px-3 py-1.5 border-b border-slate-100 flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                      <span className="w-4 h-4 rounded-full bg-slate-900 text-white font-mono text-[9px] font-bold flex items-center justify-center">
                         {sec.stepNum}
-                      </div>
-                      <span className="text-xs font-bold text-slate-900 truncate">
-                        {sec.sectionTitle}
                       </span>
-                    </div>
-                    <span className="text-[10.5px] font-semibold text-amber-800 bg-amber-50 border border-amber-300/80 px-2 py-0.5 rounded-md shrink-0">
-                      {sec.missingFields.length} {sec.missingFields.length === 1 ? 'field' : 'fields'} required
+                      <span>{sec.sectionTitle}</span>
+                    </span>
+                    <span className="text-[10px] font-semibold text-amber-800 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">
+                      {sec.missingFields.length} missing
                     </span>
                   </div>
 
                   <div className="divide-y divide-slate-100">
                     {sec.missingFields.map((field) => (
-                      <div key={field.id} className="p-3 sm:px-3.5 sm:py-2.5 flex items-center justify-between gap-3 hover:bg-slate-50/60 transition group">
-                        <div className="min-w-0 flex-1">
-                          <div className="text-xs font-semibold text-slate-900 flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
-                            <span className="truncate">{field.label}</span>
-                          </div>
-                          <div className="text-[11px] text-slate-500 truncate mt-0.5 pl-3">
-                            {field.message}
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => handleJumpToField(field)}
-                          className="shrink-0 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100/90 text-emerald-800 border border-emerald-300 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs group-hover:border-emerald-400"
-                        >
-                          <span>Complete Field</span>
-                          <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-                        </button>
-                      </div>
+                      <button
+                        key={field.id}
+                        type="button"
+                        onClick={() => handleJumpToField(field)}
+                        className="w-full text-left px-3 py-2 flex items-center justify-between gap-2 hover:bg-emerald-50/50 transition cursor-pointer group"
+                      >
+                        <span className="text-xs font-medium text-slate-800 group-hover:text-emerald-900 flex items-center gap-2 truncate">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0 group-hover:bg-emerald-600" />
+                          <span className="truncate">{field.label}</span>
+                        </span>
+                        <span className="text-[11px] font-semibold text-emerald-700 group-hover:translate-x-0.5 transition flex items-center gap-1 shrink-0">
+                          <span>Fix</span>
+                          <ArrowRight className="w-3 h-3" />
+                        </span>
+                      </button>
                     ))}
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* Modal Footer */}
-            <div className="p-4 border-t border-slate-200 bg-white flex items-center justify-between gap-2.5">
+            {/* Streamlined Footer */}
+            <div className="px-4 py-2.5 border-t border-slate-100 bg-white flex items-center justify-between gap-2">
               <button
                 type="button"
                 onClick={() => setValidationModalOpen(false)}
-                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+                className="px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition cursor-pointer"
               >
-                Close &amp; Keep Editing
+                Close
               </button>
 
               {validationSummary.sectionErrors[0]?.missingFields[0] && (
                 <button
                   type="button"
                   onClick={() => handleJumpToField(validationSummary.sectionErrors[0].missingFields[0])}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+                  className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
                 >
-                  <span>Fix First Field: {validationSummary.sectionErrors[0].missingFields[0].label}</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <span>Fix First: {validationSummary.sectionErrors[0].missingFields[0].label}</span>
+                  <ArrowRight className="w-3 h-3" />
                 </button>
               )}
             </div>
