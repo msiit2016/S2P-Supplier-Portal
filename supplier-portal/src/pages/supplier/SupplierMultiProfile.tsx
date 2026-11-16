@@ -2857,12 +2857,12 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
               </div>
 
               {/* Date of Incorporate */}
+              {/* Date of Incorporation */}
               <div className="space-y-1.5 lg:col-span-2">
-                <div className="flex items-center justify-between min-h-[20px] h-5 gap-1">
+                <div className="flex items-center justify-between min-h-[20px] h-5">
                   <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
-                    Date of Incorporate
+                    Date of Incorporation
                   </label>
-                  <span className="text-[10px] text-slate-400 font-mono font-normal shrink-0">MM-DD-YYYY</span>
                 </div>
                 <input
                   type="date"
@@ -2877,13 +2877,12 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
                 />
               </div>
 
-              {/* Country / Jurisdiction */}
+              {/* Country of Incorporation */}
               <div className="space-y-1.5 lg:col-span-2">
-                <div className="flex items-center justify-between min-h-[20px] h-5 gap-1">
+                <div className="flex items-center justify-between min-h-[20px] h-5">
                   <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
-                    Country / Jurisdiction <span className="text-red-500">*</span>
+                    Country of Incorporation <span className="text-red-500">*</span>
                   </label>
-                  <span className="text-[10px] text-slate-400 font-mono font-normal shrink-0">ISO-3166</span>
                 </div>
                 <SearchableSelect
                   options={AVAILABLE_COUNTRIES}

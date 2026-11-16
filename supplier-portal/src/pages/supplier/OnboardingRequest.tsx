@@ -2066,7 +2066,7 @@ export const OnboardingRequest: React.FC = () => {
         missing.push({ id: 'totalEmployees', label: 'Total Number of Employees', stepNum: 2, sectionTitle: 'Business Information', message: 'Enter full-time organizational employee headcount' });
       }
       if (!country || !country.trim()) {
-        missing.push({ id: 'country', label: 'Country / Jurisdiction', stepNum: 2, sectionTitle: 'Business Information', message: 'Select registered country jurisdiction' });
+        missing.push({ id: 'country', label: 'Country of Incorporation', stepNum: 2, sectionTitle: 'Business Information', message: 'Select country of incorporation' });
       }
       if (!registeredAddress || !registeredAddress.trim()) {
         missing.push({ id: 'registeredAddress', label: 'Registered Corporate Address', stepNum: 2, sectionTitle: 'Business Information', message: 'Enter registered street address, city, state, ZIP' });
@@ -5689,13 +5689,12 @@ export const OnboardingRequest: React.FC = () => {
                       />
                     </div>
 
-                    {/* Date of Incorporate (MM-DD-YYYY) */}
+                    {/* Date of Incorporation */}
                     <div className="space-y-1.5 lg:col-span-2">
-                      <div className="flex items-center justify-between min-h-[20px] h-5 gap-1">
+                      <div className="flex items-center justify-between min-h-[20px] h-5">
                         <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
-                          Date of Incorporate
+                          Date of Incorporation
                         </label>
-                        <span className="text-[10px] text-slate-400 font-mono font-normal shrink-0">MM-DD-YYYY</span>
                       </div>
                       <input
                         id="incorporationDate"
@@ -5711,15 +5710,14 @@ export const OnboardingRequest: React.FC = () => {
                       />
                     </div>
 
-                    {/* Country / Jurisdiction (ISO 3166-1) */}
+                    {/* Country of Incorporation */}
                     <div id="country" className={`space-y-1.5 lg:col-span-2 rounded-xl transition ${
                       isFieldHighlighted('country') ? 'ring-2 ring-rose-500 border border-rose-400 p-1 rounded-xl bg-rose-50/30' : ''
                     }`}>
-                      <div className="flex items-center justify-between min-h-[20px] h-5 gap-1">
+                      <div className="flex items-center justify-between min-h-[20px] h-5">
                         <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
-                          Country / Jurisdiction <span className="text-red-500">*</span>
+                          Country of Incorporation <span className="text-red-500">*</span>
                         </label>
-                        <span className="text-[10px] text-slate-400 font-mono font-normal shrink-0">ISO-3166</span>
                       </div>
                       <SearchableSelect
                         options={AVAILABLE_COUNTRIES}
@@ -6224,7 +6222,7 @@ export const OnboardingRequest: React.FC = () => {
                           </div>
 
                           <div className="space-y-1 lg:col-span-2">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Country / Jurisdiction</label>
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Country of Incorporation</label>
                             <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 text-slate-800 font-medium">
                               {country}
                             </div>
