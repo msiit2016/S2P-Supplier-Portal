@@ -4489,29 +4489,36 @@ export const OnboardingRequest: React.FC = () => {
                                   : 'bg-white border-transparent hover:bg-slate-50 text-slate-700 font-medium'
                               }`}
                             >
-                              {/* Semantic Stepper Indicator: Emerald (Done), Dark (Current), Amber (Pending) */}
-                              <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] shrink-0 transition ${
-                                isDone
-                                  ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 shadow-2xs'
-                                  : isCurrent
+                              {/* Persistent Stepper Number Circle: 1 to 9 always visible */}
+                              <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] shrink-0 transition font-mono ${
+                                isCurrent
                                   ? 'bg-slate-900 text-white font-bold shadow-2xs'
-                                  : 'bg-amber-50 text-amber-800 border border-amber-300/90 font-bold shadow-2xs'
+                                  : isDone
+                                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-300/90 font-bold shadow-2xs'
+                                  : 'bg-slate-100 text-slate-600 border border-slate-200/90 font-semibold'
                               }`}>
-                                {isDone ? (
-                                  <Check className="w-3 h-3 stroke-[2.5]" />
-                                ) : (
-                                  <span>{s.num}</span>
-                                )}
+                                <span>{s.num}</span>
                               </div>
 
-                              {/* Clean Section Name - Full Width Without Truncation */}
-                              <div className="flex-1 min-w-0">
+                              {/* Section Title - Full Width Without Truncation */}
+                              <div className="flex-1 min-w-0 pr-1">
                                 <span className={`text-xs truncate block ${
-                                  isCurrent ? 'font-semibold text-slate-900' : isDone ? 'text-slate-800' : 'text-slate-700'
+                                  isCurrent ? 'font-semibold text-slate-900' : isDone ? 'text-slate-800' : 'text-slate-600'
                                 }`}>
                                   {s.title}
                                 </span>
                               </div>
+
+                              {/* Trailing Status Indicator: Checkmark for Done, Pip for Pending */}
+                              {isDone ? (
+                                <div className="w-4 h-4 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-200/90 shadow-2xs" title="Completed">
+                                  <Check className="w-2.5 h-2.5 stroke-[3]" />
+                                </div>
+                              ) : isCurrent ? (
+                                <div className="w-1.5 h-1.5 rounded-full bg-slate-900 shrink-0" title="Active Step" />
+                              ) : (
+                                <div className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" title="Pending Details" />
+                              )}
                             </button>
                           );
                         })}
