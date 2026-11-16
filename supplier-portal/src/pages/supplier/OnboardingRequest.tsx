@@ -4485,16 +4485,14 @@ export const OnboardingRequest: React.FC = () => {
                                 isCurrent
                                   ? 'bg-slate-100 border-slate-300 shadow-2xs font-semibold text-slate-900 ring-1 ring-slate-300/50'
                                   : isDone
-                                  ? 'bg-white border-transparent hover:bg-slate-50 text-slate-800 font-medium'
+                                  ? 'bg-emerald-50/30 border-emerald-200/60 hover:bg-emerald-50/70 text-slate-800 font-medium'
                                   : 'bg-white border-transparent hover:bg-slate-50 text-slate-700 font-medium'
                               }`}
                             >
-                              {/* Left Step Number: Continuous 1 to 9 sequence */}
+                              {/* Left Step Number: Clean neutral 1 to 9 sequence (no green circle) */}
                               <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] shrink-0 transition font-mono ${
                                 isCurrent
                                   ? 'bg-slate-900 text-white font-bold shadow-2xs'
-                                  : isDone
-                                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-300 font-bold shadow-2xs'
                                   : 'bg-slate-100 text-slate-500 font-semibold border border-slate-200/80'
                               }`}>
                                 <span>{s.num}</span>
@@ -4509,21 +4507,21 @@ export const OnboardingRequest: React.FC = () => {
                                 </span>
                               </div>
 
-                              {/* Right Status: Green Pill for Complete, Amber Pill for Pending (No text words) */}
+                              {/* Right Status Indicator: Identical w-5 h-5 Circle Size for Both */}
                               {isDone ? (
-                                <span 
-                                  className="h-5 px-2 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200/90 flex items-center justify-center shrink-0 shadow-2xs" 
+                                <div 
+                                  className="w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200/90 flex items-center justify-center shrink-0 shadow-2xs" 
                                   title="Completed"
                                 >
                                   <Check className="w-3 h-3 stroke-[2.5]" />
-                                </span>
+                                </div>
                               ) : (
-                                <span 
-                                  className="h-5 px-2 rounded-full bg-amber-50 text-amber-600 border border-amber-200/90 flex items-center justify-center shrink-0 shadow-2xs" 
+                                <div 
+                                  className="w-5 h-5 rounded-full bg-amber-50 text-amber-600 border border-amber-200/90 flex items-center justify-center shrink-0 shadow-2xs" 
                                   title="Pending Details"
                                 >
                                   <span className={`w-2 h-2 rounded-full bg-amber-500 shrink-0 ${isCurrent ? 'animate-pulse ring-2 ring-amber-200' : ''}`} />
-                                </span>
+                                </div>
                               )}
                             </button>
                           );
