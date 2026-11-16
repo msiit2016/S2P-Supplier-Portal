@@ -73,7 +73,6 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
   // UI States
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
 
   // Canvas ref for 3D constellation sphere
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -396,11 +395,8 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
         setErrorMsg(res.error);
         setLoading(false);
       } else {
-        setSuccessMsg('Account created successfully! Launching your onboarding questionnaire...');
-        setTimeout(() => {
-          switchUser(signupEmail, companyName, signupContactName);
-          navigate('/onboarding/detail', { isNewRegistration: true, autoDetail: true, openAva: true });
-        }, 700);
+        switchUser(signupEmail, companyName, signupContactName);
+        navigate('/onboarding/detail', { isNewRegistration: true, autoDetail: true, openAva: true });
       }
     } catch (err: any) {
       // Offline fallback: provision profile and navigate to onboarding questionnaire
@@ -626,13 +622,6 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
             <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl flex items-center gap-2 animate-fadeIn">
               <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
               <span>{errorMsg}</span>
-            </div>
-          )}
-
-          {successMsg && (
-            <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl flex items-center gap-2 animate-fadeIn">
-              <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
-              <span>{successMsg}</span>
             </div>
           )}
 

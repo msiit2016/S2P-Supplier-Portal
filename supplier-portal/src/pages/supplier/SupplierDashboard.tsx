@@ -158,7 +158,6 @@ export const SupplierDashboard: React.FC = () => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [taskCategoryFilter, setTaskCategoryFilter] = useState<'ALL' | 'ORDER' | 'ASN' | 'INVOICE' | 'ONBOARDING' | 'RFP'>('ALL');
   const [isSyncing, setIsSyncing] = useState(false);
-  const [lastSyncedTime, setLastSyncedTime] = useState<string>('Just Now');
 
   const { tasks: sharedTasks, pendingTasks: sharedPendingTasks } = useSharedTasks();
   const { events: rfpEvents } = useSharedRfps();
@@ -262,10 +261,6 @@ export const SupplierDashboard: React.FC = () => {
     try {
       setIsSyncing(true);
       await loadDashboardData();
-      const now = new Date();
-      setLastSyncedTime(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-      setToastMessage('Live telemetry and ERP vendor masters synchronized successfully');
-      setTimeout(() => setToastMessage(null), 3000);
     } finally {
       setTimeout(() => setIsSyncing(false), 500);
     }
@@ -321,19 +316,6 @@ export const SupplierDashboard: React.FC = () => {
 
   return (
     <div className="space-y-5">
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="bg-emerald-50 border-l-4 border-emerald-500 p-3 rounded-r-xl shadow-xs flex items-center justify-between animate-in fade-in slide-in-from-top-1">
-          <div className="flex items-center space-x-2 text-emerald-800 text-xs font-medium">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>{toastMessage}</span>
-          </div>
-          <button onClick={() => setToastMessage(null)} className="text-emerald-700 text-xs font-semibold hover:underline cursor-pointer">
-            Dismiss
-          </button>
-        </div>
-      )}
-
       {/* Top Banner (Minimal, Balanced, Clean) */}
       <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         {/* Left: Icon, Title & Subtitle */}
@@ -349,18 +331,8 @@ export const SupplierDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Right: Telemetry Sync Status & Master Profile Quick Action */}
+        {/* Right: Master Profile Quick Action */}
         <div className="flex items-center gap-2.5 self-end sm:self-auto shrink-0">
-          <button
-            onClick={handleManualSync}
-            disabled={isSyncing}
-            className="px-2.5 py-1.5 text-xs text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200/90 rounded-lg transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-2xs"
-            title="Synchronize ERP telemetry and live ledgers"
-          >
-            <RotateCw className={`w-3.5 h-3.5 text-slate-400 ${isSyncing ? 'animate-spin text-emerald-600' : ''}`} />
-            <span className="text-[11px] font-medium">{isSyncing ? 'Syncing...' : lastSyncedTime}</span>
-          </button>
-
           <button
             onClick={() => navigate('/public-profile')}
             className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center gap-1.5 cursor-pointer"
