@@ -4509,16 +4509,20 @@ export const OnboardingRequest: React.FC = () => {
                                 </span>
                               </div>
 
-                              {/* Right Status: Green Pill for Done, Amber Pill for Pending */}
+                              {/* Right Status: Green Pill for Complete, Amber Pill for Pending (No text words) */}
                               {isDone ? (
-                                <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/90 px-2 py-0.5 rounded-full flex items-center gap-1 shrink-0 shadow-2xs font-sans">
-                                  <Check className="w-2.5 h-2.5 text-emerald-600 stroke-[2.5]" />
-                                  <span>Done</span>
+                                <span 
+                                  className="h-5 px-2 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200/90 flex items-center justify-center shrink-0 shadow-2xs" 
+                                  title="Completed"
+                                >
+                                  <Check className="w-3 h-3 stroke-[2.5]" />
                                 </span>
                               ) : (
-                                <span className="text-[10px] font-medium text-amber-800 bg-amber-50 border border-amber-300/80 px-2 py-0.5 rounded-full flex items-center gap-1.5 shrink-0 shadow-2xs font-sans">
-                                  <span className={`w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0 ${isCurrent ? 'animate-pulse' : ''}`}></span>
-                                  <span>Pending</span>
+                                <span 
+                                  className="h-5 px-2 rounded-full bg-amber-50 text-amber-600 border border-amber-200/90 flex items-center justify-center shrink-0 shadow-2xs" 
+                                  title="Pending Details"
+                                >
+                                  <span className={`w-2 h-2 rounded-full bg-amber-500 shrink-0 ${isCurrent ? 'animate-pulse ring-2 ring-amber-200' : ''}`} />
                                 </span>
                               )}
                             </button>
