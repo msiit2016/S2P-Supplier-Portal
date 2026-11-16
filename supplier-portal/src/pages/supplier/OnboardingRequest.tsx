@@ -1102,6 +1102,24 @@ export const OnboardingRequest: React.FC = () => {
     message: string;
   } | null>(null);
 
+  // Progressive Soft Validation Guidance State (Triggered on Save & Next)
+  const [softValidationToast, setSoftValidationToast] = useState<{
+    type: 'INCOMPLETE' | 'COMPLETE';
+    stepNum: number;
+    sectionTitle: string;
+    missingCount: number;
+    missingFields: { id: string; label: string; stepNum: number; sectionTitle: string; message: string }[];
+  } | null>(null);
+
+  // Auto-dismiss soft validation toast after 6 seconds
+  useEffect(() => {
+    if (!softValidationToast) return;
+    const timer = setTimeout(() => {
+      setSoftValidationToast(null);
+    }, 6000);
+    return () => clearTimeout(timer);
+  }, [softValidationToast]);
+
   // Real-time UI highlight state
   const [highlightField, setHighlightField] = useState<string | null>(null);
 
@@ -3131,12 +3149,34 @@ export const OnboardingRequest: React.FC = () => {
     }, 550);
   };
 
-  // Handle Save / Next Section
+  // Handle Save & Next Section with Non-blocking Soft Validation Guidance
   const handleSaveAndContinue = (nextStep: number) => {
     setSaving(true);
+    const currentStepNum = activeStep;
+    const currentValidation = getSectionValidation(currentStepNum);
+
     setTimeout(() => {
       setSaving(false);
       setActiveStep(nextStep);
+
+      // Non-blocking Soft Validation Guidance: inform user of section readiness without locking navigation
+      if (!currentValidation.isComplete && currentValidation.missingFields.length > 0) {
+        setSoftValidationToast({
+          type: 'INCOMPLETE',
+          stepNum: currentStepNum,
+          sectionTitle: currentValidation.sectionTitle,
+          missingCount: currentValidation.missingFields.length,
+          missingFields: currentValidation.missingFields
+        });
+      } else {
+        setSoftValidationToast({
+          type: 'COMPLETE',
+          stepNum: currentStepNum,
+          sectionTitle: currentValidation.sectionTitle,
+          missingCount: 0,
+          missingFields: []
+        });
+      }
     }, 200);
   };
 
@@ -3163,11 +3203,11 @@ export const OnboardingRequest: React.FC = () => {
     }, 250);
   };
 
-  // Handle Final Submit & Resubmit with Strict Enterprise Mandatory Field Guard
+  // Handle Final Submit & Resubmit with Strict Enterprise Mandatory Field Guard (Hard Stop)
   const handleFinalSubmit = () => {
     setDeclarationError(null);
 
-    // Run strict multi-section validation audit
+    // Run strict multi-section validation audit (Hard Stop: blocks submission if any required field is missing)
     const validation = validateAllSections();
     if (!validation.isValid) {
       setValidationSummary({
@@ -3175,6 +3215,11 @@ export const OnboardingRequest: React.FC = () => {
         sectionErrors: validation.sectionErrors
       });
       setValidationModalOpen(true);
+      setActiveValidationBanner({
+        fieldLabel: `${validation.totalMissing} Mandatory Fields`,
+        stepNum: 9,
+        message: `Submission Blocked: ${validation.totalMissing} mandatory fields across ${validation.sectionErrors.length} sections must be completed before submitting to ${activeInvitation.buyerName}.`
+      });
       return;
     }
 
@@ -4629,6 +4674,78 @@ export const OnboardingRequest: React.FC = () => {
               </div>
             )}
 
+            {/* Soft Validation Guidance Banner (Triggered on Save & Next when advancing sections) */}
+            {softValidationToast && (
+              <div className={`rounded-xl p-3 sm:px-4 sm:py-2.5 shadow-2xs flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-1 border transition-all ${
+                softValidationToast.type === 'INCOMPLETE'
+                  ? 'bg-amber-50/90 border-amber-200 text-slate-800'
+                  : 'bg-emerald-50/90 border-emerald-200 text-slate-800'
+              }`}>
+                <div className="flex items-center space-x-2.5 min-w-0">
+                  <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+                    softValidationToast.type === 'INCOMPLETE'
+                      ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                      : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                  }`}>
+                    {softValidationToast.type === 'INCOMPLETE' ? (
+                      <AlertCircle className="w-4 h-4 stroke-[2.5]" />
+                    ) : (
+                      <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs font-bold flex items-center gap-2">
+                      <span>
+                        {softValidationToast.type === 'INCOMPLETE'
+                          ? 'Draft Saved • Soft Validation Notice'
+                          : 'Section Saved Successfully'}
+                      </span>
+                      {softValidationToast.type === 'INCOMPLETE' ? (
+                        <span className="text-[10px] font-mono font-bold bg-amber-200/80 text-amber-900 px-2 py-0.2 rounded">
+                          {softValidationToast.missingCount} REQUIRED FIELD{softValidationToast.missingCount > 1 ? 'S' : ''} REMAINING
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-mono font-bold bg-emerald-200/80 text-emerald-900 px-2 py-0.2 rounded">
+                          100% COMPLETE
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-[11px] text-slate-600 mt-0.5 truncate">
+                      {softValidationToast.type === 'INCOMPLETE' ? (
+                        <span>
+                          Progress in <strong>{softValidationToast.sectionTitle}</strong> saved as draft. You can continue filling other sections and return anytime before final submission.
+                        </span>
+                      ) : (
+                        <span>
+                          All mandatory fields in <strong>{softValidationToast.sectionTitle}</strong> are verified.
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2 shrink-0">
+                  {softValidationToast.type === 'INCOMPLETE' && softValidationToast.missingFields.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => handleJumpToField(softValidationToast.missingFields[0])}
+                      className="text-xs font-bold text-amber-900 hover:text-amber-950 underline underline-offset-2 px-2 py-1 cursor-pointer transition hidden sm:inline"
+                    >
+                      Return to Fix
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setSoftValidationToast(null)}
+                    className="p-1 rounded-lg hover:bg-slate-200/70 text-slate-500 hover:text-slate-800 transition cursor-pointer"
+                    title="Dismiss"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Active Validation Warning Banner for Jump-to-Field Navigation */}
             {activeValidationBanner && activeValidationBanner.stepNum === activeStep && (
               <div className="bg-amber-50 border border-amber-300 rounded-xl p-3 sm:px-4 sm:py-3 shadow-xs flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-1 text-amber-950">
@@ -4696,11 +4813,8 @@ export const OnboardingRequest: React.FC = () => {
                   ))}
                 </div>
 
-                {/* Right Controls: Stage Status Pill & Toggle */}
+                {/* Right Controls: Toggle Pipeline */}
                 <div className="flex items-center space-x-2 shrink-0 self-end sm:self-auto">
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 whitespace-nowrap">
-                    {isSubmitted ? 'Submitted' : 'Stage 2 Active'}
-                  </span>
                   <button
                     type="button"
                     onClick={() => setLifecycleExpanded(!lifecycleExpanded)}
@@ -5812,23 +5926,24 @@ export const OnboardingRequest: React.FC = () => {
               {/* SECTION 9: COMPLETE FORM DOSSIER REVIEW */}
               {activeStep === 9 && (
                 <div className="space-y-5">
-                  {/* Validation Status Card */}
+                  {/* Minimal & Streamlined Mandatory Validation Status Strip */}
                   {validateAllSections().totalMissing > 0 ? (
-                    <div className="p-4 bg-amber-50/90 border border-amber-300 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-amber-950 shadow-xs animate-fadeIn">
-                      <div className="flex items-start gap-3 min-w-0">
-                        <div className="w-8 h-8 rounded-xl bg-amber-200/80 border border-amber-300 text-amber-800 flex items-center justify-center shrink-0 mt-0.5">
-                          <AlertTriangle className="w-4.5 h-4.5 stroke-[2.5]" />
+                    <div className="px-3.5 py-2.5 bg-amber-50/80 border border-amber-200/90 rounded-xl flex items-center justify-between gap-3 text-slate-800 shadow-2xs animate-fadeIn">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-6 h-6 rounded-lg bg-amber-100 border border-amber-300 text-amber-800 flex items-center justify-center shrink-0">
+                          <AlertCircle className="w-3.5 h-3.5 stroke-[2.5]" />
                         </div>
-                        <div className="min-w-0">
-                          <h4 className="text-xs font-bold text-amber-950 flex items-center gap-2">
-                            <span>Mandatory Fields Incomplete</span>
-                            <span className="text-[10px] font-mono bg-amber-200 text-amber-900 px-2 py-0.2 rounded-full font-bold">
-                              {validateAllSections().totalMissing} Required Fields Missing
-                            </span>
-                          </h4>
-                          <p className="text-[11px] text-amber-800 mt-0.5 leading-relaxed">
-                            {activeInvitation.buyerName} requires all mandatory governance, tax, and banking fields to be completed before submission can be accepted.
-                          </p>
+                        <div className="flex items-center gap-2 flex-wrap min-w-0">
+                          <span className="text-xs font-bold text-slate-900">
+                            Mandatory Fields Incomplete
+                          </span>
+                          <span className="text-[10.5px] font-mono font-bold bg-amber-100 text-amber-900 border border-amber-300/80 px-2 py-0.5 rounded">
+                            {validateAllSections().totalMissing} Required Fields Missing
+                          </span>
+                          <span className="text-slate-300 hidden sm:inline">•</span>
+                          <span className="text-[11px] text-slate-500 hidden sm:inline truncate">
+                            Required by {activeInvitation.buyerName} prior to final submission.
+                          </span>
                         </div>
                       </div>
                       <button
@@ -5841,29 +5956,33 @@ export const OnboardingRequest: React.FC = () => {
                           });
                           setValidationModalOpen(true);
                         }}
-                        className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
+                        className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-semibold shadow-2xs transition flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
                       >
                         <span>Fix Missing Fields</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
+                        <ArrowRight className="w-3 h-3" />
                       </button>
                     </div>
                   ) : (
-                    <div className="p-4 bg-emerald-50/90 border border-emerald-300 rounded-2xl flex items-center justify-between gap-3 text-emerald-950 shadow-xs">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-8 h-8 rounded-xl bg-emerald-200/80 text-emerald-800 flex items-center justify-center shrink-0">
-                          <CheckCircle2 className="w-4.5 h-4.5 stroke-[2.5]" />
+                    <div className="px-3.5 py-2.5 bg-emerald-50/80 border border-emerald-200 rounded-xl flex items-center justify-between gap-3 text-slate-800 shadow-2xs">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+                          <CheckCircle2 className="w-3.5 h-3.5 stroke-[2.5]" />
                         </div>
-                        <div className="min-w-0">
-                          <h4 className="text-xs font-bold text-emerald-950">
-                            All Mandatory Fields Verified &amp; Complete
-                          </h4>
-                          <p className="text-[11px] text-emerald-800 mt-0.5">
-                            All 8 questionnaire sections meet {activeInvitation.buyerName}&apos;s compliance requirements. Ready for submission.
-                          </p>
+                        <div className="flex items-center gap-2 flex-wrap min-w-0">
+                          <span className="text-xs font-bold text-slate-900">
+                            All Mandatory Fields Verified
+                          </span>
+                          <span className="text-[10.5px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300/80 px-2 py-0.5 rounded">
+                            100% Ready
+                          </span>
+                          <span className="text-slate-300 hidden sm:inline">•</span>
+                          <span className="text-[11px] text-slate-500 hidden sm:inline truncate">
+                            Ready for final submission to {activeInvitation.buyerName}.
+                          </span>
                         </div>
                       </div>
-                      <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-emerald-200 text-emerald-900 shrink-0">
-                        100% READY
+                      <span className="text-[11px] font-semibold text-emerald-700 shrink-0">
+                        Verified ✓
                       </span>
                     </div>
                   )}
