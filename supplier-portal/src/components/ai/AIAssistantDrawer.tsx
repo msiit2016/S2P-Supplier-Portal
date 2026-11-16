@@ -625,8 +625,7 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({ inline = f
 
   const currentBuyerContext = livePageContext.invitationCode || livePageContext.buyerName || '';
   const currentSupplierEntity = livePageContext.legalName || '';
-  const currentProgressContext = livePageContext.progressPercent !== undefined ? `:${livePageContext.progressPercent}` : '';
-  const dynamicConfigId = `${agenticBriefing.route}:${currentBuyerContext}:${currentSupplierEntity}${currentProgressContext}`;
+  const dynamicConfigId = `${agenticBriefing.route}:${currentBuyerContext}:${currentSupplierEntity}`;
 
   const config: PageCopilotConfig = {
     id: dynamicConfigId,
