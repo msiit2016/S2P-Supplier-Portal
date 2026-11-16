@@ -4488,15 +4488,19 @@ export const OnboardingRequest: React.FC = () => {
                                   : 'bg-white border-transparent hover:bg-slate-50 text-slate-700 font-medium'
                               }`}
                             >
-                              {/* High-Contrast Bold Step Number Badge */}
-                              <div className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 transition shadow-2xs ${
+                              {/* Refined Stepper Indicator (Optimized Proportions & Font) */}
+                              <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] shrink-0 transition ${
                                 isDone
-                                  ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                                  ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 shadow-2xs'
                                   : isCurrent
-                                  ? 'bg-slate-900 text-white shadow-xs ring-2 ring-emerald-500/20'
-                                  : 'bg-slate-100 text-slate-800 border border-slate-300'
+                                  ? 'bg-slate-900 text-white font-bold shadow-2xs'
+                                  : 'bg-slate-100 text-slate-500 font-medium'
                               }`}>
-                                <span className="font-mono font-bold text-[11px]">{s.num}</span>
+                                {isDone ? (
+                                  <Check className="w-3 h-3 stroke-[2.5]" />
+                                ) : (
+                                  <span>{s.num}</span>
+                                )}
                               </div>
 
                               {/* Clean Section Name - No Subtitles */}
