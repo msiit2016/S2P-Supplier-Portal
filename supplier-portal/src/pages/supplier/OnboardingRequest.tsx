@@ -4503,32 +4503,14 @@ export const OnboardingRequest: React.FC = () => {
                                 )}
                               </div>
 
-                              {/* Clean Section Name - No Subtitles */}
+                              {/* Clean Section Name - Full Width Without Truncation */}
                               <div className="flex-1 min-w-0">
                                 <span className={`text-xs truncate block ${
-                                  isCurrent ? 'font-semibold text-slate-900' : isDone ? 'text-slate-800' : 'text-slate-700'
+                                  isCurrent ? 'font-semibold text-slate-900' : isDone ? 'text-slate-800' : 'text-slate-600'
                                 }`}>
                                   {s.title}
                                 </span>
                               </div>
-
-                              {/* High-Visibility Industry-Standard Status Badges */}
-                              {isDone ? (
-                                <span className="text-[10px] font-medium text-emerald-700 bg-emerald-50 border border-emerald-200/90 px-1.5 py-0.5 rounded-md flex items-center gap-1 shrink-0 shadow-2xs">
-                                  <Check className="w-2.5 h-2.5 text-emerald-600 shrink-0 stroke-[2.5]" />
-                                  <span>Done</span>
-                                </span>
-                              ) : isCurrent ? (
-                                <span className="text-[10px] font-semibold text-amber-800 bg-amber-50 border border-amber-300/90 px-2 py-0.5 rounded-md flex items-center gap-1 shrink-0 shadow-2xs">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shrink-0"></span>
-                                  <span>Pending</span>
-                                </span>
-                              ) : (
-                                <span className="text-[10px] font-semibold text-amber-800 bg-amber-50 border border-amber-300/80 px-2 py-0.5 rounded-md flex items-center gap-1.5 shrink-0 shadow-2xs font-sans">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
-                                  <span>Pending</span>
-                                </span>
-                              )}
                             </button>
                           );
                         })}
