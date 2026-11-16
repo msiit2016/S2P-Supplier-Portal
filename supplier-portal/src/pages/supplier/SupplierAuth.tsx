@@ -37,6 +37,14 @@ interface SupplierAuthProps {
 
 type AuthMethod = 'EMAIL_OTP' | 'PASSWORD' | 'MOBILE_SMS';
 
+// Strict RFC 5322 compatible email format validation with mandatory domain extension (.com, .org, .co, etc.)
+export const isValidEmail = (email: string): boolean => {
+  if (!email) return false;
+  const trimmed = email.trim();
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  return emailRegex.test(trimmed);
+};
+
 export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN' }) => {
   const { switchUser } = useAuth();
   const { navigate } = usePortal();
@@ -74,6 +82,8 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
   // UI States
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [signupEmailTouched, setSignupEmailTouched] = useState(false);
 
   // Registration Success Greeting & Transition Modal State
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -258,8 +268,9 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
   // OTP Handlers
   const handleSendVerificationCode = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!emailInput || !emailInput.includes('@')) {
-      setErrorMsg('Please enter a valid work email address.');
+    setEmailTouched(true);
+    if (!emailInput || !isValidEmail(emailInput)) {
+      setErrorMsg('Please enter a valid work email address (e.g. name@company.com).');
       return;
     }
     setErrorMsg('');
@@ -350,8 +361,9 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
   // Password Login -> Lands on Dashboard
   const handlePasswordLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!emailInput) {
-      setErrorMsg('Please enter your work email address.');
+    setEmailTouched(true);
+    if (!emailInput || !isValidEmail(emailInput)) {
+      setErrorMsg('Please enter a valid work email address (e.g. name@company.com).');
       return;
     }
     setLoading(true);
@@ -369,8 +381,13 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
   // Sign Up Handler -> Lands on Onboarding Detail Page with clean blank profile and Ava in Deck view
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSignupEmailTouched(true);
     if (!companyName || !signupEmail) {
       setErrorMsg('Please complete all required fields.');
+      return;
+    }
+    if (!isValidEmail(signupEmail)) {
+      setErrorMsg('Please enter a valid work email address with domain (e.g. alex@company.com).');
       return;
     }
     if (signupPassword !== signupConfirmPassword) {
@@ -675,16 +692,30 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
                           Work Email Address
                         </label>
                         <div className="relative">
-                          <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                          <Mail className={`w-4 h-4 absolute left-3.5 top-3.5 transition-colors ${emailTouched && emailInput && !isValidEmail(emailInput) ? 'text-rose-400' : 'text-slate-400'}`} />
                           <input
                             type="email"
                             required
                             placeholder="name@company.com"
                             value={emailInput}
-                            onChange={(e) => setEmailInput(e.target.value)}
-                            className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 pl-10 pr-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"
+                            onChange={(e) => {
+                              setEmailInput(e.target.value);
+                              if (errorMsg) setErrorMsg('');
+                            }}
+                            onBlur={() => setEmailTouched(true)}
+                            className={`w-full bg-slate-50 border rounded-xl py-2.5 pl-10 pr-3 text-sm text-slate-900 placeholder-slate-400 transition ${
+                              emailTouched && emailInput && !isValidEmail(emailInput)
+                                ? 'border-rose-400 ring-2 ring-rose-100 bg-rose-50/20 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500'
+                                : 'border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white'
+                            }`}
                           />
                         </div>
+                        {emailTouched && emailInput && !isValidEmail(emailInput) && (
+                          <p className="text-[11px] text-rose-500 mt-1.5 flex items-center gap-1 font-medium animate-fadeIn">
+                            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                            <span>Please enter a valid work email address (e.g. name@company.com)</span>
+                          </p>
+                        )}
                       </div>
 
                       <button
@@ -834,16 +865,30 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
                       Work Email Address
                     </label>
                     <div className="relative">
-                      <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                      <Mail className={`w-4 h-4 absolute left-3.5 top-3.5 transition-colors ${emailTouched && emailInput && !isValidEmail(emailInput) ? 'text-rose-400' : 'text-slate-400'}`} />
                       <input
                         type="email"
                         required
                         placeholder="elena@acmeindustrial.com"
                         value={emailInput}
-                        onChange={(e) => setEmailInput(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 pl-10 pr-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"
+                        onChange={(e) => {
+                          setEmailInput(e.target.value);
+                          if (errorMsg) setErrorMsg('');
+                        }}
+                        onBlur={() => setEmailTouched(true)}
+                        className={`w-full bg-slate-50 border rounded-xl py-2.5 pl-10 pr-3 text-sm text-slate-900 placeholder-slate-400 transition ${
+                          emailTouched && emailInput && !isValidEmail(emailInput)
+                            ? 'border-rose-400 ring-2 ring-rose-100 bg-rose-50/20 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500'
+                            : 'border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white'
+                        }`}
                       />
                     </div>
+                    {emailTouched && emailInput && !isValidEmail(emailInput) && (
+                      <p className="text-[11px] text-rose-500 mt-1.5 flex items-center gap-1 font-medium animate-fadeIn">
+                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                        <span>Please enter a valid work email address (e.g. name@company.com)</span>
+                      </p>
+                    )}
                   </div>
 
                   <div>
@@ -1114,16 +1159,30 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">Work Email *</label>
                   <div className="relative">
-                    <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                    <Mail className={`w-4 h-4 absolute left-3 top-2.5 transition-colors ${signupEmailTouched && signupEmail && !isValidEmail(signupEmail) ? 'text-rose-400' : 'text-slate-400'}`} />
                     <input
                       type="email"
                       required
                       placeholder="alex@apexsystems.com"
                       value={signupEmail}
-                      onChange={(e) => setSignupEmail(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2 pl-9 pr-3 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"
+                      onChange={(e) => {
+                        setSignupEmail(e.target.value);
+                        if (errorMsg) setErrorMsg('');
+                      }}
+                      onBlur={() => setSignupEmailTouched(true)}
+                      className={`w-full bg-slate-50 border rounded-xl py-2 pl-9 pr-3 text-xs text-slate-900 placeholder-slate-400 transition ${
+                        signupEmailTouched && signupEmail && !isValidEmail(signupEmail)
+                          ? 'border-rose-400 ring-2 ring-rose-100 bg-rose-50/20 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500'
+                          : 'border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white'
+                      }`}
                     />
                   </div>
+                  {signupEmailTouched && signupEmail && !isValidEmail(signupEmail) && (
+                    <p className="text-[10.5px] text-rose-500 mt-1 flex items-center gap-1 font-medium animate-fadeIn">
+                      <AlertCircle className="w-3 h-3 shrink-0" />
+                      <span>Please enter a valid work email address with domain (e.g. name@company.com)</span>
+                    </p>
+                  )}
                 </div>
 
                 {/* Country / HQ */}
@@ -1265,74 +1324,51 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
       </div>
 
       {/* =========================================================================
-          WORLD-CLASS REGISTRATION SUCCESS & PROVISIONING INTERSTITIAL MODAL
+          MINIMAL & PREMIUM REGISTRATION SUCCESS GREETING MODAL
          ========================================================================= */}
       {showSuccessModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="bg-[#0b1329] border border-slate-700/80 text-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative overflow-hidden text-center animate-in zoom-in-95 duration-300">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#0b1329] border border-slate-700/80 text-white rounded-2xl p-6 sm:p-7 max-w-sm w-full shadow-2xl relative overflow-hidden text-center animate-in zoom-in-95 duration-200">
             {/* Ambient Background Glow */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-24 bg-emerald-500/20 rounded-full blur-2xl pointer-events-none" />
 
-            {/* Pulsing Animated Success Emblem */}
-            <div className="relative mx-auto w-16 h-16 sm:w-20 sm:h-20 mb-5 flex items-center justify-center">
-              <div className="absolute inset-0 rounded-2xl bg-emerald-500/20 animate-ping opacity-25" />
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-emerald-500/30 text-white">
-                <CheckCircle2 className="w-9 h-9 sm:w-11 sm:h-11 stroke-[2.2]" />
+            {/* Clean Minimal Success Icon */}
+            <div className="relative mx-auto w-12 h-12 mb-4 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-full bg-emerald-500/15 border border-emerald-400/30 flex items-center justify-center text-emerald-400 shadow-lg shadow-emerald-500/20">
+                <Check className="w-6 h-6 stroke-[2.8]" />
               </div>
             </div>
 
-            {/* Personalized Welcome Headline */}
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
-              Registered Successfully!
+            {/* Minimal Typography */}
+            <h2 className="text-lg font-bold tracking-tight text-white">
+              Account Created!
             </h2>
-            <p className="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed">
-              Welcome, <span className="font-semibold text-white">{signupFirstName || signupContactName || 'Partner'}</span>. Your enterprise account for <strong className="text-emerald-400">{companyName}</strong> is provisioned and ready.
+            <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">
+              Welcome, <span className="font-semibold text-white">{signupFirstName || signupContactName || 'Partner'}</span>. Your enterprise account for <strong className="text-emerald-400">{companyName}</strong> is ready.
             </p>
 
-            {/* Live Provisioning Telemetry Checklist */}
-            <div className="bg-slate-900/90 border border-slate-800/90 rounded-2xl p-4 my-5 text-left space-y-2.5 shadow-inner">
-              <div className="flex items-center gap-2.5 text-xs text-slate-200">
-                <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-                  <Check className="w-3.5 h-3.5 stroke-[3]" />
-                </div>
-                <span>Universal Master Profile &amp; Passport Created</span>
-              </div>
-              <div className="flex items-center gap-2.5 text-xs text-slate-200">
-                <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-                  <Check className="w-3.5 h-3.5 stroke-[3]" />
-                </div>
-                <span>SSO Security &amp; Compliance Vault Initialized</span>
-              </div>
-              <div className="flex items-center gap-2.5 text-xs text-slate-200">
-                <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-                  <Check className="w-3.5 h-3.5 stroke-[3]" />
-                </div>
-                <span className="truncate">Connected to <strong className="text-emerald-400">Apex Global Enterprises</strong> (INV-APEX-2026)</span>
-              </div>
-            </div>
-
-            {/* Countdown & Progress Indicator */}
-            <div className="space-y-2 mb-5">
+            {/* Sleek Auto-Redirect Bar */}
+            <div className="mt-5 pt-4 border-t border-slate-800/80 space-y-2">
               <div className="flex items-center justify-between text-[11px] text-slate-400">
-                <span>Launching buyer onboarding questionnaire...</span>
+                <span>Opening onboarding...</span>
                 <span className="font-mono font-bold text-emerald-400">{countdownSeconds}s</span>
               </div>
               <div className="w-full bg-slate-800/80 h-1.5 rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-1000 ease-linear"
-                  style={{ width: `${Math.max(10, ((4 - countdownSeconds) / 3) * 100)}%` }}
+                  style={{ width: `${Math.max(15, ((4 - countdownSeconds) / 3) * 100)}%` }}
                 />
               </div>
             </div>
 
-            {/* Primary Action Button */}
+            {/* Clean Action Button */}
             <button
               type="button"
               onClick={handleProceedToOnboarding}
-              className="w-full py-3 px-4 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs sm:text-sm rounded-xl shadow-lg shadow-emerald-950/50 transition-all flex items-center justify-center gap-2 cursor-pointer group"
+              className="w-full mt-4 py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-950/40 transition-all flex items-center justify-center gap-2 cursor-pointer group"
             >
-              <span>Continue to Onboarding Questionnaire</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <span>Continue to Onboarding</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
             </button>
           </div>
         </div>

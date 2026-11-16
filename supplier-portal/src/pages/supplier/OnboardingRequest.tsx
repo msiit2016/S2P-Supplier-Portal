@@ -58,7 +58,8 @@ import {
   Eye,
   Plus,
   Trash2,
-  LayoutGrid
+  LayoutGrid,
+  AlertCircle
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { GepIdentificationGrid } from '../../components/onboarding/GepIdentificationGrid.js';
@@ -1084,6 +1085,23 @@ export const OnboardingRequest: React.FC = () => {
   const [syncModalOpen, setSyncModalOpen] = useState(false);
   const [syncSuccessToast, setSyncSuccessToast] = useState<{ count: number; sections: number; message: string } | null>(null);
 
+  // Smart Mandatory Validation States
+  const [validationModalOpen, setValidationModalOpen] = useState(false);
+  const [validationSummary, setValidationSummary] = useState<{
+    totalMissing: number;
+    sectionErrors: {
+      stepNum: number;
+      sectionTitle: string;
+      isComplete: boolean;
+      missingFields: { id: string; label: string; stepNum: number; sectionTitle: string; message: string }[];
+    }[];
+  } | null>(null);
+  const [activeValidationBanner, setActiveValidationBanner] = useState<{
+    fieldLabel: string;
+    stepNum: number;
+    message: string;
+  } | null>(null);
+
   // Real-time UI highlight state
   const [highlightField, setHighlightField] = useState<string | null>(null);
 
@@ -1951,20 +1969,218 @@ export const OnboardingRequest: React.FC = () => {
     return INITIAL_BUYER_PACKETS[invId] || INITIAL_BUYER_PACKETS['inv-apex-01'];
   };
 
-  // Check section completion (9 GEP Quantum Modules)
-  const isStep1Done = Boolean(legalName && (!hasDuns || dunsNumber) && partnerStatus && supplierManager);
-  const isStep2Done = Boolean(annualRevenue && totalEmployees && country && registeredAddress && reportingCurrency);
-  const isStep3Done = identifications.length > 0;
-  const isStep4Done = contacts.length > 0 && (!isNonAcmeActive || contacts.some(c => c.phone && c.email));
-  const isStep5Done = locations.length > 0;
-  const isStep6Done = bankAccounts.length > 0;
-  const isStep7Done = isNonAcmeActive 
-    ? Boolean(commercialSettings.confirmed && commercialSettings.paymentTerms)
-    : Boolean(commercialSettings.matchingType && commercialSettings.paymentTerms);
-  const isStep8Done = certificates.length > 0;
-  const allDeclarationsAgreed = true;
-  const isSubmitReady = true;
+  // =========================================================================
+  // STRICT MANDATORY FIELD VALIDATION & COMPLETION ENGINE
+  // =========================================================================
+  const getSectionValidation = (stepNum: number): {
+    stepNum: number;
+    sectionTitle: string;
+    isComplete: boolean;
+    missingFields: { id: string; label: string; stepNum: number; sectionTitle: string; message: string }[];
+  } => {
+    const missing: { id: string; label: string; stepNum: number; sectionTitle: string; message: string }[] = [];
+
+    if (stepNum === 1) {
+      if (!legalName || !legalName.trim()) {
+        missing.push({ id: 'legalName', label: 'Legal Company Name', stepNum: 1, sectionTitle: 'Basic Details', message: 'Enter legal registered company name' });
+      }
+      if (!partnerStatus) {
+        missing.push({ id: 'partnerStatus', label: 'Partner Status', stepNum: 1, sectionTitle: 'Basic Details', message: 'Select partner onboarding status' });
+      }
+      if (!supplierManager || !supplierManager.trim() || supplierManager.toLowerCase().includes('select supplier manager')) {
+        missing.push({ id: 'supplierManager', label: 'Supplier Manager Name', stepNum: 1, sectionTitle: 'Basic Details', message: 'Assign designated buyer supplier manager' });
+      }
+      if (hasDuns && (!dunsNumber || !dunsNumber.trim())) {
+        missing.push({ id: 'dunsNumber', label: 'D&B DUNS Number', stepNum: 1, sectionTitle: 'Basic Details', message: 'Enter 9-digit Dun & Bradstreet identifier' });
+      }
+      if (!taxId || !taxId.trim()) {
+        missing.push({ id: 'taxId', label: 'Primary Tax Identification (TIN/EIN)', stepNum: 1, sectionTitle: 'Basic Details', message: 'Provide corporate federal tax ID' });
+      }
+      if (!mobilePhone || !mobilePhone.trim()) {
+        missing.push({ id: 'mobilePhone', label: 'Mobile Phone Number', stepNum: 1, sectionTitle: 'Basic Details', message: 'Enter primary officer mobile phone' });
+      }
+      if (!primaryLanguage || !primaryLanguage.trim()) {
+        missing.push({ id: 'primaryLanguage', label: 'Primary Language', stepNum: 1, sectionTitle: 'Basic Details', message: 'Select operating business language' });
+      }
+      if (!subcategories || subcategories.length === 0) {
+        missing.push({ id: 'subcategories', label: 'Subcategory (Procurement UNSPSC)', stepNum: 1, sectionTitle: 'Basic Details', message: 'Map at least one procurement commodity code' });
+      }
+      return {
+        stepNum: 1,
+        sectionTitle: 'Basic Details',
+        isComplete: missing.length === 0,
+        missingFields: missing
+      };
+    }
+
+    if (stepNum === 2) {
+      if (!reportingCurrency || !reportingCurrency.trim()) {
+        missing.push({ id: 'reportingCurrency', label: 'Reporting Currency', stepNum: 2, sectionTitle: 'Business Information', message: 'Select standard billing/reporting currency' });
+      }
+      if (!annualRevenue || String(annualRevenue).trim() === '' || Number(annualRevenue) <= 0) {
+        missing.push({ id: 'annualRevenue', label: 'Annual Revenue', stepNum: 2, sectionTitle: 'Business Information', message: 'Enter annual fiscal revenue in millions' });
+      }
+      if (!totalEmployees || String(totalEmployees).trim() === '' || Number(totalEmployees) <= 0) {
+        missing.push({ id: 'totalEmployees', label: 'Total Number of Employees', stepNum: 2, sectionTitle: 'Business Information', message: 'Enter full-time organizational employee headcount' });
+      }
+      if (!country || !country.trim()) {
+        missing.push({ id: 'country', label: 'Country / Jurisdiction', stepNum: 2, sectionTitle: 'Business Information', message: 'Select registered country jurisdiction' });
+      }
+      if (!registeredAddress || !registeredAddress.trim()) {
+        missing.push({ id: 'registeredAddress', label: 'Registered Corporate Address', stepNum: 2, sectionTitle: 'Business Information', message: 'Enter registered street address, city, state, ZIP' });
+      }
+      if (!descriptionOfServices || !descriptionOfServices.trim()) {
+        missing.push({ id: 'descriptionOfServices', label: 'Detailed Description of Service', stepNum: 2, sectionTitle: 'Business Information', message: 'Provide summary of services and manufactured goods' });
+      }
+      if (!businessUnits || businessUnits.length === 0) {
+        missing.push({ id: 'businessUnits', label: 'Target Business Units', stepNum: 2, sectionTitle: 'Business Information', message: 'Select at least one operating business unit' });
+      }
+      return {
+        stepNum: 2,
+        sectionTitle: 'Business Information',
+        isComplete: missing.length === 0,
+        missingFields: missing
+      };
+    }
+
+    if (stepNum === 3) {
+      if (!identifications || identifications.length === 0) {
+        missing.push({ id: 'identifications', label: 'Statutory Identification (EIN/TIN/VAT)', stepNum: 3, sectionTitle: 'Identification Information', message: 'Add at least one verified tax identification record' });
+      } else if (!identifications.some(i => Boolean(i.idNumber && i.idNumber.trim()))) {
+        missing.push({ id: 'identifications', label: 'Valid Tax Identification Number', stepNum: 3, sectionTitle: 'Identification Information', message: 'Tax record is missing ID number' });
+      }
+      return {
+        stepNum: 3,
+        sectionTitle: 'Identification Information',
+        isComplete: missing.length === 0,
+        missingFields: missing
+      };
+    }
+
+    if (stepNum === 4) {
+      if (!contacts || contacts.length === 0) {
+        missing.push({ id: 'contacts', label: 'Authorized Officer Contact', stepNum: 4, sectionTitle: 'Contact Information', message: 'Add at least one primary organizational contact' });
+      } else if (!contacts.some(c => Boolean(c.firstName && c.lastName && (c.email || c.phone)))) {
+        missing.push({ id: 'contacts', label: 'Primary Contact Full Name & Email', stepNum: 4, sectionTitle: 'Contact Information', message: 'Contact record is missing name or work email' });
+      }
+      return {
+        stepNum: 4,
+        sectionTitle: 'Contact Information',
+        isComplete: missing.length === 0,
+        missingFields: missing
+      };
+    }
+
+    if (stepNum === 5) {
+      if (!locations || locations.length === 0) {
+        missing.push({ id: 'locations', label: 'Operating Facility / HQ Location', stepNum: 5, sectionTitle: 'Location', message: 'Add at least one corporate or dispatch location' });
+      } else if (!locations.some(l => Boolean(l.name && (l.city || l.country || l.street1)))) {
+        missing.push({ id: 'locations', label: 'Facility Name & Physical Address', stepNum: 5, sectionTitle: 'Location', message: 'Location record is missing facility name or address' });
+      }
+      return {
+        stepNum: 5,
+        sectionTitle: 'Location',
+        isComplete: missing.length === 0,
+        missingFields: missing
+      };
+    }
+
+    if (stepNum === 6) {
+      if (!bankAccounts || bankAccounts.length === 0) {
+        missing.push({ id: 'bankAccounts', label: 'Bank Disbursement Account', stepNum: 6, sectionTitle: 'Banking Information', message: 'Add at least one bank account for electronic settlement' });
+      } else if (!bankAccounts.some(b => Boolean(b.bankName && (b.accountNumberFull || b.accountNumberMasked)))) {
+        missing.push({ id: 'bankAccounts', label: 'Bank Name & Account Number', stepNum: 6, sectionTitle: 'Banking Information', message: 'Bank account is missing bank name or account number' });
+      }
+      return {
+        stepNum: 6,
+        sectionTitle: 'Banking Information',
+        isComplete: missing.length === 0,
+        missingFields: missing
+      };
+    }
+
+    if (stepNum === 7) {
+      if (!commercialSettings?.paymentTerms) {
+        missing.push({ id: 'paymentTerms', label: 'Payment Terms Protocol', stepNum: 7, sectionTitle: 'Payment Terms', message: 'Confirm standard commercial payment terms' });
+      }
+      if (!commercialSettings?.matchingType) {
+        missing.push({ id: 'matchingType', label: 'Invoice Matching Rule (3-Way / 2-Way)', stepNum: 7, sectionTitle: 'Payment Terms', message: 'Select purchase order matching method' });
+      }
+      return {
+        stepNum: 7,
+        sectionTitle: 'Payment Terms',
+        isComplete: missing.length === 0,
+        missingFields: missing
+      };
+    }
+
+    if (stepNum === 8) {
+      if (!certificates || certificates.length === 0) {
+        missing.push({ id: 'certificates', label: 'Compliance Credential or Insurance COI', stepNum: 8, sectionTitle: 'Diversity & Certificates', message: 'Add at least one liability insurance COI, ISO, SOC2 or diversity attestation' });
+      }
+      return {
+        stepNum: 8,
+        sectionTitle: 'Diversity & Certificates',
+        isComplete: missing.length === 0,
+        missingFields: missing
+      };
+    }
+
+    if (stepNum === 9) {
+      return {
+        stepNum: 9,
+        sectionTitle: 'Review & Submit',
+        isComplete: Boolean(isSubmitted),
+        missingFields: []
+      };
+    }
+
+    return {
+      stepNum,
+      sectionTitle: '',
+      isComplete: false,
+      missingFields: []
+    };
+  };
+
+  const isStepCompleted = (stepNum: number): boolean => {
+    return getSectionValidation(stepNum).isComplete;
+  };
+
+  const isStep1Done = isStepCompleted(1);
+  const isStep2Done = isStepCompleted(2);
+  const isStep3Done = isStepCompleted(3);
+  const isStep4Done = isStepCompleted(4);
+  const isStep5Done = isStepCompleted(5);
+  const isStep6Done = isStepCompleted(6);
+  const isStep7Done = isStepCompleted(7);
+  const isStep8Done = isStepCompleted(8);
   const isStep9Done = Boolean(isSubmitted);
+
+  const validateAllSections = () => {
+    const sectionErrors: {
+      stepNum: number;
+      sectionTitle: string;
+      isComplete: boolean;
+      missingFields: { id: string; label: string; stepNum: number; sectionTitle: string; message: string }[];
+    }[] = [];
+    let totalMissing = 0;
+    for (let s = 1; s <= 8; s++) {
+      const res = getSectionValidation(s);
+      if (!res.isComplete) {
+        sectionErrors.push(res);
+        totalMissing += res.missingFields.length;
+      }
+    }
+    return {
+      isValid: sectionErrors.length === 0,
+      totalMissing,
+      sectionErrors
+    };
+  };
+
+  const allDeclarationsAgreed = true;
+  const isSubmitReady = isStep1Done && isStep2Done && isStep3Done && isStep4Done && isStep5Done && isStep6Done && isStep7Done && isStep8Done;
 
   const completedStepsCount = [
     isStep1Done, 
@@ -2195,15 +2411,8 @@ export const OnboardingRequest: React.FC = () => {
   ];
 
   const getStepStatus = (stepNum: number) => {
-    if (stepNum === 1) return isStep1Done ? 'COMPLETED' : activeStep === 1 ? 'CURRENT' : 'PENDING';
-    if (stepNum === 2) return isStep2Done ? 'COMPLETED' : activeStep === 2 ? 'CURRENT' : 'PENDING';
-    if (stepNum === 3) return isStep3Done ? 'COMPLETED' : activeStep === 3 ? 'CURRENT' : 'PENDING';
-    if (stepNum === 4) return isStep4Done ? 'COMPLETED' : activeStep === 4 ? 'CURRENT' : 'PENDING';
-    if (stepNum === 5) return isStep5Done ? 'COMPLETED' : activeStep === 5 ? 'CURRENT' : 'PENDING';
-    if (stepNum === 6) return isStep6Done ? 'COMPLETED' : activeStep === 6 ? 'CURRENT' : 'PENDING';
-    if (stepNum === 7) return isStep7Done ? 'COMPLETED' : activeStep === 7 ? 'CURRENT' : 'PENDING';
-    if (stepNum === 8) return isStep8Done ? 'COMPLETED' : activeStep === 8 ? 'CURRENT' : 'PENDING';
-    if (stepNum === 9) return isStep9Done ? 'COMPLETED' : activeStep === 9 ? 'CURRENT' : 'PENDING';
+    if (isStepCompleted(stepNum)) return 'COMPLETED';
+    if (activeStep === stepNum) return 'CURRENT';
     return 'PENDING';
   };
 
@@ -2931,9 +3140,44 @@ export const OnboardingRequest: React.FC = () => {
     }, 200);
   };
 
-  // Handle Final Submit & Resubmit
+  // One-click jump to missing mandatory field with smooth scroll & pulse
+  const handleJumpToField = (field: { id: string; label: string; stepNum: number; sectionTitle: string; message: string }) => {
+    setValidationModalOpen(false);
+    setActiveStep(field.stepNum);
+    setActiveValidationBanner({
+      fieldLabel: field.label,
+      stepNum: field.stepNum,
+      message: `Action Required: Please complete "${field.label}" to satisfy buyer submission requirements.`
+    });
+    
+    // Smoothly scroll and trigger pulse
+    setTimeout(() => {
+      triggerFieldPulse(field.id);
+      const targetEl = document.getElementById(`field-${field.id}`) || document.getElementById(field.id);
+      if (targetEl) {
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (targetEl.tagName === 'INPUT' || targetEl.tagName === 'TEXTAREA') {
+          (targetEl as HTMLElement).focus();
+        }
+      }
+    }, 250);
+  };
+
+  // Handle Final Submit & Resubmit with Strict Enterprise Mandatory Field Guard
   const handleFinalSubmit = () => {
     setDeclarationError(null);
+
+    // Run strict multi-section validation audit
+    const validation = validateAllSections();
+    if (!validation.isValid) {
+      setValidationSummary({
+        totalMissing: validation.totalMissing,
+        sectionErrors: validation.sectionErrors
+      });
+      setValidationModalOpen(true);
+      return;
+    }
+
     handleSaveDraft();
     setSubmitting(true);
     setTimeout(() => {
@@ -4128,7 +4372,7 @@ export const OnboardingRequest: React.FC = () => {
               <div className="space-y-3">
                 {phases.map((phase) => {
                   const phaseSteps = steps.filter((s) => phase.stepNums.includes(s.num));
-                  const phaseDoneCount = phaseSteps.filter((s) => getStepStatus(s.num) === 'COMPLETED').length;
+                  const phaseDoneCount = phaseSteps.filter((s) => isStepCompleted(s.num)).length;
                   const isPhaseDone = phaseDoneCount === phaseSteps.length;
                   const isPhaseActive = phase.stepNums.includes(activeStep);
 
@@ -4157,8 +4401,7 @@ export const OnboardingRequest: React.FC = () => {
                       <div className="space-y-0.5">
                         {phaseSteps.map((s) => {
                           const isCurrent = activeStep === s.num;
-                          const status = getStepStatus(s.num);
-                          const isDone = status === 'COMPLETED';
+                          const isDone = isStepCompleted(s.num);
 
                           return (
                             <button
@@ -4174,15 +4417,13 @@ export const OnboardingRequest: React.FC = () => {
                             >
                               {/* Minimalist Circular Step Indicator */}
                               <div className={`w-5.5 h-5.5 rounded-full flex items-center justify-center font-medium text-xs shrink-0 transition ${
-                                isCurrent
-                                  ? 'bg-slate-900 text-white shadow-2xs text-[11px] font-bold'
-                                  : isDone
+                                isDone
                                   ? 'bg-emerald-50 text-emerald-700 border border-emerald-300 font-bold'
+                                  : isCurrent
+                                  ? 'bg-slate-900 text-white shadow-2xs text-[11px] font-bold'
                                   : 'bg-white text-slate-700 border border-slate-300 text-[11px] font-semibold'
                               }`}>
-                                {isCurrent ? (
-                                  <span>{s.num}</span>
-                                ) : isDone ? (
+                                {isDone ? (
                                   <Check className="w-3 h-3 stroke-[2.5]" />
                                 ) : (
                                   <span>{s.num}</span>
@@ -4199,21 +4440,15 @@ export const OnboardingRequest: React.FC = () => {
                               </div>
 
                               {/* High-Visibility Industry-Standard Status Badges */}
-                              {isCurrent ? (
-                                !isFormEditable ? (
-                                  <span title="Viewing section in read-only mode" className="shrink-0 flex items-center text-slate-400">
-                                    <Eye className="w-3.5 h-3.5" />
-                                  </span>
-                                ) : (
-                                  <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-100/80 border border-emerald-300 px-2 py-0.5 rounded-md flex items-center gap-1 shrink-0 shadow-2xs">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse shrink-0"></span>
-                                    <span>Active</span>
-                                  </span>
-                                )
-                              ) : isDone ? (
-                                <span className="text-[10px] font-medium text-emerald-700 bg-emerald-50 border border-emerald-200/90 px-1.5 py-0.5 rounded-md flex items-center gap-1 shrink-0">
+                              {isDone ? (
+                                <span className="text-[10px] font-medium text-emerald-700 bg-emerald-50 border border-emerald-200/90 px-1.5 py-0.5 rounded-md flex items-center gap-1 shrink-0 shadow-2xs">
                                   <Check className="w-2.5 h-2.5 text-emerald-600 shrink-0 stroke-[2.5]" />
                                   <span>Done</span>
+                                </span>
+                              ) : isCurrent ? (
+                                <span className="text-[10px] font-semibold text-amber-800 bg-amber-50 border border-amber-300/90 px-2 py-0.5 rounded-md flex items-center gap-1 shrink-0 shadow-2xs">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shrink-0"></span>
+                                  <span>Pending</span>
                                 </span>
                               ) : (
                                 <span className="text-[10px] font-semibold text-amber-800 bg-amber-50 border border-amber-300/80 px-2 py-0.5 rounded-md flex items-center gap-1.5 shrink-0 shadow-2xs font-sans">
@@ -4263,8 +4498,7 @@ export const OnboardingRequest: React.FC = () => {
                     {phaseSteps.map((s) => {
                       const Icon = s.icon;
                       const isCurrent = activeStep === s.num;
-                      const status = getStepStatus(s.num);
-                      const isDone = status === 'COMPLETED';
+                      const isDone = isStepCompleted(s.num);
 
                       return (
                         <button
@@ -4278,16 +4512,16 @@ export const OnboardingRequest: React.FC = () => {
                               ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 hover:text-emerald-900'
                               : 'bg-amber-50/80 text-amber-700 border border-amber-200 hover:bg-amber-100'
                           }`}
-                          title={`${s.num}. ${s.title} (${isDone ? 'Completed' : isCurrent ? 'Active' : 'Pending Details'})`}
+                          title={`${s.num}. ${s.title} (${isDone ? 'Completed' : isCurrent ? 'Active · Pending' : 'Pending Details'})`}
                         >
                           <Icon className="w-4 h-4" />
-                          {isDone && !isCurrent ? (
+                          {isDone ? (
                             <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-600 text-white rounded-full flex items-center justify-center shadow-2xs">
                               <Check className="w-2.5 h-2.5 stroke-[3]" />
                             </span>
-                          ) : !isDone && !isCurrent ? (
+                          ) : (
                             <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-amber-500 rounded-full ring-2 ring-white" title="Incomplete - Action Required" />
-                          ) : null}
+                          )}
                         </button>
                       );
                     })}
@@ -4389,6 +4623,37 @@ export const OnboardingRequest: React.FC = () => {
                   onClick={() => setShowSubmitToast(false)}
                   className="p-1 rounded-lg hover:bg-white/20 text-white/80 hover:text-white transition shrink-0 cursor-pointer"
                   title="Dismiss notification"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+
+            {/* Active Validation Warning Banner for Jump-to-Field Navigation */}
+            {activeValidationBanner && activeValidationBanner.stepNum === activeStep && (
+              <div className="bg-amber-50 border border-amber-300 rounded-xl p-3 sm:px-4 sm:py-3 shadow-xs flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-1 text-amber-950">
+                <div className="flex items-center space-x-3 min-w-0">
+                  <div className="w-8 h-8 rounded-lg bg-amber-100 border border-amber-300 text-amber-700 flex items-center justify-center shrink-0">
+                    <AlertCircle className="w-4.5 h-4.5 stroke-[2.5]" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs font-bold flex items-center gap-2">
+                      <span>Mandatory Field Required: {activeValidationBanner.fieldLabel}</span>
+                      <span className="text-[10px] bg-amber-200/80 text-amber-900 px-1.5 py-0.2 rounded font-mono font-bold">
+                        ACTION REQUIRED
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-amber-800 mt-0.5 truncate">
+                      {activeValidationBanner.message}
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveValidationBanner(null)}
+                  className="p-1 rounded-lg hover:bg-amber-100 text-amber-700 hover:text-amber-950 transition shrink-0 cursor-pointer"
+                  title="Dismiss warning"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -4760,6 +5025,7 @@ export const OnboardingRequest: React.FC = () => {
                         </div>
                       </div>
                       <input
+                        id="legalName"
                         type="text"
                         disabled={isFormReadOnly}
                         value={legalName}
@@ -4773,8 +5039,8 @@ export const OnboardingRequest: React.FC = () => {
                         className={`w-full px-3 py-2 text-xs font-medium rounded-lg border transition ${
                           isFormReadOnly
                             ? 'bg-slate-50 text-slate-700 border-slate-200 cursor-default'
-                            : highlightField === 'legalName'
-                            ? 'ring-2 ring-emerald-500 border-emerald-500 bg-emerald-50/50'
+                            : (highlightField === 'legalName' || highlightField === 'field-legalName')
+                            ? 'ring-2 ring-rose-500 border-rose-500 bg-rose-50/50 animate-pulse'
                             : 'bg-white text-slate-900 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600'
                         }`}
                       />
@@ -4788,6 +5054,7 @@ export const OnboardingRequest: React.FC = () => {
                         </label>
                       </div>
                       <input
+                        id="tradeName"
                         type="text"
                         disabled={isFormReadOnly}
                         value={tradeName}
@@ -4796,7 +5063,7 @@ export const OnboardingRequest: React.FC = () => {
                         className={`w-full px-3 py-2 text-xs rounded-lg border transition ${
                           isFormReadOnly
                             ? 'bg-slate-50 text-slate-700 border-slate-200 cursor-default'
-                            : highlightField === 'tradeName'
+                            : (highlightField === 'tradeName' || highlightField === 'field-tradeName')
                             ? 'ring-2 ring-emerald-500 border-emerald-500 bg-emerald-50/50'
                             : 'bg-white text-slate-900 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600'
                         }`}
@@ -4811,6 +5078,7 @@ export const OnboardingRequest: React.FC = () => {
                         </label>
                       </div>
                       <input
+                        id="formerlyKnownAs"
                         type="text"
                         disabled={isFormReadOnly}
                         value={formerlyKnownAs}
@@ -4819,7 +5087,7 @@ export const OnboardingRequest: React.FC = () => {
                         className={`w-full px-3 py-2 text-xs rounded-lg border transition ${
                           isFormReadOnly
                             ? 'bg-slate-50 text-slate-700 border-slate-200 cursor-default'
-                            : highlightField === 'formerlyKnownAs'
+                            : (highlightField === 'formerlyKnownAs' || highlightField === 'field-formerlyKnownAs')
                             ? 'ring-2 ring-emerald-500 border-emerald-500 bg-emerald-50/50'
                             : 'bg-white text-slate-900 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600'
                         }`}
@@ -4842,7 +5110,9 @@ export const OnboardingRequest: React.FC = () => {
                     </div>
 
                     {/* Partner Status */}
-                    <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                    <div id="partnerStatus" className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'} rounded-xl transition ${
+                      (highlightField === 'partnerStatus' || highlightField === 'field-partnerStatus') ? 'ring-2 ring-rose-500 p-1 bg-rose-50/30 animate-pulse' : ''
+                    }`}>
                       <div className="flex items-center justify-between min-h-[20px]">
                         <label className="text-xs font-semibold text-slate-700 truncate" title="Partner Status">
                           Partner Status <span className="text-red-500">*</span>
@@ -4858,7 +5128,9 @@ export const OnboardingRequest: React.FC = () => {
                     </div>
 
                     {/* Supplier Manager Name */}
-                    <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                    <div id="supplierManager" className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'} rounded-xl transition ${
+                      (highlightField === 'supplierManager' || highlightField === 'field-supplierManager') ? 'ring-2 ring-rose-500 p-1 bg-rose-50/30 animate-pulse' : ''
+                    }`}>
                       <div className="flex items-center justify-between min-h-[20px]">
                         <label className="text-xs font-semibold text-slate-700 truncate" title="Supplier Manager Name">
                           Supplier Manager Name <span className="text-red-500">*</span>
@@ -4900,6 +5172,7 @@ export const OnboardingRequest: React.FC = () => {
                         </div>
                         <div className="relative">
                           <input
+                            id="dunsNumber"
                             type="text"
                             disabled={isFormReadOnly}
                             value={dunsNumber}
@@ -4908,8 +5181,8 @@ export const OnboardingRequest: React.FC = () => {
                             className={`w-full px-3 py-2 text-xs font-mono rounded-lg border transition ${
                               isFormReadOnly
                                 ? 'bg-slate-50 text-slate-700 border-slate-200 cursor-default'
-                                : highlightField === 'dunsNumber'
-                                ? 'ring-2 ring-emerald-500 border-emerald-500 bg-emerald-50/50'
+                                : (highlightField === 'dunsNumber' || highlightField === 'field-dunsNumber')
+                                ? 'ring-2 ring-rose-500 border-rose-500 bg-rose-50/50 animate-pulse'
                                 : 'bg-white text-slate-900 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600'
                             }`}
                           />
@@ -4945,6 +5218,7 @@ export const OnboardingRequest: React.FC = () => {
                       </div>
                       <div className="relative">
                         <input
+                          id="taxId"
                           type="text"
                           disabled={isFormReadOnly}
                           value={taxId}
@@ -4956,8 +5230,8 @@ export const OnboardingRequest: React.FC = () => {
                           className={`w-full pl-3 pr-28 py-2 text-xs font-mono rounded-lg border transition ${
                             isFormReadOnly
                               ? 'bg-slate-50 text-slate-700 border-slate-200 cursor-default font-semibold'
-                              : highlightField === 'taxId'
-                              ? 'ring-2 ring-emerald-500 border-emerald-500 bg-emerald-50/50'
+                              : (highlightField === 'taxId' || highlightField === 'field-taxId')
+                              ? 'ring-2 ring-rose-500 border-rose-500 bg-rose-50/50 animate-pulse'
                               : 'bg-white text-slate-900 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600'
                           }`}
                         />
@@ -5001,6 +5275,7 @@ export const OnboardingRequest: React.FC = () => {
                           wrapperClassName="shrink-0"
                         />
                         <input
+                          id="mobilePhone"
                           type="tel"
                           disabled={isFormReadOnly}
                           value={mobilePhone}
@@ -5009,6 +5284,8 @@ export const OnboardingRequest: React.FC = () => {
                           className={`flex-1 min-w-0 px-3 py-2 text-xs font-medium rounded-lg border transition ${
                             isFormReadOnly
                               ? 'bg-slate-50 text-slate-700 border-slate-200 cursor-default'
+                              : (highlightField === 'mobilePhone' || highlightField === 'field-mobilePhone')
+                              ? 'ring-2 ring-rose-500 border-rose-500 bg-rose-50/50 animate-pulse'
                               : 'bg-white text-slate-900 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600'
                           }`}
                         />
@@ -5016,7 +5293,9 @@ export const OnboardingRequest: React.FC = () => {
                     </div>
 
                     {/* Primary Language */}
-                    <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-6' : 'lg:col-span-2'}`}>
+                    <div id="primaryLanguage" className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-6' : 'lg:col-span-2'} rounded-xl transition ${
+                      (highlightField === 'primaryLanguage' || highlightField === 'field-primaryLanguage') ? 'ring-2 ring-rose-500 p-1 bg-rose-50/30 animate-pulse' : ''
+                    }`}>
                       <div className="flex items-center justify-between min-h-[20px]">
                         <label className="text-xs font-semibold text-slate-700 truncate" title="Primary Language">
                           Primary Language <span className="text-red-500">*</span>
@@ -5033,7 +5312,9 @@ export const OnboardingRequest: React.FC = () => {
                     </div>
 
                     {/* Subcategory (UNSPSC) */}
-                    <div className="space-y-2 lg:col-span-3">
+                    <div id="subcategories" className={`space-y-2 lg:col-span-3 rounded-xl transition ${
+                      (highlightField === 'subcategories' || highlightField === 'field-subcategories') ? 'ring-2 ring-rose-500 p-1 bg-rose-50/30 animate-pulse' : ''
+                    }`}>
                       <div className="h-6 flex items-center justify-between gap-1">
                         <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
                           Subcategory (Procurement UNSPSC) <span className="text-red-500">*</span>
@@ -5164,7 +5445,9 @@ export const OnboardingRequest: React.FC = () => {
                 <div className="border border-slate-200 rounded-xl bg-white shadow-2xs p-4 sm:p-5 lg:p-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 sm:gap-4.5">
                     {/* Currency */}
-                    <div className="space-y-1.5 lg:col-span-2">
+                    <div id="reportingCurrency" className={`space-y-1.5 lg:col-span-2 rounded-xl transition ${
+                      (highlightField === 'reportingCurrency' || highlightField === 'field-reportingCurrency') ? 'ring-2 ring-rose-500 p-1 bg-rose-50/30 animate-pulse' : ''
+                    }`}>
                       <div className="flex items-center justify-between min-h-[20px] h-5">
                         <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
                           Currency <span className="text-red-500">*</span>
@@ -5181,7 +5464,7 @@ export const OnboardingRequest: React.FC = () => {
                     </div>
 
                     {/* Annual Revenue (in Millions) */}
-                    <div className="space-y-1.5 lg:col-span-2">
+                    <div className={`space-y-1.5 lg:col-span-2`}>
                       <div className="flex items-center justify-between min-h-[20px] h-5">
                         <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
                           Annual Revenue (in Millions) <span className="text-red-500">*</span>
@@ -5192,6 +5475,7 @@ export const OnboardingRequest: React.FC = () => {
                           {currentCurrencySymbol}
                         </div>
                         <input
+                          id="annualRevenue"
                           type="number"
                           step="0.1"
                           disabled={isFormReadOnly}
@@ -5201,6 +5485,8 @@ export const OnboardingRequest: React.FC = () => {
                           className={`w-full ${currentCurrencySymbol.length > 2 ? 'pl-11' : currentCurrencySymbol.length > 1 ? 'pl-9' : 'pl-7'} pr-14 py-2 text-xs font-semibold rounded-lg border transition ${
                             isFormReadOnly
                               ? 'bg-slate-50 text-slate-700 border-slate-200 cursor-default'
+                              : (highlightField === 'annualRevenue' || highlightField === 'field-annualRevenue')
+                              ? 'ring-2 ring-rose-500 border-rose-500 bg-rose-50/50 animate-pulse'
                               : 'bg-white text-slate-900 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600'
                           }`}
                         />
@@ -5218,6 +5504,7 @@ export const OnboardingRequest: React.FC = () => {
                         </label>
                       </div>
                       <input
+                        id="totalEmployees"
                         type="number"
                         disabled={isFormReadOnly}
                         value={totalEmployees}
@@ -5226,6 +5513,8 @@ export const OnboardingRequest: React.FC = () => {
                         className={`w-full px-3 py-2 text-xs rounded-lg border transition ${
                           isFormReadOnly
                             ? 'bg-slate-50 text-slate-700 border-slate-200 cursor-default'
+                            : (highlightField === 'totalEmployees' || highlightField === 'field-totalEmployees')
+                            ? 'ring-2 ring-rose-500 border-rose-500 bg-rose-50/50 animate-pulse'
                             : 'bg-white text-slate-900 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600'
                         }`}
                       />
@@ -5240,6 +5529,7 @@ export const OnboardingRequest: React.FC = () => {
                         <span className="text-[10px] text-slate-400 font-mono font-normal shrink-0">MM-DD-YYYY</span>
                       </div>
                       <input
+                        id="incorporationDate"
                         type="date"
                         disabled={isFormReadOnly}
                         value={incorporationDate}
@@ -5253,7 +5543,9 @@ export const OnboardingRequest: React.FC = () => {
                     </div>
 
                     {/* Country / Jurisdiction (ISO 3166-1) */}
-                    <div className="space-y-1.5 lg:col-span-2">
+                    <div id="country" className={`space-y-1.5 lg:col-span-2 rounded-xl transition ${
+                      (highlightField === 'country' || highlightField === 'field-country') ? 'ring-2 ring-rose-500 p-1 bg-rose-50/30 animate-pulse' : ''
+                    }`}>
                       <div className="flex items-center justify-between min-h-[20px] h-5 gap-1">
                         <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
                           Country / Jurisdiction <span className="text-red-500">*</span>
@@ -5300,6 +5592,7 @@ export const OnboardingRequest: React.FC = () => {
                       </div>
                       <div className="relative">
                         <input
+                          id="registeredAddress"
                           type="text"
                           disabled={isFormReadOnly}
                           value={registeredAddress}
@@ -5308,6 +5601,8 @@ export const OnboardingRequest: React.FC = () => {
                           className={`w-full px-3 py-2 text-xs rounded-lg border transition ${
                             isFormReadOnly
                               ? 'bg-slate-50 text-slate-700 border-slate-200 cursor-default'
+                              : (highlightField === 'registeredAddress' || highlightField === 'field-registeredAddress')
+                              ? 'ring-2 ring-rose-500 border-rose-500 bg-rose-50/50 animate-pulse'
                               : 'bg-white text-slate-900 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600'
                           }`}
                         />
@@ -5327,6 +5622,7 @@ export const OnboardingRequest: React.FC = () => {
                         </span>
                       </div>
                       <textarea
+                        id="descriptionOfServices"
                         rows={3}
                         maxLength={500}
                         disabled={isFormReadOnly}
@@ -5336,13 +5632,17 @@ export const OnboardingRequest: React.FC = () => {
                         className={`w-full px-3 py-2 text-xs rounded-lg border transition resize-none ${
                           isFormReadOnly
                             ? 'bg-slate-50 text-slate-700 border-slate-200 cursor-default'
+                            : (highlightField === 'descriptionOfServices' || highlightField === 'field-descriptionOfServices')
+                            ? 'ring-2 ring-rose-500 border-rose-500 bg-rose-50/50 animate-pulse'
                             : 'bg-white text-slate-900 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600'
                         }`}
                       />
                     </div>
 
                     {/* Target Business Units */}
-                    <div className="space-y-2 lg:col-span-3">
+                    <div id="businessUnits" className={`space-y-2 lg:col-span-3 rounded-xl transition ${
+                      (highlightField === 'businessUnits' || highlightField === 'field-businessUnits') ? 'ring-2 ring-rose-500 p-1 bg-rose-50/30 animate-pulse' : ''
+                    }`}>
                       <div className="h-6 flex items-center justify-between gap-1">
                         <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
                           Target Business Units <span className="text-red-500">*</span>
@@ -5457,37 +5757,117 @@ export const OnboardingRequest: React.FC = () => {
 
               {/* SECTION 3: IDENTIFICATION INFORMATION GRID */}
               {activeStep === 3 && (
-                <GepIdentificationGrid items={identifications} onChange={setIdentifications} readOnly={isFormReadOnly} openAddTrigger={openAddTrigger} />
+                <div id="identifications" className={`rounded-xl transition ${
+                  (highlightField === 'identifications' || highlightField === 'field-identifications') ? 'ring-2 ring-rose-500 p-1 rounded-xl bg-rose-50/20 animate-pulse' : ''
+                }`}>
+                  <GepIdentificationGrid items={identifications} onChange={setIdentifications} readOnly={isFormReadOnly} openAddTrigger={openAddTrigger} />
+                </div>
               )}
 
               {/* SECTION 4: CONTACT INFORMATION */}
               {activeStep === 4 && (
-                <GepContactMatrix contacts={contacts} onChange={setContacts} readOnly={isFormReadOnly} openAddTrigger={openAddTrigger} />
+                <div id="contacts" className={`rounded-xl transition ${
+                  (highlightField === 'contacts' || highlightField === 'field-contacts') ? 'ring-2 ring-rose-500 p-1 rounded-xl bg-rose-50/20 animate-pulse' : ''
+                }`}>
+                  <GepContactMatrix contacts={contacts} onChange={setContacts} readOnly={isFormReadOnly} openAddTrigger={openAddTrigger} />
+                </div>
               )}
 
               {/* SECTION 5: LOCATION */}
               {activeStep === 5 && (
-                <GepLocationGrid locations={locations} onChange={setLocations} readOnly={isFormReadOnly} openAddTrigger={openAddTrigger} />
+                <div id="locations" className={`rounded-xl transition ${
+                  (highlightField === 'locations' || highlightField === 'field-locations') ? 'ring-2 ring-rose-500 p-1 rounded-xl bg-rose-50/20 animate-pulse' : ''
+                }`}>
+                  <GepLocationGrid locations={locations} onChange={setLocations} readOnly={isFormReadOnly} openAddTrigger={openAddTrigger} />
+                </div>
               )}
 
               {/* SECTION 6: BANKING INFORMATION */}
               {activeStep === 6 && (
-                <GepBankingGrid bankAccounts={bankAccounts} locations={locations} onChange={setBankAccounts} readOnly={isFormReadOnly} openAddTrigger={openAddTrigger} />
+                <div id="bankAccounts" className={`rounded-xl transition ${
+                  (highlightField === 'bankAccounts' || highlightField === 'field-bankAccounts') ? 'ring-2 ring-rose-500 p-1 rounded-xl bg-rose-50/20 animate-pulse' : ''
+                }`}>
+                  <GepBankingGrid bankAccounts={bankAccounts} locations={locations} onChange={setBankAccounts} readOnly={isFormReadOnly} openAddTrigger={openAddTrigger} />
+                </div>
               )}
 
               {/* SECTION 7: PAYMENT TERMS */}
               {activeStep === 7 && (
-                <GepCommercialTerms settings={commercialSettings} onChange={setCommercialSettings} readOnly={isFormReadOnly} />
+                <div id="paymentTerms" className={`rounded-xl transition ${
+                  (highlightField === 'paymentTerms' || highlightField === 'field-paymentTerms' || highlightField === 'matchingType') ? 'ring-2 ring-rose-500 p-1 rounded-xl bg-rose-50/20 animate-pulse' : ''
+                }`}>
+                  <GepCommercialTerms settings={commercialSettings} onChange={setCommercialSettings} readOnly={isFormReadOnly} />
+                </div>
               )}
 
               {/* SECTION 8: DIVERSITY & CERTIFICATES */}
               {activeStep === 8 && (
-                <GepCertificatesGrid certificates={certificates} onChange={setCertificates} readOnly={isFormReadOnly} openAddTrigger={openAddTrigger} />
+                <div id="certificates" className={`rounded-xl transition ${
+                  (highlightField === 'certificates' || highlightField === 'field-certificates') ? 'ring-2 ring-rose-500 p-1 rounded-xl bg-rose-50/20 animate-pulse' : ''
+                }`}>
+                  <GepCertificatesGrid certificates={certificates} onChange={setCertificates} readOnly={isFormReadOnly} openAddTrigger={openAddTrigger} />
+                </div>
               )}
 
               {/* SECTION 9: COMPLETE FORM DOSSIER REVIEW */}
               {activeStep === 9 && (
                 <div className="space-y-5">
+                  {/* Validation Status Card */}
+                  {validateAllSections().totalMissing > 0 ? (
+                    <div className="p-4 bg-amber-50/90 border border-amber-300 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-amber-950 shadow-xs animate-fadeIn">
+                      <div className="flex items-start gap-3 min-w-0">
+                        <div className="w-8 h-8 rounded-xl bg-amber-200/80 border border-amber-300 text-amber-800 flex items-center justify-center shrink-0 mt-0.5">
+                          <AlertTriangle className="w-4.5 h-4.5 stroke-[2.5]" />
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className="text-xs font-bold text-amber-950 flex items-center gap-2">
+                            <span>Mandatory Fields Incomplete</span>
+                            <span className="text-[10px] font-mono bg-amber-200 text-amber-900 px-2 py-0.2 rounded-full font-bold">
+                              {validateAllSections().totalMissing} Required Fields Missing
+                            </span>
+                          </h4>
+                          <p className="text-[11px] text-amber-800 mt-0.5 leading-relaxed">
+                            {activeInvitation.buyerName} requires all mandatory governance, tax, and banking fields to be completed before submission can be accepted.
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const val = validateAllSections();
+                          setValidationSummary({
+                            totalMissing: val.totalMissing,
+                            sectionErrors: val.sectionErrors
+                          });
+                          setValidationModalOpen(true);
+                        }}
+                        className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
+                      >
+                        <span>Fix Missing Fields</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="p-4 bg-emerald-50/90 border border-emerald-300 rounded-2xl flex items-center justify-between gap-3 text-emerald-950 shadow-xs">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-8 h-8 rounded-xl bg-emerald-200/80 text-emerald-800 flex items-center justify-center shrink-0">
+                          <CheckCircle2 className="w-4.5 h-4.5 stroke-[2.5]" />
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className="text-xs font-bold text-emerald-950">
+                            All Mandatory Fields Verified &amp; Complete
+                          </h4>
+                          <p className="text-[11px] text-emerald-800 mt-0.5">
+                            All 8 questionnaire sections meet {activeInvitation.buyerName}&apos;s compliance requirements. Ready for submission.
+                          </p>
+                        </div>
+                      </div>
+                      <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-emerald-200 text-emerald-900 shrink-0">
+                        100% READY
+                      </span>
+                    </div>
+                  )}
+
                   {/* 1. DOSSIER VIEW (Default: Full Complete Form View) */}
                   {reviewViewMode === 'DOSSIER' && (
                     <div className="space-y-5">
@@ -6065,6 +6445,110 @@ export const OnboardingRequest: React.FC = () => {
         isLocked={isSubmitted && !isEditingAfterSubmit}
         onApplySync={handleApplyMasterSync}
       />
+
+      {/* =========================================================================
+          SMART MANDATORY FIELD VALIDATION & ERROR AUDIT MODAL
+         ========================================================================= */}
+      {validationModalOpen && validationSummary && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white border border-slate-200 rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-200 text-slate-900">
+            {/* Modal Header */}
+            <div className="p-5 pb-4 border-b border-slate-100 flex items-start justify-between gap-3 bg-slate-50/70">
+              <div className="flex items-start space-x-3.5">
+                <div className="w-10 h-10 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center shrink-0 shadow-xs">
+                  <AlertCircle className="w-5 h-5 stroke-[2.5]" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                    <span>Mandatory Fields Required</span>
+                    <span className="text-[10px] font-mono font-bold bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full">
+                      {validationSummary.totalMissing} Missing
+                    </span>
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                    {activeInvitation.buyerName} requires all statutory, commercial, and compliance fields before submission can proceed.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setValidationModalOpen(false)}
+                className="p-1.5 rounded-xl hover:bg-slate-200/70 text-slate-400 hover:text-slate-700 transition cursor-pointer"
+                title="Close"
+              >
+                <X className="w-4.5 h-4.5" />
+              </button>
+            </div>
+
+            {/* Incomplete Sections List */}
+            <div className="p-4 sm:p-5 overflow-y-auto space-y-3.5 flex-1 min-h-0 bg-slate-50/40">
+              {validationSummary.sectionErrors.map((sec) => (
+                <div key={sec.stepNum} className="border border-slate-200 rounded-2xl bg-white shadow-2xs overflow-hidden">
+                  <div className="bg-slate-50/90 px-3.5 py-2.5 border-b border-slate-200/80 flex items-center justify-between">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-5 h-5 rounded-full bg-slate-900 text-white font-mono text-[10px] font-bold flex items-center justify-center shrink-0">
+                        {sec.stepNum}
+                      </div>
+                      <span className="text-xs font-bold text-slate-900 truncate">
+                        {sec.sectionTitle}
+                      </span>
+                    </div>
+                    <span className="text-[10.5px] font-semibold text-amber-800 bg-amber-50 border border-amber-300/80 px-2 py-0.5 rounded-md shrink-0">
+                      {sec.missingFields.length} {sec.missingFields.length === 1 ? 'field' : 'fields'} required
+                    </span>
+                  </div>
+
+                  <div className="divide-y divide-slate-100">
+                    {sec.missingFields.map((field) => (
+                      <div key={field.id} className="p-3 sm:px-3.5 sm:py-2.5 flex items-center justify-between gap-3 hover:bg-slate-50/60 transition group">
+                        <div className="min-w-0 flex-1">
+                          <div className="text-xs font-semibold text-slate-900 flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
+                            <span className="truncate">{field.label}</span>
+                          </div>
+                          <div className="text-[11px] text-slate-500 truncate mt-0.5 pl-3">
+                            {field.message}
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleJumpToField(field)}
+                          className="shrink-0 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100/90 text-emerald-800 border border-emerald-300 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs group-hover:border-emerald-400"
+                        >
+                          <span>Complete Field</span>
+                          <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 border-t border-slate-200 bg-white flex items-center justify-between gap-2.5">
+              <button
+                type="button"
+                onClick={() => setValidationModalOpen(false)}
+                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+              >
+                Close &amp; Keep Editing
+              </button>
+
+              {validationSummary.sectionErrors[0]?.missingFields[0] && (
+                <button
+                  type="button"
+                  onClick={() => handleJumpToField(validationSummary.sectionErrors[0].missingFields[0])}
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+                >
+                  <span>Fix First Field: {validationSummary.sectionErrors[0].missingFields[0].label}</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       </div>
     </div>
