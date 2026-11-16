@@ -4386,7 +4386,7 @@ export const OnboardingRequest: React.FC = () => {
             (Hidden only in FULL agent view)
            ======================================================== */}
         {!isFull && !sidebarCollapsed && (
-          <aside className="w-64 xl:w-72 bg-white border-r border-slate-200 flex flex-col justify-between p-3 shrink-0 h-full overflow-y-auto transition-all duration-200">
+          <aside className="w-[272px] xl:w-[288px] bg-white border-r border-slate-200 flex flex-col justify-between p-3 shrink-0 h-full overflow-y-auto transition-all duration-200">
             <div className="space-y-3">
               
               {/* Header with Title & ChatGPT-style Minimize Button */}
@@ -4493,25 +4493,32 @@ export const OnboardingRequest: React.FC = () => {
                               <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] shrink-0 transition font-mono ${
                                 isCurrent
                                   ? 'bg-slate-900 text-white font-bold shadow-2xs'
+                                  : isDone
+                                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-300 font-bold shadow-2xs'
                                   : 'bg-slate-100 text-slate-500 font-semibold border border-slate-200/80'
                               }`}>
                                 <span>{s.num}</span>
                               </div>
 
-                              {/* Section Title */}
-                              <div className="flex-1 min-w-0 pr-1">
-                                <span className={`text-xs truncate block ${
+                              {/* Section Title - Generous Width Without Awkward Clipping */}
+                              <div className="flex-1 min-w-0 pr-1.5">
+                                <span className={`text-xs block leading-tight ${
                                   isCurrent ? 'font-semibold text-slate-900' : isDone ? 'text-slate-800' : 'text-slate-700'
                                 }`}>
                                   {s.title}
                                 </span>
                               </div>
 
-                              {/* Right Status: Green Pill for Complete Only (Zero 'Pending' text noise) */}
-                              {isDone && (
-                                <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/90 px-2 py-0.5 rounded-full flex items-center gap-1 shrink-0 shadow-2xs">
+                              {/* Right Status: Green Pill for Done, Amber Pill for Pending */}
+                              {isDone ? (
+                                <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/90 px-2 py-0.5 rounded-full flex items-center gap-1 shrink-0 shadow-2xs font-sans">
                                   <Check className="w-2.5 h-2.5 text-emerald-600 stroke-[2.5]" />
                                   <span>Done</span>
+                                </span>
+                              ) : (
+                                <span className="text-[10px] font-medium text-amber-800 bg-amber-50 border border-amber-300/80 px-2 py-0.5 rounded-full flex items-center gap-1.5 shrink-0 shadow-2xs font-sans">
+                                  <span className={`w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0 ${isCurrent ? 'animate-pulse' : ''}`}></span>
+                                  <span>Pending</span>
                                 </span>
                               )}
                             </button>
