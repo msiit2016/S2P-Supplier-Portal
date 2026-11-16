@@ -4507,15 +4507,11 @@ export const OnboardingRequest: React.FC = () => {
                                 </span>
                               </div>
 
-                              {/* Right Status: Green Check for Complete, Amber Pill for Pending */}
-                              {isDone ? (
-                                <div className="w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-200/90 shadow-2xs" title="Completed">
-                                  <Check className="w-3 h-3 stroke-[2.5]" />
-                                </div>
-                              ) : (
-                                <span className="text-[10px] font-semibold text-amber-800 bg-amber-50 border border-amber-300/80 px-2 py-0.5 rounded-md flex items-center gap-1.5 shrink-0 shadow-2xs font-sans">
-                                  <span className={`w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0 ${isCurrent ? 'animate-pulse' : ''}`}></span>
-                                  <span>Pending</span>
+                              {/* Right Status: Green Pill for Complete Only (Zero 'Pending' text noise) */}
+                              {isDone && (
+                                <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/90 px-2 py-0.5 rounded-full flex items-center gap-1 shrink-0 shadow-2xs">
+                                  <Check className="w-2.5 h-2.5 text-emerald-600 stroke-[2.5]" />
+                                  <span>Done</span>
                                 </span>
                               )}
                             </button>
