@@ -5984,66 +5984,65 @@ export const OnboardingRequest: React.FC = () => {
               {activeStep === 9 && (
                 <div className="space-y-5">
                   {/* Minimal & Streamlined Mandatory Validation Status Strip */}
-                  {validateAllSections().totalMissing > 0 ? (
-                    <div className="p-3.5 bg-amber-50/90 border border-amber-200/90 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-slate-800 shadow-2xs animate-fadeIn">
-                      <div className="flex items-start gap-3 min-w-0">
-                        <div className="w-8 h-8 rounded-lg bg-amber-100 border border-amber-300 text-amber-800 flex items-center justify-center shrink-0 mt-0.5">
-                          <AlertCircle className="w-4.5 h-4.5 stroke-[2.2]" />
-                        </div>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-slate-900">
-                              Incomplete Application
-                            </span>
-                            <span className="text-[10px] font-mono font-bold bg-amber-200/80 text-amber-900 border border-amber-300/80 px-2 py-0.5 rounded-full">
-                              {validateAllSections().totalMissing} required fields missing
-                            </span>
+                  {!isSubmitted && (
+                    validateAllSections().totalMissing > 0 ? (
+                      <div className="p-3.5 bg-amber-50/90 border border-amber-200/90 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-slate-800 shadow-2xs animate-fadeIn">
+                        <div className="flex items-start gap-3 min-w-0">
+                          <div className="w-8 h-8 rounded-lg bg-amber-100 border border-amber-300 text-amber-800 flex items-center justify-center shrink-0 mt-0.5">
+                            <AlertCircle className="w-4.5 h-4.5 stroke-[2.2]" />
                           </div>
-                          <p className="text-[11px] text-slate-600 mt-0.5 leading-normal">
-                            All statutory, tax, and banking fields must be completed before submitting to {activeInvitation.buyerName}.
-                          </p>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-slate-900">
+                                Incomplete Application
+                              </span>
+                              <span className="text-[10px] font-mono font-bold bg-amber-200/80 text-amber-900 border border-amber-300/80 px-2 py-0.5 rounded-full">
+                                {validateAllSections().totalMissing} required fields missing
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-600 mt-0.5 leading-normal">
+                              All statutory, tax, and banking fields must be completed before submitting to {activeInvitation.buyerName}.
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const val = validateAllSections();
+                            setValidationSummary({
+                              totalMissing: val.totalMissing,
+                              sectionErrors: val.sectionErrors
+                            });
+                            setValidationModalOpen(true);
+                          }}
+                          className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center justify-center gap-1.5 shrink-0 cursor-pointer self-start sm:self-center"
+                        >
+                          <span>Fix Missing Fields</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="p-3.5 bg-emerald-50/90 border border-emerald-200 rounded-xl flex items-center justify-between gap-3 text-slate-800 shadow-2xs">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+                            <CheckCircle2 className="w-4.5 h-4.5 stroke-[2.2]" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-slate-900">
+                                Ready for Submission
+                              </span>
+                              <span className="text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300/80 px-2 py-0.5 rounded-full">
+                                100% verified
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-600 mt-0.5">
+                              All mandatory governance, tax, and banking fields have been verified.
+                            </p>
+                          </div>
                         </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const val = validateAllSections();
-                          setValidationSummary({
-                            totalMissing: val.totalMissing,
-                            sectionErrors: val.sectionErrors
-                          });
-                          setValidationModalOpen(true);
-                        }}
-                        className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center justify-center gap-1.5 shrink-0 cursor-pointer self-start sm:self-center"
-                      >
-                        <span>Fix Missing Fields</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="p-3.5 bg-emerald-50/90 border border-emerald-200 rounded-xl flex items-center justify-between gap-3 text-slate-800 shadow-2xs">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
-                          <CheckCircle2 className="w-4.5 h-4.5 stroke-[2.2]" />
-                        </div>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-slate-900">
-                              Ready for Submission
-                            </span>
-                            <span className="text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300/80 px-2 py-0.5 rounded-full">
-                              100% verified
-                            </span>
-                          </div>
-                          <p className="text-[11px] text-slate-600 mt-0.5">
-                            All mandatory governance, tax, and banking fields have been verified.
-                          </p>
-                        </div>
-                      </div>
-                      <span className="text-xs font-bold text-emerald-700 shrink-0 bg-emerald-100/80 border border-emerald-300 px-3 py-1.5 rounded-lg">
-                        Ready to Submit ✓
-                      </span>
-                    </div>
+                    )
                   )}
 
                   {/* 1. DOSSIER VIEW (Default: Full Complete Form View) */}
