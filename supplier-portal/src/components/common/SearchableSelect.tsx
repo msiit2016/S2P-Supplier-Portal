@@ -6,6 +6,8 @@ export interface SelectOption {
   value: string;
   label: string;
   code?: string;
+  flag?: string;
+  hideCodeBadge?: boolean;
   sublabel?: string;
   category?: string;
   disabled?: boolean;
@@ -44,6 +46,8 @@ export interface SearchableSelectProps {
   icon?: React.ReactNode;
   /** Show search count badge */
   showCount?: boolean;
+  /** Whether to show code badge in trigger (defaults to true) */
+  showCodeBadge?: boolean;
   /** Whether to show the search input inside dropdown (defaults to true if options.length > 5) */
   searchable?: boolean;
 }
@@ -65,6 +69,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
   maxListHeight = 'max-h-64',
   icon,
   showCount = true,
+  showCodeBadge = true,
   searchable
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -122,10 +127,22 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
 
   // Find currently selected option
   const selectedOption = useMemo(() => {
-    if (resetOnSelect) return null;
+    if (resetOnSelect || !value) return null;
+    const cleanStr = (s: string) =>
+      (s || '')
+        .replace(/[\p{Emoji}\p{Extended_Pictographic}\u200d\uFE0F]/gu, '')
+        .replace(/\([A-Z]{2}\)/g, '')
+        .trim()
+        .toLowerCase();
+    const cleanVal = cleanStr(value);
+
     return (
       normalizedOptions.find((opt) => opt.value === value) ||
-      normalizedOptions.find((opt) => opt.label.toLowerCase() === (value || '').toLowerCase()) ||
+      normalizedOptions.find((opt) => opt.value.toLowerCase() === value.toLowerCase()) ||
+      normalizedOptions.find((opt) => opt.label.toLowerCase() === value.toLowerCase()) ||
+      normalizedOptions.find((opt) => cleanVal && cleanStr(opt.value) === cleanVal) ||
+      normalizedOptions.find((opt) => cleanVal && cleanStr(opt.label) === cleanVal) ||
+      normalizedOptions.find((opt) => cleanVal && opt.label.toLowerCase().includes(cleanVal)) ||
       null
     );
   }, [normalizedOptions, value, resetOnSelect]);
@@ -457,7 +474,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
       >
         <div className="flex items-center gap-1.5 min-w-0 flex-1">
           {icon && <span className="shrink-0 text-slate-400">{icon}</span>}
-          {selectedOption?.code && !resetOnSelect && (
+          {selectedOption?.code && !resetOnSelect && showCodeBadge && !selectedOption?.hideCodeBadge && (
             <span className="font-mono text-[10px] font-bold text-slate-600 bg-slate-100 px-1 py-0.5 rounded border border-slate-200 shrink-0">
               {selectedOption.code}
             </span>

@@ -107,12 +107,14 @@ export const SupplierRegister: React.FC = () => {
                 onChange={(e) => setCountry(e.target.value)}
                 className="w-full text-xs border border-slate-300 rounded-lg px-3 py-2.5 bg-white"
               >
-                <option value="United States">United States</option>
-                <option value="Canada">Canada</option>
-                <option value="United Kingdom">United Kingdom</option>
-                <option value="Germany">Germany</option>
-                <option value="Japan">Japan</option>
-                <option value="India">India</option>
+                <option value="United States">🇺🇸 United States</option>
+                <option value="Canada">🇨🇦 Canada</option>
+                <option value="United Kingdom">🇬🇧 United Kingdom</option>
+                <option value="Germany">🇩🇪 Germany</option>
+                <option value="Japan">🇯🇵 Japan</option>
+                <option value="India">🇮🇳 India</option>
+                <option value="Australia">🇦🇺 Australia</option>
+                <option value="Singapore">🇸🇬 Singapore</option>
               </select>
             </div>
 

@@ -23,6 +23,7 @@ import {
 import { GepIdentificationItem } from '../../types/index.js';
 import { SearchableSelect } from '../common/SearchableSelect.js';
 import { DocumentPreviewModal, ComplianceDoc } from '../common/DocumentPreviewModal.js';
+import { getCountryFlag } from '../../utils/countryData.js';
 
 interface GepIdentificationGridProps {
   items: GepIdentificationItem[];
@@ -648,7 +649,7 @@ export const GepIdentificationGrid: React.FC<GepIdentificationGridProps> = ({
                     <SearchableSelect
                       options={COUNTRY_OPTIONS.map(c => ({
                         value: c.name,
-                        label: c.name,
+                        label: `${getCountryFlag(c.code)}  ${c.name}`,
                         code: c.code,
                         sublabel: `${c.types.length} tax identifiers available`
                       }))}
@@ -662,6 +663,7 @@ export const GepIdentificationGrid: React.FC<GepIdentificationGridProps> = ({
                       }}
                       placeholder="Select Country..."
                       searchPlaceholder="Search country or code..."
+                      showCodeBadge={false}
                     />
                   </div>
 

@@ -7,6 +7,7 @@ import { resetPageContext } from '../../services/pageActionBridge.js';
 import { VerisourceLogo } from '../../components/common/VerisourceLogo.js';
 import { FilterSelect } from '../../components/common/FilterSelect.js';
 import { SearchableSelect } from '../../components/common/SearchableSelect.js';
+import { COUNTRY_REGISTRATION_OPTIONS } from '../../utils/countryData.js';
 import {
   ShieldCheck,
   Lock,
@@ -1107,18 +1108,10 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
                   <SearchableSelect
                     value={signupCountry}
                     onChange={(val) => setSignupCountry(val)}
-                    options={[
-                      'United States',
-                      'United Kingdom',
-                      'Germany',
-                      'Japan',
-                      'India',
-                      'Canada',
-                      'Australia',
-                      'Singapore'
-                    ]}
+                    options={COUNTRY_REGISTRATION_OPTIONS}
                     placeholder="Select Country of Registration..."
-                    searchPlaceholder="Search country..."
+                    searchPlaceholder="Search country or code..."
+                    showCodeBadge={false}
                   />
                 </div>
 
