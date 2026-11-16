@@ -4483,17 +4483,21 @@ export const OnboardingRequest: React.FC = () => {
                               title={`${s.num}. ${s.title} (${isDone ? 'Completed' : isCurrent ? 'Active · In Progress' : 'Pending Details'})`}
                               className={`w-full p-2 rounded-xl text-left transition flex items-center space-x-2.5 border cursor-pointer ${
                                 isCurrent
-                                  ? 'bg-slate-100 border-slate-300 shadow-2xs font-semibold text-slate-900 ring-1 ring-slate-300/50'
+                                  ? isDone
+                                    ? 'bg-emerald-50/80 border-emerald-300 shadow-2xs font-semibold text-emerald-950 ring-2 ring-emerald-400/50'
+                                    : 'bg-amber-50/90 border-amber-300 shadow-2xs font-semibold text-amber-950 ring-2 ring-amber-400/50'
                                   : isDone
-                                  ? 'bg-emerald-50/30 border-emerald-200/60 hover:bg-emerald-50/70 text-slate-800 font-medium'
-                                  : 'bg-white border-transparent hover:bg-slate-50 text-slate-700 font-medium'
+                                  ? 'bg-emerald-50/40 border-emerald-200/60 hover:bg-emerald-50/80 text-slate-800 font-medium'
+                                  : 'bg-amber-50/30 border-amber-200/50 hover:bg-amber-50/70 text-slate-800 font-medium'
                               }`}
                             >
-                              {/* Left Step Number: Clean neutral 1 to 9 sequence (no green circle) */}
+                              {/* Left Step Number: Continuous 1 to 9 sequence */}
                               <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] shrink-0 transition font-mono ${
                                 isCurrent
                                   ? 'bg-slate-900 text-white font-bold shadow-2xs'
-                                  : 'bg-slate-100 text-slate-500 font-semibold border border-slate-200/80'
+                                  : isDone
+                                  ? 'bg-emerald-100/80 text-emerald-800 font-semibold border border-emerald-200/90'
+                                  : 'bg-amber-100/70 text-amber-800 font-semibold border border-amber-200/80'
                               }`}>
                                 <span>{s.num}</span>
                               </div>
