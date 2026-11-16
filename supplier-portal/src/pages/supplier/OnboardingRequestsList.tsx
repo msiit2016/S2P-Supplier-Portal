@@ -99,31 +99,7 @@ export const OnboardingRequestsList: React.FC = () => {
         ? 'bg-emerald-50 text-emerald-800 border-emerald-200/80'
         : 'bg-sky-50 text-sky-800 border-sky-200/80',
       complianceScope: 'IRS Form W-9, FedACH Remittance, Commercial COI, SOC 2 Type II',
-      ctaText: apexProg.isSubmitted ? 'View Dossier' : 'Continue'
-    },
-    {
-      id: 'inv-meridian-03',
-      orgId: 'buyer-org-3',
-      buyerName: 'Meridian Health Network',
-      initials: 'ME',
-      color: 'from-teal-600 to-cyan-700',
-      invitationCode: 'INV-MERIDIAN-4011',
-      program: 'Clinical Diagnostic & Hospital Lab Automation',
-      category: 'Clinical Diagnostic & Lab Automation',
-      invitedBy: 'David Chen (Global Procurement Lead)',
-      invitedDate: '3 days ago',
-      deadline: meridianProg.isSubmitted ? 'Under Buyer SLA Review' : 'Dec 15, 2026',
-      progressPercent: meridianProg.progressPercent,
-      stageLabel: meridianProg.stageLabel,
-      statusKey: meridianProg.statusKey,
-      statusLabel: meridianProg.statusLabel,
-      statusBadgeBg: meridianProg.statusKey === 'UNDER_REVIEW'
-        ? 'bg-emerald-50 text-emerald-800 border-emerald-200/80'
-        : meridianProg.statusKey === 'ACTION_REQUIRED'
-        ? 'bg-amber-50 text-amber-800 border-amber-200/80'
-        : 'bg-sky-50 text-sky-800 border-sky-200/80',
-      complianceScope: 'HIPAA Business Associate (BAA), $5M Malpractice COI, FDA QSR',
-      ctaText: meridianProg.isSubmitted ? 'View Dossier' : 'Continue'
+      ctaText: apexProg.isSubmitted ? 'View Onboarding Details' : 'Continue'
     },
     {
       id: 'inv-novatech-02',
@@ -145,7 +121,31 @@ export const OnboardingRequestsList: React.FC = () => {
         ? 'bg-sky-50 text-sky-800 border-sky-200/80'
         : 'bg-amber-50 text-amber-800 border-amber-200/80',
       complianceScope: 'ITAR Defense Attestation, NIST SP 800-171, Mil-Spec Quality Cert',
-      ctaText: novatechProg.progressPercent > 0 ? 'Continue' : 'Start'
+      ctaText: novatechProg.isSubmitted ? 'View Onboarding Details' : 'Resume'
+    },
+    {
+      id: 'inv-meridian-03',
+      orgId: 'buyer-org-3',
+      buyerName: 'Meridian Health Network',
+      initials: 'ME',
+      color: 'from-teal-600 to-cyan-700',
+      invitationCode: 'INV-MERIDIAN-4011',
+      program: 'Clinical Diagnostic & Hospital Lab Automation',
+      category: 'Clinical Diagnostic & Lab Automation',
+      invitedBy: 'David Chen (Global Procurement Lead)',
+      invitedDate: '3 days ago',
+      deadline: meridianProg.isSubmitted ? 'Under Buyer SLA Review' : 'Dec 15, 2026',
+      progressPercent: meridianProg.isSubmitted ? 100 : meridianProg.progressPercent,
+      stageLabel: meridianProg.isSubmitted ? 'Stage 3 of 5: Buyer Review & Adjudication' : meridianProg.stageLabel,
+      statusKey: meridianProg.statusKey,
+      statusLabel: meridianProg.isSubmitted ? 'Under Buyer Review' : meridianProg.statusLabel,
+      statusBadgeBg: meridianProg.statusKey === 'UNDER_REVIEW'
+        ? 'bg-emerald-50 text-emerald-800 border-emerald-200/80'
+        : meridianProg.statusKey === 'ACTION_REQUIRED'
+        ? 'bg-amber-50 text-amber-800 border-amber-200/80'
+        : 'bg-sky-50 text-sky-800 border-sky-200/80',
+      complianceScope: 'HIPAA Business Associate (BAA), $5M Malpractice COI, FDA QSR',
+      ctaText: meridianProg.isSubmitted ? 'View Onboarding Details' : 'Continue'
     }
   ];
 
@@ -718,7 +718,7 @@ export const OnboardingRequestsList: React.FC = () => {
                               e.stopPropagation();
                               handleOpenDetail(card);
                             }}
-                            className={`w-28 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer flex items-center justify-center ${
+                            className={`px-3.5 py-1.5 whitespace-nowrap min-w-[130px] rounded-lg text-xs font-semibold transition cursor-pointer flex items-center justify-center ${
                               card.statusKey === 'UNDER_REVIEW'
                                 ? 'bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs'
                                 : 'bg-slate-900 hover:bg-slate-800 text-white shadow-xs'

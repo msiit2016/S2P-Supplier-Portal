@@ -2235,30 +2235,33 @@ export const OnboardingRequest: React.FC = () => {
   // Synchronize dynamic progress state with OnboardingRequestsList
   useEffect(() => {
     if (activeInvitation?.id) {
+      const isSub = Boolean(currentSub.isSubmitted);
+      const effCompleted = isSub ? 9 : completedStepsCount;
+      const effPercent = isSub ? 100 : progressPercent;
       saveBuyerOnboardingProgress(activeInvitation.id, {
         id: activeInvitation.id,
         buyerName: activeInvitation.buyerName,
         invitationCode: activeInvitation.invitationCode,
-        completedStepsCount,
+        completedStepsCount: effCompleted,
         totalSteps: 9,
-        progressPercent,
-        stageLabel: currentSub.isSubmitted
+        progressPercent: effPercent,
+        stageLabel: isSub
           ? 'Stage 3 of 5: Buyer Review & Adjudication'
-          : progressPercent > 0
+          : effPercent > 0
           ? 'Stage 2 of 5: Form Submission'
           : 'Stage 1 of 5: Registration Completed',
-        stageNum: currentSub.isSubmitted ? 3 : progressPercent > 0 ? 2 : 1,
-        statusKey: currentSub.isSubmitted
+        stageNum: isSub ? 3 : effPercent > 0 ? 2 : 1,
+        statusKey: isSub
           ? 'UNDER_REVIEW'
-          : progressPercent > 0
+          : effPercent > 0
           ? 'IN_PROGRESS'
           : 'ACTION_REQUIRED',
-        statusLabel: currentSub.isSubmitted
+        statusLabel: isSub
           ? 'Under Buyer Review'
-          : progressPercent > 0
-          ? `In Progress (${progressPercent}%)`
+          : effPercent > 0
+          ? `In Progress (${effPercent}%)`
           : 'Action Needed',
-        isSubmitted: Boolean(currentSub.isSubmitted),
+        isSubmitted: isSub,
         isEditing: Boolean(currentSub.isEditing),
         submittedAt: currentSub.submittedAt
       });

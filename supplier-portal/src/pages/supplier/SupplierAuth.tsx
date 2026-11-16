@@ -47,7 +47,7 @@ export const isValidEmail = (email: string): boolean => {
 
 export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN' }) => {
   const { switchUser } = useAuth();
-  const { navigate } = usePortal();
+  const { navigate, setSelectedBuyerId } = usePortal();
 
   const [activeTab, setActiveTab] = useState<'LOGIN' | 'SIGNUP'>(initialTab);
   const [authMethod, setAuthMethod] = useState<AuthMethod>('EMAIL_OTP');
@@ -93,7 +93,15 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
   const handleProceedToOnboarding = () => {
     setShowSuccessModal(false);
     switchUser(signupEmail, companyName, signupContactName);
-    navigate('/onboarding/detail', { isNewRegistration: true, autoDetail: true, openAva: true });
+    setSelectedBuyerId('buyer-org-1');
+    navigate('/onboarding/detail', { 
+      buyerOrgId: 'buyer-org-1',
+      invitationId: 'inv-apex-01',
+      invitationCode: 'INV-APEX-2026',
+      isNewRegistration: true, 
+      autoDetail: true, 
+      openAva: true 
+    });
   };
 
   // Auto-redirect countdown after successful registration (increased by 1s to 4s for optimal readability)
@@ -1345,13 +1353,18 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
               Account Created!
             </h2>
             <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">
-              Welcome, <span className="font-semibold text-white">{signupFirstName || signupContactName || 'Partner'}</span>. Your enterprise account for <strong className="text-emerald-400">{companyName}</strong> is ready.
+              Welcome, <span className="font-semibold text-white">{signupFirstName || signupContactName || 'Partner'}</span>. Your enterprise account for <strong className="text-emerald-400">{companyName}</strong> is linked to <span className="font-semibold text-white">Apex Global Enterprises</span>.
             </p>
 
+            <div className="mt-3 py-1.5 px-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-center gap-2 text-[11px] text-emerald-300">
+              <Sparkles className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              <span>Assigned Buyer: <strong>Apex Global Enterprises</strong> (INV-APEX-2026)</span>
+            </div>
+
             {/* Sleek Auto-Redirect Bar (4s Total Duration) */}
-            <div className="mt-5 pt-4 border-t border-slate-800/80 space-y-2">
+            <div className="mt-4 pt-3 border-t border-slate-800/80 space-y-2">
               <div className="flex items-center justify-between text-[11px] text-slate-400">
-                <span>Opening onboarding...</span>
+                <span>Opening Apex onboarding...</span>
                 <span className="font-mono font-bold text-emerald-400">{countdownSeconds}s</span>
               </div>
               <div className="w-full bg-slate-800/80 h-1.5 rounded-full overflow-hidden">
@@ -1368,7 +1381,7 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
               onClick={handleProceedToOnboarding}
               className="w-full mt-4 py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-950/40 transition-all flex items-center justify-center gap-2 cursor-pointer group"
             >
-              <span>Continue to Onboarding</span>
+              <span>Continue to Apex Onboarding</span>
               <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
             </button>
           </div>

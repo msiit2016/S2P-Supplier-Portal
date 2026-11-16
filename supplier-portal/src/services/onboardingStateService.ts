@@ -32,10 +32,10 @@ export const DEFAULT_ONBOARDING_PROGRESS: Record<string, BuyerOnboardingProgress
     isSubmitted: false,
     isEditing: false,
   },
-  'inv-meridian-03': {
-    id: 'inv-meridian-03',
-    buyerName: 'Meridian Health Network',
-    invitationCode: 'INV-MERIDIAN-4011',
+  'inv-novatech-02': {
+    id: 'inv-novatech-02',
+    buyerName: 'NovaTech Aerospace & Defense',
+    invitationCode: 'INV-NOVATECH-8820',
     completedStepsCount: 4,
     totalSteps: 9,
     progressPercent: 44,
@@ -46,19 +46,20 @@ export const DEFAULT_ONBOARDING_PROGRESS: Record<string, BuyerOnboardingProgress
     isSubmitted: false,
     isEditing: false,
   },
-  'inv-novatech-02': {
-    id: 'inv-novatech-02',
-    buyerName: 'NovaTech Aerospace & Defense',
-    invitationCode: 'INV-NOVATECH-8820',
-    completedStepsCount: 0,
+  'inv-meridian-03': {
+    id: 'inv-meridian-03',
+    buyerName: 'Meridian Health Network',
+    invitationCode: 'INV-MERIDIAN-4011',
+    completedStepsCount: 9,
     totalSteps: 9,
-    progressPercent: 0,
-    stageLabel: 'Stage 1 of 5: Registration Completed',
-    stageNum: 1,
-    statusKey: 'ACTION_REQUIRED',
-    statusLabel: 'Action Needed',
-    isSubmitted: false,
+    progressPercent: 100,
+    stageLabel: 'Stage 3 of 5: Buyer Review & Adjudication',
+    stageNum: 3,
+    statusKey: 'UNDER_REVIEW',
+    statusLabel: 'Under Buyer Review',
+    isSubmitted: true,
     isEditing: false,
+    submittedAt: 'Nov 4, 2026 at 17:44'
   }
 };
 
@@ -68,7 +69,36 @@ export const getBuyerOnboardingProgressMap = (): Record<string, BuyerOnboardingP
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return DEFAULT_ONBOARDING_PROGRESS;
     const parsed = JSON.parse(raw);
-    return { ...DEFAULT_ONBOARDING_PROGRESS, ...parsed };
+    const result: Record<string, BuyerOnboardingProgressState> = { ...DEFAULT_ONBOARDING_PROGRESS, ...parsed };
+
+    // Meridian is submitted by default unless explicitly in revision mode
+    if (result['inv-meridian-03'] && !result['inv-meridian-03'].isSubmitted && !result['inv-meridian-03'].isEditing) {
+      result['inv-meridian-03'] = {
+        ...result['inv-meridian-03'],
+        isSubmitted: true,
+        progressPercent: 100,
+        completedStepsCount: 9,
+        stageLabel: 'Stage 3 of 5: Buyer Review & Adjudication',
+        stageNum: 3,
+        statusKey: 'UNDER_REVIEW',
+        statusLabel: 'Under Buyer Review'
+      };
+    }
+
+    // Ensure NovaTech retains a distinct in-draft state (44%) if uncustomized or if cloned from Apex
+    if (result['inv-novatech-02'] && result['inv-novatech-02'].progressPercent === 89 && !result['inv-novatech-02'].isSubmitted) {
+      result['inv-novatech-02'] = {
+        ...result['inv-novatech-02'],
+        progressPercent: 44,
+        completedStepsCount: 4,
+        stageLabel: 'Stage 2 of 5: Form Submission',
+        stageNum: 2,
+        statusKey: 'IN_PROGRESS',
+        statusLabel: 'In Progress (44%)'
+      };
+    }
+
+    return result;
   } catch (e) {
     return DEFAULT_ONBOARDING_PROGRESS;
   }
