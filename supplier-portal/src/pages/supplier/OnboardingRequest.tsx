@@ -6033,11 +6033,11 @@ export const OnboardingRequest: React.FC = () => {
                                 Ready for Submission
                               </span>
                               <span className="text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300/80 px-2 py-0.5 rounded-full">
-                                100% verified
+                                100% Complete
                               </span>
                             </div>
                             <p className="text-[11px] text-slate-600 mt-0.5">
-                              All mandatory governance, tax, and banking fields have been verified.
+                              All mandatory governance, tax, and banking fields have been completed.
                             </p>
                           </div>
                         </div>
