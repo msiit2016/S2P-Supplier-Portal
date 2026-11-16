@@ -277,8 +277,8 @@ function resolveActiveContext(route: string, pageContext: Record<string, any>): 
     if (route.includes('/detail') || route.includes('/sync') || pageContext.invitationCode) {
       return {
         type: 'ONBOARDING_DETAIL',
-        id: pageContext.invitationCode || 'INV-NOVATECH-8820',
-        title: `${pageContext.buyerName || 'Buyer Onboarding'}: Step ${pageContext.activeStep || 1} (${pageContext.progressPercent || 89}% Done)`,
+        id: pageContext.invitationCode || 'INV-APEX-2026',
+        title: `${pageContext.buyerName || 'Apex Global Enterprises'}: Step ${pageContext.activeStep || 1} (${pageContext.progressPercent !== undefined ? pageContext.progressPercent : 11}% Done)`,
         route: '/onboarding/detail',
         isDetail: true,
         IconComponent: ShieldCheck,
@@ -623,8 +623,12 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({ inline = f
     ? activeSubagent.name
     : (agenticBriefing.role || activeSubagent.name || 'Executive Operations Supervisor');
 
+  const currentBuyerContext = livePageContext.invitationCode || livePageContext.buyerName || '';
+  const currentSupplierEntity = livePageContext.legalName || '';
+  const dynamicConfigId = `${agenticBriefing.route}:${currentBuyerContext}:${currentSupplierEntity}`;
+
   const config: PageCopilotConfig = {
-    id: agenticBriefing.route,
+    id: dynamicConfigId,
     pageContextName: agenticBriefing.pageContextName,
     contextMetric: agenticBriefing.contextMetric,
     summary: agenticBriefing.urgentBottleneck || agenticBriefing.pageContextName,
@@ -787,12 +791,12 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({ inline = f
 
   // Re-initialize conversation greeting when page context changes
   useEffect(() => {
-    const isRouteChange = lastConfigIdRef.current !== config.id;
+    const isContextChange = lastConfigIdRef.current !== config.id;
     lastConfigIdRef.current = config.id;
 
     setChatMessages(currentMsgs => {
       const hasUserMsg = currentMsgs.some(m => m.sender === 'USER');
-      if (isRouteChange) {
+      if (isContextChange) {
         if (hasUserMsg) {
           const firstUserMsg = currentMsgs.find(m => m.sender === 'USER');
           const sessionTitle = firstUserMsg 
@@ -820,7 +824,7 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({ inline = f
       return currentMsgs;
     });
     setIsHistoryOpen(false);
-  }, [config.id, activeSubagent.id]);
+  }, [config.id, config.initialGreeting, activeSubagent.id]);
 
   // Click outside listener for view, history, and subagent dropdowns
   useEffect(() => {

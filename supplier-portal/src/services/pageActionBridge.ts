@@ -90,6 +90,20 @@ export function broadcastPageContext(context: Record<string, any>): void {
 }
 
 /**
+ * Reset page context completely (clears previous page/buyer artifacts)
+ */
+export function resetPageContext(newContext: Record<string, any> = {}): void {
+  latestPageContext = {
+    ...newContext,
+    _lastUpdated: Date.now()
+  };
+
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent(CONTEXT_EVENT_NAME, { detail: latestPageContext }));
+  }
+}
+
+/**
  * Get current snapshot of active page state
  */
 export function getPageContext(): Record<string, any> {

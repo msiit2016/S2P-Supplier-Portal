@@ -54,8 +54,74 @@ export const OnboardingRequestsList: React.FC = () => {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteCodeInput, setInviteCodeInput] = useState('');
 
-  // Canonical Mock Data for Onboarding Requests
-  const requestCardsData: OnboardingRequestCard[] = [
+  // Canonical Mock Data for Onboarding Requests (Dynamic for new supplier registrations vs demo Acme)
+  const isNew = typeof window !== 'undefined' && localStorage.getItem('is_new_registration') === 'true';
+  const storedMasterRaw = typeof window !== 'undefined' ? localStorage.getItem('verisource_master_profile') : null;
+  const storedMaster = storedMasterRaw ? JSON.parse(storedMasterRaw) : null;
+  const isNonAcme = (storedMaster?.legalName && storedMaster?.legalName !== 'Acme Industrial Tech Inc.') || isNew;
+
+  const requestCardsData: OnboardingRequestCard[] = isNonAcme ? [
+    {
+      id: 'inv-apex-01',
+      orgId: 'buyer-org-1',
+      buyerName: 'Apex Global Enterprises',
+      initials: 'AP',
+      color: 'from-emerald-600 to-teal-700',
+      invitationCode: 'INV-APEX-2026',
+      program: 'Cloud Infrastructure & High-Performance Hardware Supply',
+      category: 'Enterprise Cloud Infrastructure & Hardware',
+      invitedBy: 'Marcus Vance (VP Strategic Procurement)',
+      invitedDate: 'Today',
+      deadline: 'Nov 30, 2026 (20d left)',
+      progressPercent: 11,
+      stageLabel: 'Stage 2 of 5: Form Submission',
+      statusKey: 'IN_PROGRESS',
+      statusLabel: 'In Progress (11%)',
+      statusBadgeBg: 'bg-sky-50 text-sky-800 border-sky-200/80',
+      complianceScope: 'IRS Form W-9, FedACH Remittance, Commercial COI, SOC 2 Type II',
+      ctaText: 'Continue'
+    },
+    {
+      id: 'inv-novatech-02',
+      orgId: 'buyer-org-2',
+      buyerName: 'NovaTech Aerospace & Defense',
+      initials: 'NO',
+      color: 'from-indigo-600 to-blue-700',
+      invitationCode: 'INV-NOVATECH-8820',
+      program: 'Defense Avionics & High-Tolerance Telemetry',
+      category: 'Mission-Critical Aerospace Telemetry',
+      invitedBy: 'Sarah Lin (S2P Vendor Operations)',
+      invitedDate: 'Yesterday',
+      deadline: 'Nov 20, 2026 (10d left)',
+      progressPercent: 0,
+      stageLabel: 'Stage 1 of 5: Registration Completed',
+      statusKey: 'ACTION_REQUIRED',
+      statusLabel: 'Action Needed',
+      statusBadgeBg: 'bg-amber-50 text-amber-800 border-amber-200/80',
+      complianceScope: 'ITAR Defense Attestation, NIST SP 800-171, Mil-Spec Quality Cert',
+      ctaText: 'Start'
+    },
+    {
+      id: 'inv-meridian-03',
+      orgId: 'buyer-org-3',
+      buyerName: 'Meridian Health Network',
+      initials: 'ME',
+      color: 'from-teal-600 to-cyan-700',
+      invitationCode: 'INV-MERIDIAN-4011',
+      program: 'Clinical Diagnostic & Hospital Lab Automation',
+      category: 'Clinical Diagnostic & Lab Automation',
+      invitedBy: 'David Chen (Global Procurement Lead)',
+      invitedDate: '3 days ago',
+      deadline: 'Dec 15, 2026',
+      progressPercent: 0,
+      stageLabel: 'Stage 1 of 5: Registration Completed',
+      statusKey: 'ACTION_REQUIRED',
+      statusLabel: 'Action Needed',
+      statusBadgeBg: 'bg-amber-50 text-amber-800 border-amber-200/80',
+      complianceScope: 'HIPAA Business Associate (BAA), $5M Malpractice COI, FDA QSR',
+      ctaText: 'Start'
+    }
+  ] : [
     {
       id: 'inv-novatech-02',
       orgId: 'buyer-org-2',

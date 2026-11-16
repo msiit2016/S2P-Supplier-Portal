@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext.js';
 import { usePortal } from '../../context/PortalContext.js';
 import { ApiClient } from '../../api/client.js';
 import { createBlankSupplierProfile } from './SupplierMultiProfile.js';
+import { resetPageContext } from '../../services/pageActionBridge.js';
 import { VerisourceLogo } from '../../components/common/VerisourceLogo.js';
 import {
   ShieldCheck,
@@ -301,6 +302,9 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
     setErrorMsg('');
     setTimeout(() => {
       setLoading(false);
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('is_new_registration');
+      }
       switchUser(emailInput);
       navigate('/dashboard');
     }, 600);
@@ -317,12 +321,15 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
     setErrorMsg('');
     setTimeout(() => {
       setLoading(false);
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('is_new_registration');
+      }
       switchUser(emailInput);
       navigate('/dashboard');
     }, 500);
   };
 
-  // Sign Up Handler -> Lands on Public Profile Page in active EDIT mode with clean blank profile
+  // Sign Up Handler -> Lands on Onboarding Detail Page with clean blank profile and Ava in Deck view
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!companyName || !signupEmail) {
@@ -352,7 +359,20 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
       if (typeof window !== 'undefined') {
         localStorage.setItem('verisource_master_profile', JSON.stringify(cleanProfile));
         localStorage.setItem('is_new_registration', 'true');
+        const orgKey = `verisource_profile_${companyName.toLowerCase().replace(/\s+/g, '_')}`;
+        localStorage.setItem(orgKey, JSON.stringify(cleanProfile));
       }
+
+      resetPageContext({
+        legalName: companyName,
+        normalisedName: companyName.toUpperCase(),
+        buyerName: 'Apex Global Enterprises',
+        invitationCode: 'INV-APEX-2026',
+        progressPercent: 11,
+        completedStepsCount: 1,
+        activeStep: 1,
+        isNewRegistration: true
+      });
 
       const res = await ApiClient.registerSupplier({
         legalName: companyName,
@@ -383,7 +403,19 @@ export const SupplierAuth: React.FC<SupplierAuthProps> = ({ initialTab = 'LOGIN'
       if (typeof window !== 'undefined') {
         localStorage.setItem('verisource_master_profile', JSON.stringify(cleanProfile));
         localStorage.setItem('is_new_registration', 'true');
+        const orgKey = `verisource_profile_${companyName.toLowerCase().replace(/\s+/g, '_')}`;
+        localStorage.setItem(orgKey, JSON.stringify(cleanProfile));
       }
+      resetPageContext({
+        legalName: companyName,
+        normalisedName: companyName.toUpperCase(),
+        buyerName: 'Apex Global Enterprises',
+        invitationCode: 'INV-APEX-2026',
+        progressPercent: 11,
+        completedStepsCount: 1,
+        activeStep: 1,
+        isNewRegistration: true
+      });
       switchUser(signupEmail, companyName, signupContactName);
       navigate('/onboarding/detail', { isNewRegistration: true, autoDetail: true, openAva: true });
     } finally {

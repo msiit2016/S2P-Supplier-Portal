@@ -760,6 +760,7 @@ export interface GepCommercialSettings {
   relationshipType?: string;
   supplierRiskType?: 'LOW' | 'MEDIUM' | 'HIGH' | 'EXTREME';
   businessCriticality?: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'ROUTINE';
+  confirmed?: boolean;
 }
 
 

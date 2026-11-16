@@ -897,7 +897,7 @@ export const SupplierHeader: React.FC<SupplierHeaderProps> = ({ onToggleAi }) =>
                     ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shadow-xs font-bold'
                     : 'text-slate-300 hover:text-white hover:bg-slate-800/80 font-medium'
                 }`}
-                title={activeSecondaryLink ? `More Modules • Active: ${activeSecondaryLink.label}` : 'More Modules'}
+                title={moreDropdownOpen ? undefined : (activeSecondaryLink ? `More Modules • Active: ${activeSecondaryLink.label}` : 'More Modules')}
               >
                 <LayoutGrid className={`w-3.5 h-3.5 ${activeSecondaryLink || moreDropdownOpen ? 'text-emerald-400' : 'text-slate-400'} shrink-0`} />
                 <span>More</span>

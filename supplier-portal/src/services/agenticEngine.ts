@@ -162,28 +162,55 @@ How can I assist with your buyer onboarding today?`;
 // 1B. DETAILED ONBOARDING QUESTIONNAIRE AGENT (/onboarding/detail)
 // ==============================================================================
 function synthesizeOnboardingDetailAgent(context: Record<string, any> = {}): AgenticBriefing {
+  let storedMaster: any = null;
+  let isNewReg = false;
+  if (typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem('verisource_master_profile');
+      if (raw) storedMaster = JSON.parse(raw);
+      isNewReg = localStorage.getItem('is_new_registration') === 'true';
+    } catch (e) {}
+  }
+  const isNonAcme = (storedMaster?.legalName && storedMaster?.legalName !== 'Acme Industrial Tech Inc.') || isNewReg;
+
   const buyer = context.buyerName || 'Apex Global Enterprises';
   const code = context.invitationCode || 'INV-APEX-2026';
-  const progress = context.progressPercent ?? 89;
-  const completed = context.completedStepsCount ?? 8;
+  const progress = context.progressPercent !== undefined ? context.progressPercent : (isNonAcme ? 11 : 89);
+  const completed = context.completedStepsCount !== undefined ? context.completedStepsCount : (isNonAcme ? 1 : 8);
   const activeStep = context.activeStep ?? 1;
 
-  // Real page values from live context
-  const legalName = context.legalName || 'Acme Industrial Tech Inc.';
-  const tradeName = context.tradeName || 'Acme Tech Solutions';
-  const formerlyKnownAs = context.formerlyKnownAs || 'Acme Hardware & Sensors';
-  const dunsNumber = context.dunsNumber || '09-842-1928';
+  // Real page values from live context with dynamic fallbacks
+  const legalName = (context.legalName !== undefined && context.legalName !== '')
+    ? context.legalName
+    : (storedMaster?.legalName || (isNonAcme ? 'New Registered Supplier' : 'Acme Industrial Tech Inc.'));
+
+  const tradeName = context.tradeName !== undefined
+    ? context.tradeName
+    : (isNonAcme ? (storedMaster?.tradeName || '') : (storedMaster?.tradeName || 'Acme Tech Solutions'));
+
+  const formerlyKnownAs = context.formerlyKnownAs !== undefined
+    ? context.formerlyKnownAs
+    : (isNonAcme ? (storedMaster?.formerlyKnownAs || '') : 'Acme Hardware & Sensors');
+
+  const hasDuns = context.hasDuns !== undefined
+    ? context.hasDuns
+    : (isNonAcme ? Boolean(storedMaster?.hasDuns && storedMaster?.dunsNumber) : true);
+
+  const dunsNumber = context.dunsNumber !== undefined
+    ? context.dunsNumber
+    : (isNonAcme ? (storedMaster?.dunsNumber || '') : (storedMaster?.dunsNumber || '09-842-1928'));
+
   const partnerStatus = context.partnerStatus || 'INVITED';
   const supplierManager = context.supplierManager || 'Sarah Jenkins (Senior Category Manager - Cloud & IT)';
-  const annualRevenue = context.annualRevenue || '38.4';
+  const annualRevenue = context.annualRevenue || (isNonAcme ? '' : '38.4');
   const reportingCurrency = context.reportingCurrency || 'USD ($) - US Dollar';
-  const registeredAddress = context.registeredAddress || '100 Industrial Parkway, Suite 400, Austin, TX 78701';
-  const website = context.website || 'https://acmeindustrialtech.example.com';
-  const subcategories: string[] = context.subcategories || [
+  const registeredAddress = context.registeredAddress || (isNonAcme ? '' : '100 Industrial Parkway, Suite 400, Austin, TX 78701');
+  const website = context.website || (isNonAcme ? '' : 'https://acmeindustrialtech.example.com');
+  const subcategories: string[] = context.subcategories || (isNonAcme ? [] : [
     '41111900 - Industrial Sensors & Transducers',
     '43222600 - Network and Telemetry Equipment',
     '43232800 - Embedded System Software / Firmware'
-  ];
+  ]);
 
   const stepNames: Record<number, string> = {
     1: 'Basic Details',
@@ -202,14 +229,19 @@ function synthesizeOnboardingDetailAgent(context: Record<string, any> = {}): Age
     ? 'Application submitted to buyer procurement review committee.'
     : `Stage ${activeStep} of 9: ${9 - completed} sections remaining before final submission.`;
 
+  const dbaText = tradeName ? ` (DBA: \`${tradeName}\`)` : '';
+  const dunsText = hasDuns && dunsNumber
+    ? `\`${dunsNumber}\` (Verified • 99.9% Confidence)`
+    : (hasDuns ? 'Pending verification' : 'Not Provided (Optional)');
+
   const greeting = `Hi! I'm **Ava**.
 
 I am actively assisting with your **${buyer}** vendor onboarding questionnaire:
 • **Invitation Code:** \`${code}\`
 • **Progress:** ${progress}% (${completed} of 9 sections finalized)
 • **Current Section:** Step ${activeStep}: ${activeStepName}
-• **Corporate Legal Entity:** \`${legalName}\` (DBA: \`${tradeName}\`)
-• **D&B DUNS:** \`${dunsNumber}\` (Verified • 99.9% Confidence)
+• **Corporate Legal Entity:** \`${legalName}\`${dbaText}
+• **D&B DUNS:** ${dunsText}
 
 You can ask me to retrieve any page details, update form fields in real time, or run OCR on tax certificates. How can I assist you?`;
 
@@ -220,8 +252,8 @@ You can ask me to retrieve any page details, update form fields in real time, or
       icon: FileCheck2
     },
     {
-      label: 'Update Doing Business As',
-      prompt: 'Update Doing Business As to Acme Advanced Sensors',
+      label: tradeName ? 'Update Doing Business As' : 'Set Doing Business As (DBA)',
+      prompt: `Update Doing Business As for ${legalName}`,
       icon: Edit3
     },
     {

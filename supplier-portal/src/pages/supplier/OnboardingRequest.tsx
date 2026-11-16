@@ -906,49 +906,108 @@ export const OnboardingRequest: React.FC = () => {
     selectedBuyerId, 
     setSelectedBuyerId,
     setAiDrawerOpen,
+    aiDrawerOpen,
+    copilotViewMode: globalCopilotViewMode,
     setCopilotViewMode: setGlobalCopilotViewMode 
   } = usePortal();
   const { currentUser } = useAuth();
+  const isAgentDocked = Boolean(aiDrawerOpen && globalCopilotViewMode === 'DOCK');
+
+  const getInitialSupplierMaster = () => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const stored = localStorage.getItem('verisource_master_profile');
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const initProfile = getInitialSupplierMaster();
+  const initIsNewReg = (typeof window !== 'undefined' && localStorage.getItem('is_new_registration') === 'true') || Boolean(routeState?.isNewRegistration);
+  const initIsNonAcme = (initProfile?.legalName && initProfile?.legalName !== 'Acme Industrial Tech Inc.') || initIsNewReg;
 
   // Active Buyer Invitation Context & Multi-Buyer Support
-  const [invitations] = useState<BuyerInvitation[]>([
-    {
-      id: 'inv-apex-01',
-      buyerName: 'Apex Global Enterprises',
-      buyerOrgId: 'buyer-org-1',
-      invitationCode: 'INV-APEX-2026',
-      category: 'Enterprise Cloud Infrastructure & Hardware',
-      invitedBy: 'Marcus Vance, VP Strategic Procurement',
-      invitedDate: 'Jan 14, 2026',
-      status: 'IN_PROGRESS',
-      stage: 'Stage 2: Form Submission',
-      stageNum: 2
-    },
-    {
-      id: 'inv-novatech-02',
-      buyerName: 'NovaTech Aerospace & Defense',
-      buyerOrgId: 'buyer-org-2',
-      invitationCode: 'INV-NOVATECH-8820',
-      category: 'Mission-Critical Aerospace Telemetry',
-      invitedBy: 'Sarah Lin, S2P Vendor Operations',
-      invitedDate: 'Yesterday',
-      status: 'PENDING_INITIATION',
-      stage: 'Stage 1: Registration Completed',
-      stageNum: 1
-    },
-    {
-      id: 'inv-meridian-03',
-      buyerName: 'Meridian Health Network',
-      buyerOrgId: 'buyer-org-3',
-      invitationCode: 'INV-MERIDIAN-4011',
-      category: 'Clinical Diagnostic & Lab Automation',
-      invitedBy: 'David Chen, Global Procurement Lead',
-      invitedDate: '3 days ago',
-      status: 'IN_PROGRESS',
-      stage: 'Stage 3: Buyer Approval',
-      stageNum: 3
+  const [invitations] = useState<BuyerInvitation[]>(() => {
+    if (initIsNewReg) {
+      return [
+        {
+          id: 'inv-apex-01',
+          buyerName: 'Apex Global Enterprises',
+          buyerOrgId: 'buyer-org-1',
+          invitationCode: 'INV-APEX-2026',
+          category: 'Enterprise Cloud Infrastructure & Hardware',
+          invitedBy: 'Marcus Vance, VP Strategic Procurement',
+          invitedDate: 'Today',
+          status: 'IN_PROGRESS',
+          stage: 'Stage 2: Form Submission',
+          stageNum: 2
+        },
+        {
+          id: 'inv-novatech-02',
+          buyerName: 'NovaTech Aerospace & Defense',
+          buyerOrgId: 'buyer-org-2',
+          invitationCode: 'INV-NOVATECH-8820',
+          category: 'Mission-Critical Aerospace Telemetry',
+          invitedBy: 'Sarah Lin, S2P Vendor Operations',
+          invitedDate: 'Yesterday',
+          status: 'PENDING_INITIATION',
+          stage: 'Stage 1: Registration Completed',
+          stageNum: 1
+        },
+        {
+          id: 'inv-meridian-03',
+          buyerName: 'Meridian Health Network',
+          buyerOrgId: 'buyer-org-3',
+          invitationCode: 'INV-MERIDIAN-4011',
+          category: 'Clinical Diagnostic & Lab Automation',
+          invitedBy: 'David Chen, Global Procurement Lead',
+          invitedDate: '3 days ago',
+          status: 'PENDING_INITIATION',
+          stage: 'Stage 1: Registration Completed',
+          stageNum: 1
+        }
+      ];
     }
-  ]);
+    return [
+      {
+        id: 'inv-apex-01',
+        buyerName: 'Apex Global Enterprises',
+        buyerOrgId: 'buyer-org-1',
+        invitationCode: 'INV-APEX-2026',
+        category: 'Enterprise Cloud Infrastructure & Hardware',
+        invitedBy: 'Marcus Vance, VP Strategic Procurement',
+        invitedDate: 'Jan 14, 2026',
+        status: 'IN_PROGRESS',
+        stage: 'Stage 2: Form Submission',
+        stageNum: 2
+      },
+      {
+        id: 'inv-novatech-02',
+        buyerName: 'NovaTech Aerospace & Defense',
+        buyerOrgId: 'buyer-org-2',
+        invitationCode: 'INV-NOVATECH-8820',
+        category: 'Mission-Critical Aerospace Telemetry',
+        invitedBy: 'Sarah Lin, S2P Vendor Operations',
+        invitedDate: 'Yesterday',
+        status: 'PENDING_INITIATION',
+        stage: 'Stage 1: Registration Completed',
+        stageNum: 1
+      },
+      {
+        id: 'inv-meridian-03',
+        buyerName: 'Meridian Health Network',
+        buyerOrgId: 'buyer-org-3',
+        invitationCode: 'INV-MERIDIAN-4011',
+        category: 'Clinical Diagnostic & Lab Automation',
+        invitedBy: 'David Chen, Global Procurement Lead',
+        invitedDate: '3 days ago',
+        status: 'IN_PROGRESS',
+        stage: 'Stage 3: Buyer Approval',
+        stageNum: 3
+      }
+    ];
+  });
   const [activeInvitation, setActiveInvitation] = useState<BuyerInvitation>(invitations[0]);
 
   // View Mode: Defaults to 'DETAIL' since OnboardingRequestsList handles the list view
@@ -957,14 +1016,28 @@ export const OnboardingRequest: React.FC = () => {
   const [listSearch, setListSearch] = useState('');
 
   // Multi-buyer submission and post-submit editing tracking
-  const [submissionStates, setSubmissionStates] = useState<Record<string, { isSubmitted: boolean; isEditing: boolean; submittedAt?: string }>>({
-    'inv-apex-01': { isSubmitted: false, isEditing: false },
-    'inv-novatech-02': { isSubmitted: false, isEditing: false },
-    'inv-meridian-03': { isSubmitted: true, isEditing: false, submittedAt: 'Nov 4, 2026 at 17:44' }
+  const [submissionStates, setSubmissionStates] = useState<Record<string, { isSubmitted: boolean; isEditing: boolean; submittedAt?: string }>>(() => {
+    if (initIsNewReg) {
+      return {
+        'inv-apex-01': { isSubmitted: false, isEditing: false },
+        'inv-novatech-02': { isSubmitted: false, isEditing: false },
+        'inv-meridian-03': { isSubmitted: false, isEditing: false }
+      };
+    }
+    return {
+      'inv-apex-01': { isSubmitted: false, isEditing: false },
+      'inv-novatech-02': { isSubmitted: false, isEditing: false },
+      'inv-meridian-03': { isSubmitted: true, isEditing: false, submittedAt: 'Nov 4, 2026 at 17:44' }
+    };
   });
   
   // Scoped onboarding data store per buyer
-  const [buyerDataMap, setBuyerDataMap] = useState<Record<string, BuyerOnboardingPacket>>(INITIAL_BUYER_PACKETS);
+  const [buyerDataMap, setBuyerDataMap] = useState<Record<string, BuyerOnboardingPacket>>(() => {
+    if (initIsNonAcme) {
+      return {};
+    }
+    return INITIAL_BUYER_PACKETS;
+  });
   
   const currentSub = submissionStates[activeInvitation.id] || { isSubmitted: false, isEditing: false };
   const isSubmitted = currentSub.isSubmitted;
@@ -1009,39 +1082,6 @@ export const OnboardingRequest: React.FC = () => {
   const [syncModalOpen, setSyncModalOpen] = useState(false);
   const [syncSuccessToast, setSyncSuccessToast] = useState<{ count: number; sections: number; message: string } | null>(null);
 
-  const handleSaveDraft = () => {
-    try {
-      const stored = localStorage.getItem('verisource_master_profile');
-      const base = stored ? JSON.parse(stored) : {};
-      const updated = {
-        ...base,
-        legalName,
-        tradeName,
-        formerlyKnownAs,
-        normalisedName,
-        dunsNumber,
-        hasDuns,
-        primaryTaxId: taxId,
-        taxIdMasked: taxId,
-        phoneCountryCode,
-        mobilePhone,
-        phone: `${phoneCountryCode} ${mobilePhone}`.trim(),
-        primaryLanguage,
-        updatedAt: new Date().toISOString()
-      };
-      localStorage.setItem('verisource_master_profile', JSON.stringify(updated));
-      if (updated.legalName && updated.legalName !== 'Acme Industrial Tech Inc.') {
-        const orgKey = `verisource_profile_${updated.legalName.toLowerCase().replace(/\s+/g, '_')}`;
-        localStorage.setItem(orgKey, JSON.stringify(updated));
-      }
-      window.dispatchEvent(new CustomEvent('verisource_master_profile_updated', { detail: updated }));
-    } catch (e) {
-      console.warn('Error saving draft to master profile:', e);
-    }
-    setDraftSavedState(true);
-    setTimeout(() => setDraftSavedState(false), 2500);
-  };
-  
   // Real-time UI highlight state
   const [highlightField, setHighlightField] = useState<string | null>(null);
 
@@ -1054,52 +1094,52 @@ export const OnboardingRequest: React.FC = () => {
   });
 
   // Section 1: Basic Details (Corporate Legal Governance & Hierarchy - GEP Benchmark)
-  const [legalName, setLegalName] = useState('Acme Industrial Tech Inc.');
-  const [formerlyKnownAs, setFormerlyKnownAs] = useState('Acme Hardware & Sensors Corp');
-  const [tradeName, setTradeName] = useState('Acme Tech Solutions');
-  const [normalisedName, setNormalisedName] = useState('ACME INDUSTRIAL TECH INC');
+  const [legalName, setLegalName] = useState(() => initProfile?.legalName || 'Acme Industrial Tech Inc.');
+  const [formerlyKnownAs, setFormerlyKnownAs] = useState(() => initIsNonAcme ? (initProfile?.formerlyKnownAs || '') : 'Acme Hardware & Sensors Corp');
+  const [tradeName, setTradeName] = useState(() => initIsNonAcme ? (initProfile?.tradeName || '') : 'Acme Tech Solutions');
+  const [normalisedName, setNormalisedName] = useState(() => initProfile?.normalisedName || (initProfile?.legalName ? initProfile.legalName.toUpperCase() : 'ACME INDUSTRIAL TECH INC'));
   const [origination] = useState('Verisource');
   const [partnerStatus, setPartnerStatus] = useState<'INVITED' | 'NOT_INVITED' | 'ACTIVE'>('INVITED');
   const [supplierManager, setSupplierManager] = useState('Sarah Jenkins (Senior Category Manager - Cloud & IT)');
-  const [hasDuns, setHasDuns] = useState(true);
-  const [dunsNumber, setDunsNumber] = useState('09-842-1928');
-  const [phoneCountryCode, setPhoneCountryCode] = useState('+1');
-  const [mobilePhone, setMobilePhone] = useState('(512) 555-0199');
-  const [primaryLanguage, setPrimaryLanguage] = useState('English');
-  const [subcategories, setSubcategories] = useState<string[]>([
+  const [hasDuns, setHasDuns] = useState(() => initIsNonAcme ? Boolean(initProfile?.hasDuns && initProfile?.dunsNumber) : true);
+  const [dunsNumber, setDunsNumber] = useState(() => initIsNonAcme ? (initProfile?.dunsNumber || '') : '09-842-1928');
+  const [phoneCountryCode, setPhoneCountryCode] = useState(() => initProfile?.phoneCountryCode || '+1');
+  const [mobilePhone, setMobilePhone] = useState(() => initIsNonAcme ? (initProfile?.mobilePhone || '') : '(512) 555-0199');
+  const [primaryLanguage, setPrimaryLanguage] = useState(() => initProfile?.primaryLanguage || 'English');
+  const [subcategories, setSubcategories] = useState<string[]>(() => initIsNonAcme ? (initProfile?.subcategories || []) : [
     '41111900 - Industrial Sensors & Transducers',
     '43222600 - Network and Telemetry Equipment',
     '43232800 - Embedded System Software / Firmware'
   ]);
-  const [serviceLocations, setServiceLocations] = useState<string[]>([
+  const [serviceLocations, setServiceLocations] = useState<string[]>(() => initIsNonAcme ? (initProfile?.serviceLocations || []) : [
     'Americas (US, CA, MX)',
     'Europe (UK, DE, FR)',
     'Asia-Pacific (SG, JP, AU)'
   ]);
 
   // Section 2: Business Information (Operational & Financial Profile - GEP Benchmark)
-  const [reportingCurrency, setReportingCurrency] = useState('USD ($) - US Dollar');
+  const [reportingCurrency, setReportingCurrency] = useState(() => initProfile?.reportingCurrency || 'USD ($) - US Dollar');
   const currentCurrencySymbol = getCurrencySymbol(reportingCurrency);
-  const [annualRevenue, setAnnualRevenue] = useState('38.4');
-  const [totalEmployees, setTotalEmployees] = useState('280');
-  const [incorporationDate, setIncorporationDate] = useState('2016-12-04');
-  const [registeredAddress, setRegisteredAddress] = useState('100 Industrial Parkway, Suite 400, Austin, TX 78701');
-  const [country, setCountry] = useState('United States (US)');
-  const [website, setWebsite] = useState('https://acmeindustrialtech.example.com');
-  const [descriptionOfServices, setDescriptionOfServices] = useState('Leading provider of enterprise cloud compute nodes, specialized cybersecurity architecture, and high-tolerance industrial sensor hardware engineered for aerospace, defense, and high-volume commercial supply chains (AS9100 Rev D, ITAR compliant, CMMC Level 2).');
-  const [businessUnits, setBusinessUnits] = useState<string[]>([
+  const [annualRevenue, setAnnualRevenue] = useState(() => initIsNonAcme ? (initProfile?.annualRevenue || '') : '38.4');
+  const [totalEmployees, setTotalEmployees] = useState(() => initIsNonAcme ? (initProfile?.totalEmployees || '') : '280');
+  const [incorporationDate, setIncorporationDate] = useState(() => initIsNonAcme ? (initProfile?.incorporationDate || '') : '2016-12-04');
+  const [registeredAddress, setRegisteredAddress] = useState(() => initIsNonAcme ? (initProfile?.registeredAddress || initProfile?.hqAddress || '') : '100 Industrial Parkway, Suite 400, Austin, TX 78701');
+  const [country, setCountry] = useState(() => initProfile?.country || 'United States (US)');
+  const [website, setWebsite] = useState(() => initIsNonAcme ? (initProfile?.website || '') : 'https://acmeindustrialtech.example.com');
+  const [descriptionOfServices, setDescriptionOfServices] = useState(() => initIsNonAcme ? (initProfile?.description || '') : 'Leading provider of enterprise cloud compute nodes, specialized cybersecurity architecture, and high-tolerance industrial sensor hardware engineered for aerospace, defense, and high-volume commercial supply chains (AS9100 Rev D, ITAR compliant, CMMC Level 2).');
+  const [businessUnits, setBusinessUnits] = useState<string[]>(() => initIsNonAcme ? (initProfile?.businessUnits || []) : [
     'Industrial & Discrete Manufacturing',
     'Defense & Aerospace Systems',
     'Enterprise IT & Telemetry Infrastructure'
   ]);
-  const [operatingLanguages, setOperatingLanguages] = useState<string[]>([
+  const [operatingLanguages, setOperatingLanguages] = useState<string[]>(() => initProfile?.operatingLanguages || [
     'English',
     'German',
     'Spanish'
   ]);
 
   // Section 2: Identification Information Grid (GEP Section 2)
-  const [identifications, setIdentifications] = useState<GepIdentificationItem[]>([
+  const [identifications, setIdentifications] = useState<GepIdentificationItem[]>(() => initIsNonAcme ? (initProfile?.identifications || []) : [
     {
       id: 'id-ein-1',
       country: 'United States',
@@ -1151,59 +1191,81 @@ export const OnboardingRequest: React.FC = () => {
   ]);
 
   // Section 3: Contact Directory & Role Mapping (GEP Section 5)
-  const [contacts, setContacts] = useState<GepContactItem[]>([
-    {
-      id: 'cnt-1',
-      firstName: 'Elena',
-      lastName: 'Rostova',
-      email: 'elena@acmeindustrial.com',
-      phone: '+1 (512) 555-0199',
-      isPrimary: true,
-      status: 'REGISTERED',
-      role: 'ACCOUNTS_PAYABLE',
-      orgEntity: 'Corporate Headquarters',
-      serviceLocation: 'Americas'
-    },
-    {
-      id: 'cnt-2',
-      firstName: 'Marcus',
-      lastName: 'Vance',
-      email: 'm.vance@acmeindustrial.com',
-      phone: '+1 (512) 555-0144',
-      isPrimary: false,
-      status: 'REGISTERED',
-      role: 'OPERATIONS',
-      orgEntity: 'Supply Chain Operations',
-      serviceLocation: 'Americas & Europe'
-    },
-    {
-      id: 'cnt-3',
-      firstName: 'Sarah',
-      lastName: 'Chen',
-      email: 'schen@acmeindustrial.com',
-      phone: '+1 (512) 555-0188',
-      isPrimary: false,
-      status: 'REGISTERED',
-      role: 'LEGAL',
-      orgEntity: 'Corporate Legal & Contracts',
-      serviceLocation: 'Global'
-    },
-    {
-      id: 'cnt-4',
-      firstName: 'David',
-      lastName: 'Miller',
-      email: 'dmiller@acmeindustrial.com',
-      phone: '+1 (512) 555-0177',
-      isPrimary: false,
-      status: 'INVITED',
-      role: 'COMPLIANCE',
-      orgEntity: 'Risk, ESG & Safety',
-      serviceLocation: 'Global'
+  const [contacts, setContacts] = useState<GepContactItem[]>(() => {
+    if (initIsNonAcme) {
+      if (initProfile?.contacts && initProfile.contacts.length > 0) return initProfile.contacts;
+      if (initProfile?.gepContacts && initProfile.gepContacts.length > 0) return initProfile.gepContacts;
+      if (initProfile?.businessEmail) {
+        const parts = (initProfile.contactName || 'Authorized Officer').trim().split(' ');
+        return [{
+          id: `cnt-${Date.now()}`,
+          firstName: parts[0] || 'Authorized',
+          lastName: parts.slice(1).join(' ') || 'Officer',
+          email: initProfile.businessEmail,
+          phone: initProfile.phone || initProfile.mobilePhone || '',
+          isPrimary: true,
+          status: 'REGISTERED' as const,
+          role: 'ACCOUNTS_PAYABLE',
+          orgEntity: 'Corporate Headquarters',
+          serviceLocation: 'Americas'
+        }];
+      }
+      return [];
     }
-  ]);
+    return [
+      {
+        id: 'cnt-1',
+        firstName: 'Elena',
+        lastName: 'Rostova',
+        email: 'elena@acmeindustrial.com',
+        phone: '+1 (512) 555-0199',
+        isPrimary: true,
+        status: 'REGISTERED',
+        role: 'ACCOUNTS_PAYABLE',
+        orgEntity: 'Corporate Headquarters',
+        serviceLocation: 'Americas'
+      },
+      {
+        id: 'cnt-2',
+        firstName: 'Marcus',
+        lastName: 'Vance',
+        email: 'm.vance@acmeindustrial.com',
+        phone: '+1 (512) 555-0144',
+        isPrimary: false,
+        status: 'REGISTERED',
+        role: 'OPERATIONS',
+        orgEntity: 'Supply Chain Operations',
+        serviceLocation: 'Americas & Europe'
+      },
+      {
+        id: 'cnt-3',
+        firstName: 'Sarah',
+        lastName: 'Chen',
+        email: 'schen@acmeindustrial.com',
+        phone: '+1 (512) 555-0188',
+        isPrimary: false,
+        status: 'REGISTERED',
+        role: 'LEGAL',
+        orgEntity: 'Corporate Legal & Contracts',
+        serviceLocation: 'Global'
+      },
+      {
+        id: 'cnt-4',
+        firstName: 'David',
+        lastName: 'Miller',
+        email: 'dmiller@acmeindustrial.com',
+        phone: '+1 (512) 555-0177',
+        isPrimary: false,
+        status: 'INVITED',
+        role: 'COMPLIANCE',
+        orgEntity: 'Risk, ESG & Safety',
+        serviceLocation: 'Global'
+      }
+    ];
+  });
 
   // Section 4: Location Architecture (GEP Section 6)
-  const [locations, setLocations] = useState<GepLocationItem[]>([
+  const [locations, setLocations] = useState<GepLocationItem[]>(() => initIsNonAcme ? (initProfile?.locations || []) : [
     {
       id: 'loc-austin-1',
       name: 'Austin Corporate Headquarters & Lab',
@@ -1240,7 +1302,7 @@ export const OnboardingRequest: React.FC = () => {
   ]);
 
   // Section 5: Banking Information (GEP Section 14)
-  const [bankAccounts, setBankAccounts] = useState<GepBankItem[]>([
+  const [bankAccounts, setBankAccounts] = useState<GepBankItem[]>(() => initIsNonAcme ? (initProfile?.gepBankAccounts || initProfile?.bankAccounts || []) : [
     {
       id: 'bnk-chase-1',
       clientBankRefId: 'REF-492100',
@@ -1263,50 +1325,76 @@ export const OnboardingRequest: React.FC = () => {
   ]);
 
   // Legacy fallback states kept for backward compatibility with existing utility functions
-  const [contactName, setContactName] = useState('Elena Rostova');
-  const [contactEmail, setContactEmail] = useState('elena@acmeindustrial.com');
-  const [contactPhone, setContactPhone] = useState('+1 (512) 555-0199');
-  const [contactTitle, setContactTitle] = useState('Director of Enterprise Operations');
-  const [taxId, setTaxId] = useState('84-1294812');
+  const [contactName, setContactName] = useState(() => initIsNonAcme ? (initProfile?.contactName || '') : 'Elena Rostova');
+  const [contactEmail, setContactEmail] = useState(() => initIsNonAcme ? (initProfile?.businessEmail || '') : 'elena@acmeindustrial.com');
+  const [contactPhone, setContactPhone] = useState(() => initIsNonAcme ? (initProfile?.phone || initProfile?.mobilePhone || '') : '+1 (512) 555-0199');
+  const [contactTitle, setContactTitle] = useState(() => initIsNonAcme ? 'Authorized Representative' : 'Director of Enterprise Operations');
+  const [taxId, setTaxId] = useState(() => initIsNonAcme ? (initProfile?.primaryTaxId || initProfile?.taxIdMasked || '') : '84-1294812');
   const [taxEntityType, setTaxEntityType] = useState('Corporation');
-  const [w9Uploaded, setW9Uploaded] = useState(true);
-  const [w9FileName, setW9FileName] = useState('IRS_W9_Verified_2026.pdf');
-  const [bankBeneficiary, setBankBeneficiary] = useState('Acme Industrial Tech Inc.');
-  const [bankName, setBankName] = useState('JPMorgan Chase Bank, N.A.');
-  const [bankRouting, setBankRouting] = useState('021000021');
-  const [bankAccount, setBankAccount] = useState('489201948210');
-  const [bankDocUploaded, setBankDocUploaded] = useState(true);
-  const [bankDocFileName, setBankDocFileName] = useState('Chase_Voided_Check_Verification.pdf');
-  const [insuranceCarrier, setInsuranceCarrier] = useState('Travelers Commercial Casualty');
-  const [insuranceCoverage, setInsuranceCoverage] = useState('$5,000,000 Aggregate');
-  const [hasIsoCert, setHasIsoCert] = useState(true);
-  const [hasSoc2, setHasSoc2] = useState(true);
-  const [esgPolicyAgreed, setEsgPolicyAgreed] = useState(true);
+  const [w9Uploaded, setW9Uploaded] = useState(() => !initIsNonAcme);
+  const [w9FileName, setW9FileName] = useState(() => initIsNonAcme ? '' : 'IRS_W9_Verified_2026.pdf');
+  const [bankBeneficiary, setBankBeneficiary] = useState(() => initIsNonAcme ? (initProfile?.legalName || '') : 'Acme Industrial Tech Inc.');
+  const [bankName, setBankName] = useState(() => initIsNonAcme ? '' : 'JPMorgan Chase Bank, N.A.');
+  const [bankRouting, setBankRouting] = useState(() => initIsNonAcme ? '' : '021000021');
+  const [bankAccount, setBankAccount] = useState(() => initIsNonAcme ? '' : '489201948210');
+  const [bankDocUploaded, setBankDocUploaded] = useState(() => !initIsNonAcme);
+  const [bankDocFileName, setBankDocFileName] = useState(() => initIsNonAcme ? '' : 'Chase_Voided_Check_Verification.pdf');
+  const [insuranceCarrier, setInsuranceCarrier] = useState(() => initIsNonAcme ? '' : 'Travelers Commercial Casualty');
+  const [insuranceCoverage, setInsuranceCoverage] = useState(() => initIsNonAcme ? '' : '$5,000,000 Aggregate');
+  const [hasIsoCert, setHasIsoCert] = useState(() => !initIsNonAcme);
+  const [hasSoc2, setHasSoc2] = useState(() => !initIsNonAcme);
+  const [esgPolicyAgreed, setEsgPolicyAgreed] = useState(() => !initIsNonAcme);
 
   // Section 6: Commercial & P2P Terms (GEP Sections 4, 11, 12, 13)
-  const [commercialSettings, setCommercialSettings] = useState<GepCommercialSettings>({
-    matchingType: '3-Way Match',
-    baselineTriggerDate: 'Goods Receipt Date (GR Date)',
-    paymentTerms: '2/10 Net 30',
-    billingScheduleStructure: 'STANDARD_PO',
-    milestoneBillingProtocol: '30% PO Acceptance, 40% Factory Testing, 30% Site Commissioning',
-    primaryCurrency: 'USD',
-    disbursementMethod: 'ACH / Direct Deposit',
-    ingestionChannel: 'Supplier Portal Upload',
-    eInvoicingFramework: 'PEPPOL Network',
-    eInvoicingEndpointId: '0088:1234567890123',
-    incoTerms: 'FCA - Free Carrier',
-    namedDeliveryPlace: 'Austin Logistics Facility, TX',
-    earlyPaymentDiscount: true,
-    maxDiscountTolerance: 2.0,
-    accelerationWindow: 'Day 10 (Fastest)',
-    relationshipType: 'Strategic Tier-1 Supplier',
-    supplierRiskType: 'LOW',
-    businessCriticality: 'CRITICAL'
+  const [commercialSettings, setCommercialSettings] = useState<GepCommercialSettings>(() => {
+    if (initIsNonAcme) {
+      return initProfile?.commercialSettings || {
+        matchingType: '3-Way Match',
+        baselineTriggerDate: 'Goods Receipt Date (GR Date)',
+        paymentTerms: 'Net 30',
+        billingScheduleStructure: 'STANDARD_PO',
+        milestoneBillingProtocol: 'Standard PO Fulfillment',
+        primaryCurrency: 'USD',
+        disbursementMethod: 'ACH / Direct Deposit',
+        ingestionChannel: 'Supplier Portal Upload',
+        eInvoicingFramework: 'PEPPOL Network',
+        eInvoicingEndpointId: '',
+        incoTerms: 'FCA - Free Carrier',
+        namedDeliveryPlace: '',
+        earlyPaymentDiscount: false,
+        maxDiscountTolerance: 0,
+        accelerationWindow: 'Standard',
+        relationshipType: 'Registered Supplier',
+        supplierRiskType: 'LOW',
+        businessCriticality: 'ROUTINE',
+        confirmed: false
+      };
+    }
+    return {
+      matchingType: '3-Way Match',
+      baselineTriggerDate: 'Goods Receipt Date (GR Date)',
+      paymentTerms: '2/10 Net 30',
+      billingScheduleStructure: 'STANDARD_PO',
+      milestoneBillingProtocol: '30% PO Acceptance, 40% Factory Testing, 30% Site Commissioning',
+      primaryCurrency: 'USD',
+      disbursementMethod: 'ACH / Direct Deposit',
+      ingestionChannel: 'Supplier Portal Upload',
+      eInvoicingFramework: 'PEPPOL Network',
+      eInvoicingEndpointId: '0088:1234567890123',
+      incoTerms: 'FCA - Free Carrier',
+      namedDeliveryPlace: 'Austin Logistics Facility, TX',
+      earlyPaymentDiscount: true,
+      maxDiscountTolerance: 2.0,
+      accelerationWindow: 'Day 10 (Fastest)',
+      relationshipType: 'Strategic Tier-1 Supplier',
+      supplierRiskType: 'LOW',
+      businessCriticality: 'CRITICAL',
+      confirmed: true
+    };
   });
 
   // Section 7: Diversity & Certificate Vault (GEP Sections 8 & 9)
-  const [certificates, setCertificates] = useState<GepCertificateItem[]>([
+  const [certificates, setCertificates] = useState<GepCertificateItem[]>(() => initIsNonAcme ? (initProfile?.gepCertificates || initProfile?.certificates || []) : [
     {
       id: 'cert-coi-1',
       category: 'PROFESSIONAL',
@@ -1358,11 +1446,65 @@ export const OnboardingRequest: React.FC = () => {
   ]);
 
   // Section 8: Review & Final Submit
-  const [signatoryName, setSignatoryName] = useState('Elena Rostova');
-  const [signatoryTitle, setSignatoryTitle] = useState('Vice President of Operations');
+  const [signatoryName, setSignatoryName] = useState(() => initIsNonAcme ? (initProfile?.contactName || '') : 'Elena Rostova');
+  const [signatoryTitle, setSignatoryTitle] = useState(() => initIsNonAcme ? 'Authorized Representative' : 'Vice President of Operations');
   const [declarationAccuracy, setDeclarationAccuracy] = useState(false);
   const [declarationExport, setDeclarationExport] = useState(false);
   const [declarationEthics, setDeclarationEthics] = useState(false);
+
+  const handleSaveDraft = () => {
+    try {
+      const stored = localStorage.getItem('verisource_master_profile');
+      const base = stored ? JSON.parse(stored) : {};
+      const updated = {
+        ...base,
+        legalName,
+        tradeName,
+        formerlyKnownAs,
+        normalisedName,
+        dunsNumber,
+        hasDuns,
+        primaryTaxId: taxId,
+        taxIdMasked: taxId,
+        phoneCountryCode,
+        mobilePhone,
+        phone: `${phoneCountryCode} ${mobilePhone}`.trim(),
+        primaryLanguage,
+        country,
+        registeredAddress,
+        hqAddress: registeredAddress,
+        website,
+        reportingCurrency,
+        annualRevenue,
+        totalEmployees,
+        incorporationDate,
+        description: descriptionOfServices,
+        subcategories,
+        serviceLocations,
+        businessUnits,
+        identifications,
+        contacts,
+        gepContacts: contacts,
+        locations,
+        bankAccounts,
+        gepBankAccounts: bankAccounts,
+        certificates,
+        gepCertificates: certificates,
+        commercialSettings,
+        updatedAt: new Date().toISOString()
+      };
+      localStorage.setItem('verisource_master_profile', JSON.stringify(updated));
+      if (updated.legalName && updated.legalName !== 'Acme Industrial Tech Inc.') {
+        const orgKey = `verisource_profile_${updated.legalName.toLowerCase().replace(/\s+/g, '_')}`;
+        localStorage.setItem(orgKey, JSON.stringify(updated));
+      }
+      window.dispatchEvent(new CustomEvent('verisource_master_profile_updated', { detail: updated }));
+    } catch (e) {
+      console.warn('Error saving draft to master profile:', e);
+    }
+    setDraftSavedState(true);
+    setTimeout(() => setDraftSavedState(false), 2500);
+  };
 
   // Listen for Master Profile updates to keep universal corporate identity in instant sync
   useEffect(() => {
@@ -1374,7 +1516,7 @@ export const OnboardingRequest: React.FC = () => {
         if (stored) {
           const profile = JSON.parse(stored);
           const isNewReg = localStorage.getItem('is_new_registration') === 'true' || routeState?.isNewRegistration;
-          const isNonAcme = profile.legalName && profile.legalName !== 'Acme Industrial Tech Inc.';
+          const isNonAcme = (profile.legalName && profile.legalName !== 'Acme Industrial Tech Inc.') || isNewReg;
 
           if (profile.legalName) setLegalName(profile.legalName);
           if (profile.normalisedName) {
@@ -1383,7 +1525,7 @@ export const OnboardingRequest: React.FC = () => {
             setNormalisedName(profile.legalName.toUpperCase());
           }
 
-          if (isNonAcme || isNewReg) {
+          if (isNonAcme) {
             setTradeName(profile.tradeName || '');
             setFormerlyKnownAs(profile.formerlyKnownAs || '');
             setHasDuns(profile.hasDuns ?? false);
@@ -1400,17 +1542,63 @@ export const OnboardingRequest: React.FC = () => {
             setTotalEmployees(profile.totalEmployees || '');
             setIncorporationDate(profile.incorporationDate || '');
             setDescriptionOfServices(profile.description || '');
-            if (profile.subcategories && profile.subcategories.length > 0) {
-              setSubcategories(profile.subcategories);
+
+            setSubcategories(profile.subcategories || []);
+            setServiceLocations(profile.serviceLocations || []);
+            setBusinessUnits(profile.businessUnits || []);
+            setIdentifications(profile.identifications || []);
+            setLocations(profile.locations || []);
+            setBankAccounts(profile.gepBankAccounts || profile.bankAccounts || []);
+            setCertificates(profile.gepCertificates || profile.certificates || []);
+
+            if (profile.contacts && profile.contacts.length > 0) {
+              setContacts(profile.contacts);
+            } else if (profile.gepContacts && profile.gepContacts.length > 0) {
+              setContacts(profile.gepContacts);
+            } else if (profile.businessEmail) {
+              const parts = (profile.contactName || 'Authorized Officer').trim().split(' ');
+              setContacts([
+                {
+                  id: `cnt-${Date.now()}`,
+                  firstName: parts[0] || 'Authorized',
+                  lastName: parts.slice(1).join(' ') || 'Officer',
+                  email: profile.businessEmail,
+                  phone: profile.phone || profile.mobilePhone || '',
+                  isPrimary: true,
+                  status: 'REGISTERED' as const,
+                  role: 'ACCOUNTS_PAYABLE',
+                  orgEntity: 'Corporate Headquarters',
+                  serviceLocation: 'Americas'
+                }
+              ]);
+            } else {
+              setContacts([]);
             }
-            if (profile.serviceLocations && profile.serviceLocations.length > 0) {
-              setServiceLocations(profile.serviceLocations);
-            }
-            if (profile.businessUnits && profile.businessUnits.length > 0) {
-              setBusinessUnits(profile.businessUnits);
-            }
-            if (profile.identifications && profile.identifications.length > 0) {
-              setIdentifications(profile.identifications);
+
+            if (profile.commercialSettings) {
+              setCommercialSettings(profile.commercialSettings);
+            } else {
+              setCommercialSettings({
+                matchingType: '3-Way Match',
+                baselineTriggerDate: 'Goods Receipt Date (GR Date)',
+                paymentTerms: 'Net 30',
+                billingScheduleStructure: 'STANDARD_PO',
+                milestoneBillingProtocol: 'Standard PO Fulfillment',
+                primaryCurrency: 'USD',
+                disbursementMethod: 'ACH / Direct Deposit',
+                ingestionChannel: 'Supplier Portal Upload',
+                eInvoicingFramework: 'PEPPOL Network',
+                eInvoicingEndpointId: '',
+                incoTerms: 'FCA - Free Carrier',
+                namedDeliveryPlace: '',
+                earlyPaymentDiscount: false,
+                maxDiscountTolerance: 0,
+                accelerationWindow: 'Standard',
+                relationshipType: 'Registered Supplier',
+                supplierRiskType: 'LOW',
+                businessCriticality: 'ROUTINE',
+                confirmed: false
+              });
             }
           } else {
             // Acme Demo profile
@@ -1717,14 +1905,60 @@ export const OnboardingRequest: React.FC = () => {
     }
   }, [chatMessages, isAgentThinking]);
 
+  const isNewRegActive = (typeof window !== 'undefined' && localStorage.getItem('is_new_registration') === 'true') || Boolean(routeState?.isNewRegistration);
+  const isNonAcmeActive = (legalName && legalName !== 'Acme Industrial Tech Inc.') || isNewRegActive;
+
+  const getFallbackPacket = (invId: string): BuyerOnboardingPacket => {
+    if (isNonAcmeActive) {
+      return {
+        partnerStatus: 'INVITED',
+        supplierManager: 'Procurement Category Lead',
+        subcategories: [],
+        serviceLocations: [],
+        descriptionOfServices: '',
+        businessUnits: [],
+        contacts: contacts.length > 0 ? [contacts[0]] : [],
+        locations: [],
+        bankAccounts: [],
+        commercialSettings: {
+          matchingType: '3-Way Match',
+          baselineTriggerDate: 'Goods Receipt Date (GR Date)',
+          paymentTerms: 'Net 30',
+          billingScheduleStructure: 'STANDARD_PO',
+          milestoneBillingProtocol: 'Standard PO Fulfillment',
+          primaryCurrency: 'USD',
+          disbursementMethod: 'ACH / Direct Deposit',
+          ingestionChannel: 'Supplier Portal Upload',
+          eInvoicingFramework: 'PEPPOL Network',
+          eInvoicingEndpointId: '',
+          incoTerms: 'FCA - Free Carrier',
+          namedDeliveryPlace: '',
+          earlyPaymentDiscount: false,
+          maxDiscountTolerance: 0,
+          accelerationWindow: 'Standard',
+          relationshipType: 'Registered Supplier',
+          supplierRiskType: 'LOW',
+          businessCriticality: 'ROUTINE',
+          confirmed: false
+        },
+        certificates: [],
+        isSubmitted: false,
+        isEditing: false
+      };
+    }
+    return INITIAL_BUYER_PACKETS[invId] || INITIAL_BUYER_PACKETS['inv-apex-01'];
+  };
+
   // Check section completion (9 GEP Quantum Modules)
   const isStep1Done = Boolean(legalName && (!hasDuns || dunsNumber) && partnerStatus && supplierManager);
   const isStep2Done = Boolean(annualRevenue && totalEmployees && country && registeredAddress && reportingCurrency);
   const isStep3Done = identifications.length > 0;
-  const isStep4Done = contacts.length > 0;
+  const isStep4Done = contacts.length > 0 && (!isNonAcmeActive || contacts.some(c => c.phone && c.email));
   const isStep5Done = locations.length > 0;
   const isStep6Done = bankAccounts.length > 0;
-  const isStep7Done = Boolean(commercialSettings.matchingType && commercialSettings.paymentTerms);
+  const isStep7Done = isNonAcmeActive 
+    ? Boolean(commercialSettings.confirmed && commercialSettings.paymentTerms)
+    : Boolean(commercialSettings.matchingType && commercialSettings.paymentTerms);
   const isStep8Done = certificates.length > 0;
   const allDeclarationsAgreed = true;
   const isSubmitReady = true;
@@ -2675,7 +2909,7 @@ export const OnboardingRequest: React.FC = () => {
       setBuyerDataMap(prev => ({
         ...prev,
         [activeInvitation.id]: {
-          ...(prev[activeInvitation.id] || INITIAL_BUYER_PACKETS[activeInvitation.id] || INITIAL_BUYER_PACKETS['inv-apex-01']),
+          ...(prev[activeInvitation.id] || getFallbackPacket(activeInvitation.id)),
           isSubmitted: true,
           isEditing: false,
           submittedAt: timeStr
@@ -2702,7 +2936,7 @@ export const OnboardingRequest: React.FC = () => {
     setBuyerDataMap(prev => ({
       ...prev,
       [activeInvitation.id]: {
-        ...(prev[activeInvitation.id] || INITIAL_BUYER_PACKETS[activeInvitation.id] || INITIAL_BUYER_PACKETS['inv-apex-01']),
+        ...(prev[activeInvitation.id] || getFallbackPacket(activeInvitation.id)),
         isEditing: true
       }
     }));
@@ -2719,7 +2953,7 @@ export const OnboardingRequest: React.FC = () => {
     setBuyerDataMap(prev => ({
       ...prev,
       [activeInvitation.id]: {
-        ...(prev[activeInvitation.id] || INITIAL_BUYER_PACKETS[activeInvitation.id] || INITIAL_BUYER_PACKETS['inv-apex-01']),
+        ...(prev[activeInvitation.id] || getFallbackPacket(activeInvitation.id)),
         isEditing: false
       }
     }));
@@ -2822,7 +3056,43 @@ export const OnboardingRequest: React.FC = () => {
     }));
 
     // 2. Load the next buyer's specific onboarding packet
-    const nextPacket = buyerDataMap[inv.id] || INITIAL_BUYER_PACKETS[inv.id] || INITIAL_BUYER_PACKETS['inv-apex-01'];
+    const defaultCleanPacket: BuyerOnboardingPacket = {
+      partnerStatus: 'INVITED',
+      supplierManager: inv.invitedBy || 'Procurement Operations Lead',
+      subcategories: [],
+      serviceLocations: [],
+      descriptionOfServices: '',
+      businessUnits: [],
+      contacts: contacts.length > 0 ? [contacts[0]] : [],
+      locations: [],
+      bankAccounts: [],
+      commercialSettings: {
+        matchingType: '3-Way Match',
+        baselineTriggerDate: 'Goods Receipt Date (GR Date)',
+        paymentTerms: 'Net 30',
+        billingScheduleStructure: 'STANDARD_PO',
+        milestoneBillingProtocol: 'Standard PO Fulfillment',
+        primaryCurrency: 'USD',
+        disbursementMethod: 'ACH / Direct Deposit',
+        ingestionChannel: 'Supplier Portal Upload',
+        eInvoicingFramework: 'PEPPOL Network',
+        eInvoicingEndpointId: '',
+        incoTerms: 'FCA - Free Carrier',
+        namedDeliveryPlace: '',
+        earlyPaymentDiscount: false,
+        maxDiscountTolerance: 0,
+        accelerationWindow: 'Standard',
+        relationshipType: 'Registered Supplier',
+        supplierRiskType: 'LOW',
+        businessCriticality: 'ROUTINE',
+        confirmed: false
+      },
+      certificates: [],
+      isSubmitted: false,
+      isEditing: false
+    };
+
+    const nextPacket = buyerDataMap[inv.id] || (isNonAcmeActive ? defaultCleanPacket : (INITIAL_BUYER_PACKETS[inv.id] || INITIAL_BUYER_PACKETS['inv-apex-01']));
     
     setPartnerStatus(nextPacket.partnerStatus);
     setSupplierManager(nextPacket.supplierManager);
@@ -2841,11 +3111,20 @@ export const OnboardingRequest: React.FC = () => {
       setBankRouting(nextPacket.bankAccounts[0].routingNumber);
       setBankAccount(nextPacket.bankAccounts[0].accountNumberFull || nextPacket.bankAccounts[0].accountNumberMasked);
       setBankDocFileName(nextPacket.bankAccounts[0].docFileName || 'Remittance_Letter.pdf');
+    } else {
+      setBankName('');
+      setBankRouting('');
+      setBankAccount('');
+      setBankDocFileName('');
     }
     if (nextPacket.contacts[0]) {
       setContactName(`${nextPacket.contacts[0].firstName} ${nextPacket.contacts[0].lastName}`);
       setContactEmail(nextPacket.contacts[0].email);
       setContactPhone(nextPacket.contacts[0].phone);
+    } else {
+      setContactName('');
+      setContactEmail('');
+      setContactPhone('');
     }
 
     setSubmissionStates(prev => ({
@@ -3032,7 +3311,7 @@ export const OnboardingRequest: React.FC = () => {
 
         // Update scoped packet storage
         setBuyerDataMap(prev => {
-          const cur = prev[activeInvitation.id] || INITIAL_BUYER_PACKETS[activeInvitation.id];
+          const cur = prev[activeInvitation.id] || getFallbackPacket(activeInvitation.id);
           return {
             ...prev,
             [activeInvitation.id]: {
@@ -4414,10 +4693,10 @@ export const OnboardingRequest: React.FC = () => {
                 <div className="border border-slate-200 rounded-xl bg-white shadow-2xs p-4 sm:p-5 lg:p-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 sm:gap-4.5">
                     {/* Legal Company Name */}
-                    <div className="space-y-1.5 lg:col-span-2">
-                      <div className="flex items-center justify-between min-h-[20px] h-5">
-                        <div className="flex items-center gap-1.5">
-                          <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
+                    <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                      <div className="flex items-center justify-between min-h-[20px]">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <label className="text-xs font-semibold text-slate-700 truncate" title="Legal Company Name">
                             Legal Company Name <span className="text-red-500">*</span>
                           </label>
                           <AiFilledBadge isAiFilled={aiFilledFields.legalName} fieldName="Legal Company Name" />
@@ -4445,9 +4724,9 @@ export const OnboardingRequest: React.FC = () => {
                     </div>
 
                     {/* Doing Business As (Trade Name) */}
-                    <div className="space-y-1.5 lg:col-span-2">
-                      <div className="flex items-center justify-between min-h-[20px] h-5">
-                        <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
+                    <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                      <div className="flex items-center justify-between min-h-[20px]">
+                        <label className="text-xs font-semibold text-slate-700 truncate" title="Doing Business As">
                           Doing Business As
                         </label>
                       </div>
@@ -4468,9 +4747,9 @@ export const OnboardingRequest: React.FC = () => {
                     </div>
 
                     {/* Formally Known As / Formerly Known As */}
-                    <div className="space-y-1.5 lg:col-span-2">
-                      <div className="flex items-center justify-between min-h-[20px] h-5">
-                        <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
+                    <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                      <div className="flex items-center justify-between min-h-[20px]">
+                        <label className="text-xs font-semibold text-slate-700 truncate" title="Formally Known As">
                           Formally Known As
                         </label>
                       </div>
@@ -4491,9 +4770,9 @@ export const OnboardingRequest: React.FC = () => {
                     </div>
 
                     {/* Origination */}
-                    <div className="space-y-1.5 lg:col-span-2">
-                      <div className="flex items-center justify-between min-h-[20px] h-5">
-                        <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
+                    <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                      <div className="flex items-center justify-between min-h-[20px]">
+                        <label className="text-xs font-semibold text-slate-700 truncate" title="Origination">
                           Origination
                         </label>
                       </div>
@@ -4506,9 +4785,9 @@ export const OnboardingRequest: React.FC = () => {
                     </div>
 
                     {/* Partner Status */}
-                    <div className="space-y-1.5 lg:col-span-2">
-                      <div className="flex items-center justify-between min-h-[20px] h-5">
-                        <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
+                    <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                      <div className="flex items-center justify-between min-h-[20px]">
+                        <label className="text-xs font-semibold text-slate-700 truncate" title="Partner Status">
                           Partner Status <span className="text-red-500">*</span>
                         </label>
                       </div>
@@ -4522,9 +4801,9 @@ export const OnboardingRequest: React.FC = () => {
                     </div>
 
                     {/* Supplier Manager Name */}
-                    <div className="space-y-1.5 lg:col-span-2">
-                      <div className="flex items-center justify-between min-h-[20px] h-5">
-                        <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
+                    <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                      <div className="flex items-center justify-between min-h-[20px]">
+                        <label className="text-xs font-semibold text-slate-700 truncate" title="Supplier Manager Name">
                           Supplier Manager Name <span className="text-red-500">*</span>
                         </label>
                       </div>
@@ -4539,9 +4818,9 @@ export const OnboardingRequest: React.FC = () => {
                     </div>
 
                     {/* Does company have DUNS */}
-                    <div className="space-y-1.5 lg:col-span-2">
-                      <div className="flex items-center justify-between min-h-[20px] h-5">
-                        <label className="text-xs font-semibold text-slate-700 whitespace-nowrap" title="Does your company have DUNS Numbers?">
+                    <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                      <div className="flex items-center justify-between min-h-[20px]">
+                        <label className="text-xs font-semibold text-slate-700 truncate" title="Does your company have DUNS Numbers?">
                           Has D&B DUNS Number?
                         </label>
                       </div>
@@ -4556,9 +4835,9 @@ export const OnboardingRequest: React.FC = () => {
 
                     {/* DUNS Number */}
                     {hasDuns && (
-                      <div className="space-y-1.5 lg:col-span-2">
-                        <div className="flex items-center justify-between min-h-[20px] h-5">
-                          <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
+                      <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                        <div className="flex items-center justify-between min-h-[20px]">
+                          <label className="text-xs font-semibold text-slate-700 truncate" title="DUNS Number">
                             DUNS Number <span className="text-red-500">*</span>
                           </label>
                         </div>
@@ -4582,9 +4861,9 @@ export const OnboardingRequest: React.FC = () => {
                     )}
 
                     {/* Normalised Corporate Name */}
-                    <div className={`space-y-1.5 ${hasDuns ? 'lg:col-span-2' : 'lg:col-span-4'}`}>
-                      <div className="flex items-center justify-between min-h-[20px] h-5">
-                        <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
+                    <div className={`space-y-1.5 ${hasDuns ? (isAgentDocked ? 'lg:col-span-6' : 'lg:col-span-2') : (isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-4')}`}>
+                      <div className="flex items-center justify-between min-h-[20px]">
+                        <label className="text-xs font-semibold text-slate-700 truncate" title="Normalised Corporate Name">
                           Normalised Corporate Name
                         </label>
                       </div>
@@ -4598,10 +4877,10 @@ export const OnboardingRequest: React.FC = () => {
                     </div>
 
                     {/* Primary Tax Identification Number */}
-                    <div className="space-y-1.5 lg:col-span-2">
-                      <div className="flex items-center justify-between min-h-[20px] h-5">
-                        <div className="flex items-center gap-1.5">
-                          <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
+                    <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                      <div className="flex items-center justify-between min-h-[20px]">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <label className="text-xs font-semibold text-slate-700 truncate" title="Primary Tax Identification Number">
                             Primary Tax Identification Number <span className="text-red-500">*</span>
                           </label>
                           <AiFilledBadge isAiFilled={aiFilledFields.taxId} fieldName="Primary Tax ID" />
@@ -4617,7 +4896,7 @@ export const OnboardingRequest: React.FC = () => {
                             if (aiFilledFields.taxId) setAiFilledFields(prev => ({ ...prev, taxId: false }));
                           }}
                           placeholder="e.g. 84-1294812"
-                          className={`w-full pl-3 pr-24 py-2 text-xs font-mono rounded-lg border transition ${
+                          className={`w-full pl-3 pr-28 py-2 text-xs font-mono rounded-lg border transition ${
                             isFormReadOnly
                               ? 'bg-slate-50 text-slate-700 border-slate-200 cursor-default font-semibold'
                               : highlightField === 'taxId'
@@ -4626,8 +4905,8 @@ export const OnboardingRequest: React.FC = () => {
                           }`}
                         />
                         <div className="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none">
-                          <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/80 flex items-center gap-1">
-                            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                          <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/80 flex items-center gap-1 shrink-0 whitespace-nowrap shadow-2xs">
+                            <CheckCircle2 className="w-3 h-3 text-emerald-600 shrink-0" />
                             <span>TIN Verified</span>
                           </span>
                         </div>
@@ -4635,18 +4914,18 @@ export const OnboardingRequest: React.FC = () => {
                     </div>
 
                     {/* Mobile Phone Number with Country Code */}
-                    <div className="space-y-1.5 lg:col-span-2">
-                      <div className="flex items-center justify-between min-h-[20px] h-5">
-                        <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
+                    <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                      <div className="flex items-center justify-between min-h-[20px]">
+                        <label className="text-xs font-semibold text-slate-700 truncate" title="Mobile Phone Number">
                           Mobile Phone Number <span className="text-red-500">*</span>
                         </label>
                       </div>
-                      <div className="flex gap-1.5">
+                      <div className="flex gap-1.5 sm:gap-2 min-w-0">
                         <select
                           disabled={isFormReadOnly}
                           value={phoneCountryCode}
                           onChange={(e) => setPhoneCountryCode(e.target.value)}
-                          className="w-24 px-2 py-2 text-xs rounded-lg border bg-slate-50 text-slate-800 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 font-medium shrink-0 cursor-pointer disabled:cursor-default"
+                          className="w-20 sm:w-24 px-2 py-2 text-xs rounded-lg border bg-slate-50 text-slate-800 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 font-medium shrink-0 cursor-pointer disabled:cursor-default"
                         >
                           {AVAILABLE_PHONE_COUNTRY_CODES.map(c => (
                             <option key={c.code} value={c.code}>{c.flag} {c.code}</option>
@@ -4658,7 +4937,7 @@ export const OnboardingRequest: React.FC = () => {
                           value={mobilePhone}
                           onChange={(e) => setMobilePhone(e.target.value)}
                           placeholder="(555) 000-0000"
-                          className={`flex-1 px-3 py-2 text-xs font-medium rounded-lg border transition ${
+                          className={`flex-1 min-w-0 px-3 py-2 text-xs font-medium rounded-lg border transition ${
                             isFormReadOnly
                               ? 'bg-slate-50 text-slate-700 border-slate-200 cursor-default'
                               : 'bg-white text-slate-900 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600'
@@ -4668,9 +4947,9 @@ export const OnboardingRequest: React.FC = () => {
                     </div>
 
                     {/* Primary Language */}
-                    <div className="space-y-1.5 lg:col-span-2">
-                      <div className="flex items-center justify-between min-h-[20px] h-5">
-                        <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
+                    <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-6' : 'lg:col-span-2'}`}>
+                      <div className="flex items-center justify-between min-h-[20px]">
+                        <label className="text-xs font-semibold text-slate-700 truncate" title="Primary Language">
                           Primary Language <span className="text-red-500">*</span>
                         </label>
                       </div>

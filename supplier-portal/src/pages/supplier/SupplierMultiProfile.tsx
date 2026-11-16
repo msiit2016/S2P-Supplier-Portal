@@ -1060,7 +1060,8 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
   initialTab
 }) => {
   const { currentUser, switchUser } = useAuth();
-  const { navigate, routeState, openBuyerWorkspace } = usePortal();
+  const { navigate, routeState, openBuyerWorkspace, aiDrawerOpen, copilotViewMode } = usePortal();
+  const isAgentDocked = Boolean(aiDrawerOpen && copilotViewMode === 'DOCK');
 
   // If viewing via dedicated public route or unauthenticated, force view-only mode
   const isEnforcedPublic = isPublicViewProp || (!currentUser);
@@ -2359,10 +2360,10 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
           <div className="border border-slate-200 rounded-xl bg-white shadow-2xs p-4 sm:p-5 lg:p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 sm:gap-4.5">
               {/* Legal Company Name */}
-              <div className="space-y-1.5 lg:col-span-2">
-                <div className="flex items-center justify-between min-h-[20px] h-5">
-                  <div className="flex items-center gap-1.5">
-                    <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
+              <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                <div className="flex items-center justify-between min-h-[20px]">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <label className="text-xs font-semibold text-slate-700 truncate" title="Legal Company Name">
                       Legal Company Name <span className="text-red-500">*</span>
                     </label>
                     <AiFilledBadge isAiFilled={true} fieldName="Legal Company Name" />
@@ -2383,9 +2384,9 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
               </div>
 
               {/* Doing Business As (Trade Name) */}
-              <div className="space-y-1.5 lg:col-span-2">
-                <div className="flex items-center justify-between min-h-[20px] h-5">
-                  <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
+              <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                <div className="flex items-center justify-between min-h-[20px]">
+                  <label className="text-xs font-semibold text-slate-700 truncate" title="Doing Business As">
                     Doing Business As
                   </label>
                 </div>
@@ -2404,9 +2405,9 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
               </div>
 
               {/* Formally Known As */}
-              <div className="space-y-1.5 lg:col-span-2">
-                <div className="flex items-center justify-between min-h-[20px] h-5">
-                  <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
+              <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                <div className="flex items-center justify-between min-h-[20px]">
+                  <label className="text-xs font-semibold text-slate-700 truncate" title="Formally Known As">
                     Formally Known As
                   </label>
                 </div>
@@ -2425,9 +2426,9 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
               </div>
 
               {/* Origination */}
-              <div className="space-y-1.5 lg:col-span-2">
-                <div className="flex items-center justify-between min-h-[20px] h-5">
-                  <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
+              <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                <div className="flex items-center justify-between min-h-[20px]">
+                  <label className="text-xs font-semibold text-slate-700 truncate" title="Origination">
                     Origination
                   </label>
                 </div>
@@ -2440,9 +2441,9 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
               </div>
 
               {/* Partner Status */}
-              <div className="space-y-1.5 lg:col-span-2">
-                <div className="flex items-center justify-between min-h-[20px] h-5">
-                  <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
+              <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                <div className="flex items-center justify-between min-h-[20px]">
+                  <label className="text-xs font-semibold text-slate-700 truncate" title="Partner Status">
                     Partner Status <span className="text-red-500">*</span>
                   </label>
                 </div>
@@ -2456,9 +2457,9 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
               </div>
 
               {/* Supplier Manager Name */}
-              <div className="space-y-1.5 lg:col-span-2">
-                <div className="flex items-center justify-between min-h-[20px] h-5">
-                  <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
+              <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                <div className="flex items-center justify-between min-h-[20px]">
+                  <label className="text-xs font-semibold text-slate-700 truncate" title="Supplier Manager Name">
                     Supplier Manager Name <span className="text-red-500">*</span>
                   </label>
                 </div>
@@ -2473,9 +2474,9 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
               </div>
 
               {/* Does company have DUNS */}
-              <div className="space-y-1.5 lg:col-span-2">
-                <div className="flex items-center justify-between min-h-[20px] h-5">
-                  <label className="text-xs font-semibold text-slate-700 whitespace-nowrap" title="Does your company have DUNS Numbers?">
+              <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                <div className="flex items-center justify-between min-h-[20px]">
+                  <label className="text-xs font-semibold text-slate-700 truncate" title="Does your company have DUNS Numbers?">
                     Has D&B DUNS Number?
                   </label>
                 </div>
@@ -2490,9 +2491,9 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
 
               {/* DUNS Number */}
               {profile.hasDuns !== false && (
-                <div className="space-y-1.5 lg:col-span-2">
-                  <div className="flex items-center justify-between min-h-[20px] h-5">
-                    <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
+                <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                  <div className="flex items-center justify-between min-h-[20px]">
+                    <label className="text-xs font-semibold text-slate-700 truncate" title="DUNS Number">
                       DUNS Number <span className="text-red-500">*</span>
                     </label>
                   </div>
@@ -2521,9 +2522,13 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
               )}
 
               {/* Normalised Corporate Name */}
-              <div className={`space-y-1.5 ${profile.hasDuns !== false ? 'lg:col-span-2' : 'lg:col-span-4'}`}>
-                <div className="flex items-center justify-between min-h-[20px] h-5">
-                  <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
+              <div className={`space-y-1.5 ${
+                isAgentDocked 
+                  ? (profile.hasDuns !== false ? 'lg:col-span-6' : 'lg:col-span-3') 
+                  : (profile.hasDuns !== false ? 'lg:col-span-2' : 'lg:col-span-4')
+              }`}>
+                <div className="flex items-center justify-between min-h-[20px]">
+                  <label className="text-xs font-semibold text-slate-700 truncate" title="Normalised Corporate Name">
                     Normalised Corporate Name
                   </label>
                 </div>
@@ -2537,9 +2542,9 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
               </div>
 
               {/* Primary Tax Identification Number */}
-              <div className="space-y-1.5 lg:col-span-2">
-                <div className="flex items-center justify-between min-h-[20px] h-5">
-                  <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
+              <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                <div className="flex items-center justify-between min-h-[20px]">
+                  <label className="text-xs font-semibold text-slate-700 truncate" title="Primary Tax Identification Number">
                     Primary Tax Identification Number <span className="text-red-500">*</span>
                   </label>
                 </div>
@@ -2553,15 +2558,15 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
                       updateFormField('taxIdMasked', e.target.value);
                     }}
                     placeholder="e.g. 84-1294812"
-                    className={`w-full px-3 py-2 text-xs font-mono rounded-lg border transition ${
+                    className={`w-full pl-3 pr-28 py-2 text-xs font-mono rounded-lg border transition ${
                       !isEditing
                         ? 'bg-slate-50 text-slate-700 border-slate-200 cursor-default font-semibold'
                         : 'bg-white text-slate-900 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600'
                     }`}
                   />
                   {(profile.primaryTaxId || profile.taxIdMasked) && (
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
-                      <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 shrink-0 whitespace-nowrap shadow-2xs">
+                      <ShieldCheck className="w-3 h-3 text-emerald-600 shrink-0" />
                       <span>TIN Verified</span>
                     </div>
                   )}
@@ -2569,18 +2574,18 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
               </div>
 
               {/* Mobile Phone Number */}
-              <div className="space-y-1.5 lg:col-span-2">
-                <div className="flex items-center justify-between min-h-[20px] h-5">
-                  <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
+              <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                <div className="flex items-center justify-between min-h-[20px]">
+                  <label className="text-xs font-semibold text-slate-700 truncate" title="Mobile Phone Number">
                     Mobile Phone Number <span className="text-red-500">*</span>
                   </label>
                 </div>
-                <div className="flex gap-1.5">
+                <div className="flex gap-1.5 sm:gap-2 min-w-0">
                   <select
                     disabled={!isEditing}
                     value={profile.phoneCountryCode || '+1'}
                     onChange={(e) => updateFormField('phoneCountryCode', e.target.value)}
-                    className="w-24 px-2 py-2 text-xs rounded-lg border bg-slate-50 text-slate-800 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 font-medium shrink-0 cursor-pointer disabled:cursor-default"
+                    className="w-20 sm:w-24 px-2 py-2 text-xs rounded-lg border bg-slate-50 text-slate-800 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 font-medium shrink-0 cursor-pointer disabled:cursor-default"
                   >
                     {AVAILABLE_PHONE_COUNTRY_CODES.map((c) => (
                       <option key={c.code} value={c.code}>
@@ -2594,7 +2599,7 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
                     value={profile.mobilePhone || ''}
                     onChange={(e) => updateFormField('mobilePhone', e.target.value)}
                     placeholder="(512) 555-0199"
-                    className={`flex-1 px-3 py-2 text-xs rounded-lg border transition ${
+                    className={`flex-1 min-w-0 px-3 py-2 text-xs rounded-lg border transition ${
                       !isEditing
                         ? 'bg-slate-50 text-slate-700 border-slate-200 cursor-default font-semibold'
                         : 'bg-white text-slate-900 border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600'
@@ -2604,9 +2609,9 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
               </div>
 
               {/* Primary Language */}
-              <div className="space-y-1.5 lg:col-span-2">
-                <div className="flex items-center justify-between min-h-[20px] h-5">
-                  <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
+              <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-6' : 'lg:col-span-2'}`}>
+                <div className="flex items-center justify-between min-h-[20px]">
+                  <label className="text-xs font-semibold text-slate-700 truncate" title="Primary Language">
                     Primary Language <span className="text-red-500">*</span>
                   </label>
                 </div>
