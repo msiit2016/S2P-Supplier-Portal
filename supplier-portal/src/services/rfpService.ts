@@ -213,6 +213,134 @@ export const INITIAL_SOURCING_EVENTS: SourcingEvent[] = [
         aiDrafted: false
       }
     ]
+  },
+  {
+    id: 'src-apex-02',
+    eventNumber: 'BID-2026-APEX-17',
+    type: 'BID',
+    title: 'Edge AI Inferencing Acceleration Nodes & Tensor Gateways',
+    buyerName: 'Apex Global Enterprises',
+    buyerOrgId: 'buyer-org-1',
+    category: 'Enterprise Edge Compute & Acceleration',
+    estimatedValue: 430000,
+    publishedDate: 'Nov 02, 2026',
+    submissionDeadline: 'Nov 28, 2026',
+    status: 'INVITED',
+    description: 'Procurement for distributed low-latency edge AI nodes with integrated tensor processing units for regional data distribution centers.',
+    lineItems: [
+      { itemNumber: 'ACM-EDGE-AI', description: 'Rackmount Tensor Processing Unit 16-Core Node', quantity: 30, uom: 'EA', targetPrice: 12000, bidUnitPrice: 11500 },
+      { itemNumber: 'ACM-SFP-100G', description: '100Gbps Low-Latency Optical Transceiver Module', quantity: 60, uom: 'EA', targetPrice: 1200, bidUnitPrice: 1100 }
+    ],
+    technicalQuestions: [
+      {
+        id: 'q-apex-edge',
+        question: 'Confirm support for PCIe Gen 5 and ambient thermal tolerances up to 45C.',
+        answer: '',
+        aiDrafted: false
+      }
+    ]
+  },
+  {
+    id: 'src-nova-03',
+    eventNumber: 'RFP-2026-NOVA-21',
+    type: 'RFP',
+    title: 'Cryogenic Liquid Flow Transducers & Propulsion Sensor Array',
+    buyerName: 'NovaTech Aerospace & Defense',
+    buyerOrgId: 'buyer-org-2',
+    category: 'Aerospace & Propulsion Instrumentation',
+    estimatedValue: 680000,
+    publishedDate: 'Nov 04, 2026',
+    submissionDeadline: 'Dec 05, 2026',
+    status: 'IN_PROGRESS',
+    description: 'Sourcing ultra-low temperature transducers rated for liquid oxygen and liquid hydrogen manifolds with mil-spec hermetic seals.',
+    lineItems: [
+      { itemNumber: 'AERO-CRYO-FLOW', description: 'Cryogenic Cryo-Flow Telemetry Transducer (-250C to +85C)', quantity: 80, uom: 'EA', targetPrice: 6500, bidUnitPrice: 6200 },
+      { itemNumber: 'AERO-SEAL-VAC', description: 'Hermetically Sealed Stainless Sensor Coupling Enclosure', quantity: 80, uom: 'EA', targetPrice: 2000, bidUnitPrice: 1850 }
+    ],
+    technicalQuestions: [
+      {
+        id: 'q-nova-cryo',
+        question: 'Provide vacuum leak testing certifications conformed to ASTM E498.',
+        answer: '',
+        aiDrafted: false
+      }
+    ]
+  },
+  {
+    id: 'src-meridian-04',
+    eventNumber: 'RFP-2026-MER-11',
+    type: 'RFP',
+    title: 'Next-Gen Mobile Point-of-Care Diagnostic Telemetry Terminals',
+    buyerName: 'Meridian Health Systems',
+    buyerOrgId: 'buyer-org-3',
+    category: 'Clinical Diagnostic Hardware & Mobile Health',
+    estimatedValue: 495000,
+    publishedDate: 'Nov 06, 2026',
+    submissionDeadline: 'Dec 12, 2026',
+    status: 'INVITED',
+    description: 'Procurement of antimicrobial mobile point-of-care telemetry carts with dual-battery hot-swap capabilities and medical-grade touch displays.',
+    lineItems: [
+      { itemNumber: 'MED-CART-MOB', description: 'Antimicrobial Point-of-Care Medical Telemetry Station', quantity: 55, uom: 'EA', targetPrice: 7200, bidUnitPrice: 6800 },
+      { itemNumber: 'MED-BATT-HOT', description: 'Lithium Iron Phosphate Hot-Swappable Battery Modules', quantity: 110, uom: 'EA', targetPrice: 900, bidUnitPrice: 850 }
+    ],
+    technicalQuestions: [
+      {
+        id: 'q-mer-poc',
+        question: 'Confirm IEC 60601-1 electrical safety compliance for patient-vicinity medical equipment.',
+        answer: '',
+        aiDrafted: false
+      }
+    ]
+  },
+  {
+    id: 'src-apex-03',
+    eventNumber: 'BID-2026-APEX-31',
+    type: 'BID',
+    title: 'Zero-Trust Secure Hardware Key Management Modules (HSM)',
+    buyerName: 'Apex Global Enterprises',
+    buyerOrgId: 'buyer-org-1',
+    category: 'Cybersecurity & Hardware Enclaves',
+    estimatedValue: 290000,
+    publishedDate: 'Nov 08, 2026',
+    submissionDeadline: 'Dec 22, 2026',
+    status: 'SUBMITTED',
+    description: 'Sealed tender for enterprise rack-mounted PCIe Hardware Security Modules (HSM) with FIPS 140-3 Level 4 tamper-detection circuitry.',
+    lineItems: [
+      { itemNumber: 'SEC-HSM-PCIE', description: 'FIPS 140-3 Level 4 Enterprise PCIe Security Module', quantity: 20, uom: 'EA', targetPrice: 12500, bidUnitPrice: 11900 }
+    ],
+    technicalQuestions: [
+      {
+        id: 'q-apex-hsm',
+        question: 'Confirm compliance with NIST SP 800-57 key lifecycle management.',
+        answer: 'Full compliance attested. Firmware enforces zero-knowledge key ceremony attestations.',
+        aiDrafted: true
+      }
+    ]
+  },
+  {
+    id: 'src-nova-04',
+    eventNumber: 'BID-2026-NOVA-35',
+    type: 'BID',
+    title: 'High-Reliability Avionics Fiber Optic Inertial Navigation Units',
+    buyerName: 'NovaTech Aerospace & Defense',
+    buyerOrgId: 'buyer-org-2',
+    category: 'Aerospace & Navigation Systems',
+    estimatedValue: 760000,
+    publishedDate: 'Nov 10, 2026',
+    submissionDeadline: 'Jan 15, 2027',
+    status: 'INVITED',
+    description: 'Next-generation 3-axis fiber optic gyro and accelerometer pack for guidance positioning in GPS-denied environments.',
+    lineItems: [
+      { itemNumber: 'AERO-GYRO-FOG', description: 'Triaxial Fiber Optic Gyroscope Tactical Navigation Assembly', quantity: 32, uom: 'EA', targetPrice: 21000, bidUnitPrice: 19800 }
+    ],
+    technicalQuestions: [
+      {
+        id: 'q-nova-gyro',
+        question: 'Specify angular random walk (ARW) and bias stability drift tolerances.',
+        answer: '',
+        aiDrafted: false
+      }
+    ]
   }
 ];
 

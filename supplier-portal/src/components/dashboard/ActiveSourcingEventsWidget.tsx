@@ -103,7 +103,7 @@ export const ActiveSourcingEventsWidget: React.FC<ActiveSourcingEventsWidgetProp
 
       {/* Events List (Columnar Alignment: Title & Client | Status | Value | Action) */}
       <div 
-        className="divide-y divide-slate-100 flex-1 overflow-y-auto pr-1 focus:outline-none scroll-smooth visible-scrollbar"
+        className="divide-y divide-slate-100 flex-1 min-h-0 overflow-y-auto pr-1.5 focus:outline-none scroll-smooth visible-scrollbar"
       >
         {activeEvents.length === 0 ? (
           <div className="p-8 text-center text-slate-400 h-full flex flex-col items-center justify-center">
