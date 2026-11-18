@@ -39,30 +39,31 @@ export const ActiveSourcingEventsWidget: React.FC<ActiveSourcingEventsWidgetProp
     switch (status) {
       case 'INVITED':
         return (
-          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/80 shrink-0">
+          <span className="w-[74px] h-[22px] rounded-md inline-flex items-center justify-center gap-1.5 text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/80 shrink-0">
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
-            Invited
+            <span>Invited</span>
           </span>
         );
       case 'IN_PROGRESS':
         return (
-          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200/80 shrink-0">
+          <span className="w-[74px] h-[22px] rounded-md inline-flex items-center justify-center gap-1.5 text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200/80 shrink-0">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-            Drafting
+            <span>Drafting</span>
           </span>
         );
       case 'SUBMITTED':
       case 'UNDER_EVALUATION':
         return (
-          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80 shrink-0">
-            <CheckCircle2 className="w-2.5 h-2.5" />
-            Submitted
+          <span className="w-[74px] h-[22px] rounded-md inline-flex items-center justify-center gap-1.5 text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80 shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            <span>Submitted</span>
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-700 shrink-0">
-            {status}
+          <span className="w-[74px] h-[22px] rounded-md inline-flex items-center justify-center gap-1 text-[10px] font-medium bg-slate-100 text-slate-700 border border-slate-200 shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+            <span className="truncate">{status}</span>
           </span>
         );
     }
@@ -99,6 +100,14 @@ export const ActiveSourcingEventsWidget: React.FC<ActiveSourcingEventsWidgetProp
             <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform text-slate-400" />
           </button>
         </div>
+      </div>
+
+      {/* Table Column Headers (Strict Column Alignment Anchors) */}
+      <div className="px-3 sm:px-4 py-1.5 bg-slate-50/70 border-b border-slate-100 flex items-center gap-3 text-[10px] font-medium text-slate-400 uppercase tracking-wider select-none shrink-0">
+        <span className="flex-1 min-w-0">Opportunity / Client</span>
+        <span className="w-[74px] shrink-0 text-center">Status</span>
+        <span className="w-16 shrink-0 text-right">Est. Value</span>
+        <span className="w-14 shrink-0 text-right">Action</span>
       </div>
 
       {/* Events List (Columnar Alignment: Title & Client | Status | Value | Action) */}
@@ -143,13 +152,13 @@ export const ActiveSourcingEventsWidget: React.FC<ActiveSourcingEventsWidgetProp
                   </div>
                 </div>
 
-                {/* Column 2: Status Badge (Fixed Width, Vertically Aligned) */}
-                <div className="w-20 shrink-0 flex items-center justify-start">
+                {/* Column 2: Status Badge (Uniform 74px Width, Centered & Aligned) */}
+                <div className="w-[74px] shrink-0 flex items-center justify-center">
                   {getStatusBadge(event.status)}
                 </div>
 
                 {/* Column 3: Value (Fixed Width, Right Aligned) */}
-                <div className="w-14 sm:w-16 shrink-0 text-right">
+                <div className="w-16 shrink-0 text-right">
                   <span className="font-mono text-xs font-semibold text-slate-900">
                     {estFormatted}
                   </span>
