@@ -51,12 +51,12 @@ export const OrderToCashFunnelChart: React.FC<OrderToCashFunnelChartProps> = ({
   const stages: StageData[] = [
     {
       id: 'po',
-      label: '1. PO Received',
+      label: 'PO Received',
       count: orderCount,
       countLabel: 'Orders',
       value: `$${Math.round(totalOrderValue / 1000)}k`,
       conversion: '100%',
-      cycleTime: 'New Arrival',
+      cycleTime: 'Active',
       status: 'OPTIMAL',
       icon: ShoppingCart,
       color: 'text-slate-700',
@@ -66,12 +66,12 @@ export const OrderToCashFunnelChart: React.FC<OrderToCashFunnelChartProps> = ({
     },
     {
       id: 'ack',
-      label: '2. Acknowledged',
+      label: 'Acknowledged',
       count: orderCount,
       countLabel: 'Orders',
       value: '100% Rate',
       conversion: '100%',
-      cycleTime: '4.2h avg response',
+      cycleTime: '4.2h avg',
       status: 'OPTIMAL',
       icon: CheckCheck,
       color: 'text-indigo-700',
@@ -81,12 +81,12 @@ export const OrderToCashFunnelChart: React.FC<OrderToCashFunnelChartProps> = ({
     },
     {
       id: 'asn',
-      label: '3. In-Transit ASN',
+      label: 'In-Transit ASN',
       count: inTransitAsnCount,
       countLabel: 'Shipment',
       value: '$92.4k',
       conversion: '100%',
-      cycleTime: 'FedEx & UPS',
+      cycleTime: 'Carrier Active',
       status: 'ACTIVE',
       icon: Truck,
       color: 'text-indigo-700',
@@ -96,12 +96,12 @@ export const OrderToCashFunnelChart: React.FC<OrderToCashFunnelChartProps> = ({
     },
     {
       id: 'match',
-      label: '4. Invoiced & 3-Way Match',
+      label: 'Invoiced & Matched',
       count: invoiceCount,
       countLabel: 'Invoices',
       value: `$${Math.round(totalReceivables / 1000)}k`,
       conversion: '98.4%',
-      cycleTime: 'Touchless Auto-Match',
+      cycleTime: 'Touchless',
       status: 'OPTIMAL',
       icon: Receipt,
       color: 'text-emerald-700',
@@ -111,12 +111,12 @@ export const OrderToCashFunnelChart: React.FC<OrderToCashFunnelChartProps> = ({
     },
     {
       id: 'settled',
-      label: '5. Settled & Paid',
+      label: 'Settled & Paid',
       count: 32,
-      countLabel: 'Past Cleared',
+      countLabel: 'Cleared',
       value: '$115.5k',
       conversion: '100%',
-      cycleTime: '24.2d DSO Top Decile',
+      cycleTime: '24.2d DSO',
       status: 'OPTIMAL',
       icon: CheckCircle2,
       color: 'text-emerald-700',
@@ -210,10 +210,10 @@ export const OrderToCashFunnelChart: React.FC<OrderToCashFunnelChartProps> = ({
       <div className="pt-1 space-y-1.5">
         <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium">
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>Zero Friction Points: 0 Held Invoices • 0 Disputed Shipments</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>Zero Exceptions • 100% Touchless Flow</span>
           </span>
-          <span className="font-mono text-slate-700 font-semibold">Overall Funnel Health: 99.4%</span>
+          <span className="font-mono text-slate-700 font-semibold">Funnel Health: 99.4%</span>
         </div>
         <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden flex">
           <div className="bg-slate-700 h-full" style={{ width: '25%' }} title="PO Received: 100%"></div>

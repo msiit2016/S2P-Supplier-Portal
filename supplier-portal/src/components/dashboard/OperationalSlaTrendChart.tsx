@@ -83,7 +83,7 @@ export const OperationalSlaTrendChart: React.FC<OperationalSlaTrendChartProps> =
             </span>
           </div>
           <p className="text-[11px] text-slate-500 mt-0.5">
-            6-Month carrier delivery telemetry and touchless 3-way match precision
+            6-Month carrier telemetry and touchless matching precision
           </p>
         </div>
 
@@ -128,7 +128,7 @@ export const OperationalSlaTrendChart: React.FC<OperationalSlaTrendChartProps> =
             98.4% <span className="text-xs font-normal text-slate-500 font-sans">Auto</span>
           </div>
           <p className="text-[11px] text-slate-500 font-medium mt-0.5 truncate">
-            32 of 33 Invoices Matched
+            32/33 Invoices Matched
           </p>
         </div>
 
@@ -146,7 +146,7 @@ export const OperationalSlaTrendChart: React.FC<OperationalSlaTrendChartProps> =
             99.2% <span className="text-xs font-normal text-slate-500 font-sans">Tier-1</span>
           </div>
           <p className="text-[11px] text-slate-500 font-medium mt-0.5 truncate">
-            FedEx &amp; UPS Telemetry
+            Carrier Telemetry Active
           </p>
         </div>
 
@@ -164,7 +164,7 @@ export const OperationalSlaTrendChart: React.FC<OperationalSlaTrendChartProps> =
             100% <span className="text-xs font-normal text-slate-500 font-sans">Active</span>
           </div>
           <p className="text-[11px] text-slate-500 font-medium mt-0.5 truncate">
-            6 of 6 Master Credentials
+            6/6 Credentials Active
           </p>
         </div>
       </div>
