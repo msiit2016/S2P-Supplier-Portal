@@ -66,7 +66,7 @@ export const ActiveSourcingEventsWidget: React.FC<ActiveSourcingEventsWidgetProp
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden flex flex-col justify-between h-full min-h-[380px]">
+    <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden flex flex-col justify-between h-[390px]">
       {/* Header */}
       <div className="p-3.5 sm:p-4 border-b border-slate-100 flex items-center justify-between gap-3 shrink-0">
         <div className="flex items-center gap-2.5">
@@ -98,8 +98,11 @@ export const ActiveSourcingEventsWidget: React.FC<ActiveSourcingEventsWidgetProp
         </div>
       </div>
 
-      {/* Events List (No internal scrollbar) */}
-      <div className="divide-y divide-slate-100 flex-1 overflow-hidden">
+      {/* Events List (Visible Scroll Up & Down) */}
+      <div 
+        className="divide-y divide-slate-100 flex-1 overflow-y-auto pr-1 focus:outline-none scroll-smooth"
+        style={{ scrollbarWidth: 'thin', scrollbarColor: '#94a3b8 #f1f5f9' }}
+      >
         {activeEvents.length === 0 ? (
           <div className="p-8 text-center text-slate-400 h-full flex flex-col items-center justify-center">
             <Layers className="w-8 h-8 mb-2 opacity-40 text-slate-400" />
@@ -112,7 +115,7 @@ export const ActiveSourcingEventsWidget: React.FC<ActiveSourcingEventsWidgetProp
             </button>
           </div>
         ) : (
-          activeEvents.slice(0, 3).map((event: SourcingEvent) => {
+          activeEvents.map((event: SourcingEvent) => {
             const isInvited = event.status === 'INVITED';
             return (
               <div 
@@ -176,11 +179,11 @@ export const ActiveSourcingEventsWidget: React.FC<ActiveSourcingEventsWidgetProp
         )}
       </div>
 
-      {/* Footer bar */}
+      {/* Footer bar with Visible Scroll Indicator */}
       <div className="p-2.5 px-4 bg-slate-50/70 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 shrink-0">
         <span className="font-medium text-slate-600 flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-          <span>Showing top {Math.min(activeEvents.length, 3)} of {activeEvents.length} active tenders</span>
+          <span className="text-slate-400">↕</span>
+          <span>{activeEvents.length} active tenders (Scroll to review)</span>
         </span>
         <button
           onClick={() => onNavigateToRfps()}

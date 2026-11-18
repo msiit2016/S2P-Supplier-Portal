@@ -59,10 +59,8 @@ export const PriorityActionCenter: React.FC<PriorityActionCenterProps> = ({
     return 'bg-slate-900 hover:bg-slate-800 text-white shadow-2xs';
   };
 
-  const displayedTasks = filteredTasks.slice(0, 3);
-
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/90 p-3.5 sm:p-4 shadow-2xs flex flex-col justify-between h-full min-h-[380px]">
+    <div className="bg-white rounded-2xl border border-slate-200/90 p-3.5 sm:p-4 shadow-2xs flex flex-col justify-between h-[390px]">
       {/* Top Header */}
       <div>
         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
@@ -144,9 +142,12 @@ export const PriorityActionCenter: React.FC<PriorityActionCenterProps> = ({
           </button>
         </div>
 
-        {/* Action Cards (No internal scrollbar) */}
-        <div className="space-y-2 overflow-hidden">
-          {displayedTasks.map(task => {
+        {/* Scrollable Action Cards Container (Visible Scroll Up & Down) */}
+        <div 
+          className="space-y-2 max-h-[235px] overflow-y-auto pr-1.5 focus:outline-none scroll-smooth"
+          style={{ scrollbarWidth: 'thin', scrollbarColor: '#94a3b8 #f1f5f9' }}
+        >
+          {filteredTasks.map(task => {
             return (
               <div
                 key={task.id}
@@ -222,10 +223,11 @@ export const PriorityActionCenter: React.FC<PriorityActionCenterProps> = ({
         </div>
       </div>
 
-      {/* Footer Strip */}
+      {/* Footer Strip with Visible Scroll Indicator */}
       <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-        <span className="text-[11px] font-medium text-slate-500">
-          Showing top {displayedTasks.length} of {filteredTasks.length} pending
+        <span className="text-[11px] font-medium text-slate-500 flex items-center gap-1.5">
+          <span className="text-slate-400">↕</span>
+          <span>{filteredTasks.length} action items (Scroll to view all)</span>
         </span>
         <button
           onClick={onNavigateToTasks}
