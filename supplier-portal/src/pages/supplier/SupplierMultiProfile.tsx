@@ -1812,7 +1812,7 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
                       <span>Registration In Progress</span>
                     </span>
                   ) : (
-                    <VerisourceVerifiedBadge placement="bottom" />
+                    <VerisourceVerifiedBadge placement="top" />
                   )}
 
                   {/* Minimal Profile Completeness Pill Badge with Quick Snap Popover */}
