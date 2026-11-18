@@ -71,26 +71,24 @@ export const ActiveSourcingEventsWidget: React.FC<ActiveSourcingEventsWidgetProp
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden flex flex-col justify-between h-[390px]">
-      {/* Header */}
-      <div className="p-3.5 sm:p-4 border-b border-slate-100 flex items-center justify-between gap-3 shrink-0">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 ring-1 ring-indigo-500/20 flex items-center justify-center shrink-0">
-            <Layers className="w-4 h-4" />
+      {/* Header (Aligned h-[54px]) */}
+      <div className="h-[54px] px-3.5 sm:px-4 border-b border-slate-100 flex items-center justify-between gap-3 shrink-0">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-700 ring-1 ring-indigo-500/20 flex items-center justify-center shrink-0">
+            <Layers className="w-3.5 h-3.5" />
           </div>
           <div className="flex items-center gap-2">
             <h2 className="text-sm font-semibold text-slate-900 tracking-tight">Active Sourcing &amp; Tenders</h2>
-            <span className="px-2 py-0.2 rounded-full text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
               {activeEvents.length} Active
             </span>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="hidden sm:block text-right">
-            <div className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Pipeline</div>
-            <div className="text-xs font-semibold font-mono text-slate-900">
-              ${totalPipeline.toLocaleString()}
-            </div>
+          <div className="hidden sm:flex items-center gap-1.5 text-xs">
+            <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Pipeline</span>
+            <span className="font-semibold font-mono text-slate-900">${totalPipeline.toLocaleString()}</span>
           </div>
           <button
             onClick={() => onNavigateToRfps()}
@@ -102,8 +100,8 @@ export const ActiveSourcingEventsWidget: React.FC<ActiveSourcingEventsWidgetProp
         </div>
       </div>
 
-      {/* Table Column Headers (Strict Column Alignment Anchors) */}
-      <div className="px-3 sm:px-4 py-1.5 bg-slate-50/70 border-b border-slate-100 flex items-center gap-3 text-[10px] font-medium text-slate-400 uppercase tracking-wider select-none shrink-0">
+      {/* Table Column Headers (Strict h-9 Sub-Bar) */}
+      <div className="h-9 px-3 sm:px-4 bg-slate-50/70 border-b border-slate-100 flex items-center gap-3 text-[10px] font-medium text-slate-400 uppercase tracking-wider select-none shrink-0">
         <span className="flex-1 min-w-0">Opportunity / Client</span>
         <span className="w-[74px] shrink-0 text-center">Status</span>
         <span className="w-16 shrink-0 text-right">Est. Value</span>
