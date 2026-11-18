@@ -6052,7 +6052,11 @@ export const OnboardingRequest: React.FC = () => {
                   )}
 
                   {/* 1. DOSSIER VIEW (Default: Full Complete Form View) */}
-                  {reviewViewMode === 'DOSSIER' && (
+                  {reviewViewMode === 'DOSSIER' && (() => {
+                    const reviewSpan = isAgentDocked && !sidebarCollapsed ? 'lg:col-span-6 xl:col-span-3' : isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2';
+                    const reviewSubcategorySpan = isAgentDocked && !sidebarCollapsed ? 'lg:col-span-6' : isAgentDocked ? 'lg:col-span-6 xl:col-span-3' : 'lg:col-span-3';
+
+                    return (
                     <div className="space-y-5">
                       {/* Section 1: Basic Details */}
                       <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs space-y-4">
@@ -6074,7 +6078,7 @@ export const OnboardingRequest: React.FC = () => {
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3 text-xs">
-                          <div className="space-y-1 lg:col-span-2">
+                          <div className={`space-y-1 ${reviewSpan}`}>
                             <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Legal Company Name</label>
                             <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 font-medium text-slate-900 flex items-center justify-between">
                               <span>{legalName}</span>
@@ -6082,42 +6086,42 @@ export const OnboardingRequest: React.FC = () => {
                             </div>
                           </div>
 
-                          <div className="space-y-1 lg:col-span-2">
+                          <div className={`space-y-1 ${reviewSpan}`}>
                             <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Doing Business As</label>
                             <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 text-slate-700 font-normal">
                               {tradeName || '—'}
                             </div>
                           </div>
 
-                          <div className="space-y-1 lg:col-span-2">
+                          <div className={`space-y-1 ${reviewSpan}`}>
                             <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Formally Known As</label>
                             <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 text-slate-700 font-normal">
                               {formerlyKnownAs || '—'}
                             </div>
                           </div>
 
-                          <div className="space-y-1 lg:col-span-2">
+                          <div className={`space-y-1 ${reviewSpan}`}>
                             <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Origination</label>
                             <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 text-slate-700 font-normal">
                               {origination}
                             </div>
                           </div>
 
-                          <div className="space-y-1 lg:col-span-2">
+                          <div className={`space-y-1 ${reviewSpan}`}>
                             <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Partner Status</label>
                             <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 text-slate-800 font-medium capitalize">
                               {partnerStatus.toLowerCase()}
                             </div>
                           </div>
 
-                          <div className="space-y-1 lg:col-span-2">
+                          <div className={`space-y-1 ${reviewSpan}`}>
                             <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Supplier Manager</label>
                             <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 text-slate-800 font-medium truncate">
                               {supplierManager}
                             </div>
                           </div>
 
-                          <div className="space-y-1 lg:col-span-2">
+                          <div className={`space-y-1 ${reviewSpan}`}>
                             <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">D&B DUNS Number</label>
                             <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 font-mono text-slate-800 flex items-center justify-between">
                               <span>{dunsNumber || '—'}</span>
@@ -6125,14 +6129,14 @@ export const OnboardingRequest: React.FC = () => {
                             </div>
                           </div>
 
-                          <div className="space-y-1 lg:col-span-2">
+                          <div className={`space-y-1 ${reviewSpan}`}>
                             <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Normalised Corporate Name</label>
                             <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 font-mono text-slate-800 text-xs">
                               {normalisedName}
                             </div>
                           </div>
 
-                          <div className="space-y-1 lg:col-span-2">
+                          <div className={`space-y-1 ${reviewSpan}`}>
                             <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Primary Tax Identification</label>
                             <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 font-mono text-slate-800 flex items-center justify-between">
                               <span>{taxId || '—'}</span>
@@ -6140,21 +6144,21 @@ export const OnboardingRequest: React.FC = () => {
                             </div>
                           </div>
 
-                          <div className="space-y-1 lg:col-span-2">
+                          <div className={`space-y-1 ${reviewSpan}`}>
                             <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Mobile Phone Number</label>
                             <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 text-slate-800 font-medium">
                               {phoneCountryCode} {mobilePhone}
                             </div>
                           </div>
 
-                          <div className="space-y-1 lg:col-span-2">
+                          <div className={`space-y-1 ${reviewSpan}`}>
                             <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Primary Language</label>
                             <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 text-slate-800 font-medium">
                               {primaryLanguage}
                             </div>
                           </div>
 
-                          <div className="space-y-1.5 lg:col-span-3">
+                          <div className={`space-y-1.5 ${reviewSubcategorySpan}`}>
                             <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Subcategories (UNSPSC)</label>
                             <div className="p-2 bg-slate-50 rounded-lg border border-slate-200 flex flex-wrap gap-1.5 min-h-[42px]">
                               {subcategories.map(sub => (
@@ -6165,7 +6169,7 @@ export const OnboardingRequest: React.FC = () => {
                             </div>
                           </div>
 
-                          <div className="space-y-1.5 lg:col-span-3">
+                          <div className={`space-y-1.5 ${reviewSubcategorySpan}`}>
                             <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Service Locations</label>
                             <div className="p-2 bg-slate-50 rounded-lg border border-slate-200 flex flex-wrap gap-1.5 min-h-[42px]">
                               {serviceLocations.map(loc => (
@@ -6198,42 +6202,42 @@ export const OnboardingRequest: React.FC = () => {
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3 text-xs">
-                          <div className="space-y-1 lg:col-span-2">
+                          <div className={`space-y-1 ${reviewSpan}`}>
                             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Reporting Currency</label>
                             <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 text-slate-800 font-medium">
                               {reportingCurrency}
                             </div>
                           </div>
 
-                          <div className="space-y-1 lg:col-span-2">
+                          <div className={`space-y-1 ${reviewSpan}`}>
                             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Annual Revenue</label>
                             <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 font-bold text-slate-900">
                               {currentCurrencySymbol}{annualRevenue} Million
                             </div>
                           </div>
 
-                          <div className="space-y-1 lg:col-span-2">
+                          <div className={`space-y-1 ${reviewSpan}`}>
                             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Headcount</label>
                             <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 font-bold text-slate-900">
                               {totalEmployees} Employees
                             </div>
                           </div>
 
-                          <div className="space-y-1 lg:col-span-2">
+                          <div className={`space-y-1 ${reviewSpan}`}>
                             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Date of Incorporation</label>
                             <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 font-mono text-slate-800">
                               {incorporationDate}
                             </div>
                           </div>
 
-                          <div className="space-y-1 lg:col-span-2">
+                          <div className={`space-y-1 ${reviewSpan}`}>
                             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Country of Incorporation</label>
                             <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 text-slate-800 font-medium">
                               {country}
                             </div>
                           </div>
 
-                          <div className="space-y-1 lg:col-span-2">
+                          <div className={`space-y-1 ${reviewSpan}`}>
                             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Website</label>
                             <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 text-slate-800 font-medium truncate">
                               {website || '—'}
@@ -6247,7 +6251,7 @@ export const OnboardingRequest: React.FC = () => {
                             </div>
                           </div>
 
-                          <div className="space-y-1.5 lg:col-span-3">
+                          <div className={`space-y-1.5 ${reviewSubcategorySpan}`}>
                             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Operating Languages</label>
                             <div className="p-2 bg-slate-50 rounded-lg border border-slate-200 flex flex-wrap gap-1.5 min-h-[42px]">
                               {operatingLanguages.map(lang => (
@@ -6258,7 +6262,7 @@ export const OnboardingRequest: React.FC = () => {
                             </div>
                           </div>
 
-                          <div className="space-y-1.5 lg:col-span-3">
+                          <div className={`space-y-1.5 ${reviewSubcategorySpan}`}>
                             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Business Units</label>
                             <div className="p-2 bg-slate-50 rounded-lg border border-slate-200 flex flex-wrap gap-1.5 min-h-[42px]">
                               {businessUnits.map(bu => (
@@ -6404,7 +6408,8 @@ export const OnboardingRequest: React.FC = () => {
                         <GepCertificatesGrid certificates={certificates} onChange={setCertificates} readOnly={true} />
                       </div>
                     </div>
-                  )}
+                  );
+                })()}
 
                   {/* 2. COMPACT SUMMARY VIEW (Alternative Quick Overview) */}
                   {reviewViewMode === 'SUMMARY' && (
