@@ -4529,21 +4529,15 @@ export const OnboardingRequest: React.FC = () => {
                               title={`${s.num}. ${s.title} (${isDone ? 'Completed' : isCurrent ? 'Active · In Progress' : 'Pending Details'})`}
                               className={`w-full p-2 rounded-xl text-left transition flex items-center space-x-2.5 border cursor-pointer ${
                                 isCurrent
-                                  ? isDone
-                                    ? 'bg-emerald-50/80 border-emerald-300 shadow-2xs font-semibold text-emerald-950 ring-2 ring-emerald-400/50'
-                                    : 'bg-amber-50/90 border-amber-300 shadow-2xs font-semibold text-amber-950 ring-2 ring-amber-400/50'
-                                  : isDone
-                                  ? 'bg-emerald-50/40 border-emerald-200/60 hover:bg-emerald-50/80 text-slate-800 font-medium'
-                                  : 'bg-amber-50/30 border-amber-200/50 hover:bg-amber-50/70 text-slate-800 font-medium'
+                                  ? 'bg-slate-100/90 border-slate-300 ring-1 ring-slate-300/60 shadow-2xs font-semibold text-slate-900'
+                                  : 'bg-white border-transparent hover:bg-slate-50 hover:border-slate-200/80 text-slate-700 font-medium'
                               }`}
                             >
-                              {/* Left Step Number: Continuous 1 to 9 sequence */}
+                              {/* Left Step Number: Neutral 1 to 9 sequence */}
                               <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] shrink-0 transition font-mono ${
                                 isCurrent
                                   ? 'bg-slate-900 text-white font-bold shadow-2xs'
-                                  : isDone
-                                  ? 'bg-emerald-100/80 text-emerald-800 font-semibold border border-emerald-200/90'
-                                  : 'bg-amber-100/70 text-amber-800 font-semibold border border-amber-200/80'
+                                  : 'bg-slate-100 text-slate-500 font-medium border border-slate-200/80'
                               }`}>
                                 <span>{s.num}</span>
                               </div>
@@ -4551,23 +4545,23 @@ export const OnboardingRequest: React.FC = () => {
                               {/* Section Title - Generous Width Without Awkward Clipping */}
                               <div className="flex-1 min-w-0 pr-1.5">
                                 <span className={`text-xs block leading-tight ${
-                                  isCurrent ? 'font-semibold text-slate-900' : isDone ? 'text-slate-800' : 'text-slate-700'
+                                  isCurrent ? 'font-semibold text-slate-900' : 'text-slate-700'
                                 }`}>
                                   {s.title}
                                 </span>
                               </div>
 
-                              {/* Right Status Indicator: Identical w-5 h-5 Circle Size for Both */}
+                              {/* Right Status Indicator: Dedicated Color Affordances */}
                               {isDone ? (
                                 <div 
-                                  className="w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200/90 flex items-center justify-center shrink-0 shadow-2xs" 
+                                  className="w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center shrink-0 shadow-2xs" 
                                   title="Completed"
                                 >
                                   <Check className="w-3 h-3 stroke-[2.5]" />
                                 </div>
                               ) : (
                                 <div 
-                                  className="w-5 h-5 rounded-full bg-amber-50 text-amber-600 border border-amber-200/90 flex items-center justify-center shrink-0 shadow-2xs" 
+                                  className="w-5 h-5 rounded-full bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center shrink-0 shadow-2xs" 
                                   title="Pending Details"
                                 >
                                   <span className={`w-2 h-2 rounded-full bg-amber-500 shrink-0 ${isCurrent ? 'animate-pulse ring-2 ring-amber-200' : ''}`} />
@@ -4624,10 +4618,8 @@ export const OnboardingRequest: React.FC = () => {
                           onClick={() => setActiveStep(s.num)}
                           className={`w-9 h-9 rounded-xl flex items-center justify-center transition relative cursor-pointer group ${
                             isCurrent
-                              ? 'bg-slate-900 text-white ring-2 ring-emerald-500 shadow-xs'
-                              : isDone
-                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 hover:text-emerald-900'
-                              : 'bg-amber-50/80 text-amber-700 border border-amber-200 hover:bg-amber-100'
+                              ? 'bg-slate-900 text-white shadow-xs'
+                              : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-900'
                           }`}
                           title={`${s.num}. ${s.title} (${isDone ? 'Completed' : isCurrent ? 'Active · Pending' : 'Pending Details'})`}
                         >
