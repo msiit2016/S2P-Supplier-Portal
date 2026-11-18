@@ -356,12 +356,12 @@ export const SupplierDashboard: React.FC = () => {
         >
           <div>
             <div className="flex items-center justify-between">
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Active Receivables</span>
+              <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Active Receivables</span>
               <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-700 border border-slate-200/70 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                 <Receipt className="w-3.5 h-3.5" />
               </div>
             </div>
-            <div className="text-base font-bold text-slate-900 mt-1 font-mono">
+            <div className="text-base font-semibold text-slate-900 mt-1 font-mono">
               ${totalReceivables.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
           </div>
@@ -381,17 +381,17 @@ export const SupplierDashboard: React.FC = () => {
         >
           <div>
             <div className="flex items-center justify-between">
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Open Orders</span>
+              <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Open Orders</span>
               <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-700 border border-slate-200/70 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                 <ShoppingCart className="w-3.5 h-3.5" />
               </div>
             </div>
-            <div className="text-base font-bold text-slate-900 mt-1 font-mono">
+            <div className="text-base font-semibold text-slate-900 mt-1 font-mono">
               {filteredOrders.length} <span className="text-xs font-normal text-slate-500 font-sans">Orders</span>
             </div>
           </div>
           <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 gap-2">
-            <span className="inline-flex items-center text-[10px] font-bold text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 truncate shrink-0">
+            <span className="inline-flex items-center text-[10px] font-semibold text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 truncate shrink-0">
               2 Require Ack
             </span>
             <Sparkline data={[3, 4, 4, 5, 5, 6]} color="#6366f1" width={60} height={18} />
@@ -406,12 +406,12 @@ export const SupplierDashboard: React.FC = () => {
         >
           <div>
             <div className="flex items-center justify-between">
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">In-Transit Shipments</span>
+              <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">In-Transit Shipments</span>
               <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-700 border border-slate-200/70 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                 <Truck className="w-3.5 h-3.5" />
               </div>
             </div>
-            <div className="text-base font-bold text-slate-900 mt-1 font-mono">
+            <div className="text-base font-semibold text-slate-900 mt-1 font-mono">
               {inTransitAsnCount} <span className="text-xs font-normal text-slate-500 font-sans">Shipments</span>
             </div>
           </div>
@@ -432,12 +432,12 @@ export const SupplierDashboard: React.FC = () => {
           >
             <div>
               <div className="flex items-center justify-between">
-                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Early Cash Available</span>
+                <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Early Cash Available</span>
                 <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-700 border border-amber-200/70 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                   <Zap className="w-3.5 h-3.5" />
                 </div>
               </div>
-              <div className="text-base font-bold text-slate-900 mt-1 font-mono">
+              <div className="text-base font-semibold text-slate-900 mt-1 font-mono">
                 ${acceleratedCashAvailable > 0 ? acceleratedCashAvailable.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '30,870.00'}
               </div>
             </div>

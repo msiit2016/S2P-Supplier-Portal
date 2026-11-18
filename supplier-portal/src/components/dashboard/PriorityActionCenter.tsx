@@ -156,7 +156,7 @@ export const PriorityActionCenter: React.FC<PriorityActionCenterProps> = ({
                 {/* Card Header: Category & Buyer & Metric */}
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1.5 min-w-0">
-                    <span className={`px-1.5 py-0.2 rounded text-[9px] font-mono font-bold border uppercase tracking-wider shrink-0 ${getBadgeStyle(task.category)}`}>
+                    <span className={`px-1.5 py-0.2 rounded text-[9px] font-mono font-semibold border uppercase tracking-wider shrink-0 ${getBadgeStyle(task.category)}`}>
                       {task.categoryLabel}
                     </span>
                     <span className="text-[11px] font-semibold text-slate-700 truncate">
@@ -165,13 +165,13 @@ export const PriorityActionCenter: React.FC<PriorityActionCenterProps> = ({
                   </div>
 
                   {task.metricHighlight && (
-                    <div className="shrink-0">
+                    <div className="shrink-0 text-right">
                       {task.metricHighlightType === 'CURRENCY' ? (
-                        <span className="text-xs font-bold font-mono text-slate-900">
+                        <span className="text-xs font-semibold font-mono text-slate-900">
                           {task.metricHighlight}
                         </span>
                       ) : task.metricHighlight === '94% Auto-Ready' ? (
-                        <span className="text-[10px] font-bold font-mono px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                        <span className="text-[10px] font-semibold font-mono px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200/80">
                           {task.metricHighlight}
                         </span>
                       ) : task.metricHighlight === 'Dock In-Transit' ? (
@@ -187,7 +187,7 @@ export const PriorityActionCenter: React.FC<PriorityActionCenterProps> = ({
                   )}
                 </div>
 
-                {/* Card Body: Title & 1-Click Action */}
+                {/* Card Body: Title & 1-Click Action (Aligned standard button) */}
                 <div className="flex items-center justify-between gap-3 mt-1.5 pt-1.5 border-t border-slate-100/80">
                   <div className="min-w-0 flex-1">
                     <p 
@@ -201,12 +201,14 @@ export const PriorityActionCenter: React.FC<PriorityActionCenterProps> = ({
                     </span>
                   </div>
 
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onExecuteAction(task); }}
-                    className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition shrink-0 cursor-pointer ${getActionBtnClass(task.category)}`}
-                  >
-                    <span>{task.actionLabel}</span>
-                  </button>
+                  <div className="shrink-0">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onExecuteAction(task); }}
+                      className={`min-w-[68px] h-7 px-2 rounded-lg text-[11px] font-medium transition flex items-center justify-center cursor-pointer ${getActionBtnClass(task.category)}`}
+                    >
+                      <span>{task.actionLabel}</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             );
