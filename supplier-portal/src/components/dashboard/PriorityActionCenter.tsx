@@ -142,10 +142,9 @@ export const PriorityActionCenter: React.FC<PriorityActionCenterProps> = ({
           </button>
         </div>
 
-        {/* Scrollable Action Cards Container (Visible Scroll Up & Down) */}
+        {/* Scrollable Action Cards Container (Visible Scrollbar) */}
         <div 
-          className="space-y-2 max-h-[235px] overflow-y-auto pr-1.5 focus:outline-none scroll-smooth"
-          style={{ scrollbarWidth: 'thin', scrollbarColor: '#94a3b8 #f1f5f9' }}
+          className="space-y-2 max-h-[235px] overflow-y-auto pr-1.5 focus:outline-none scroll-smooth visible-scrollbar"
         >
           {filteredTasks.map(task => {
             return (
@@ -223,17 +222,17 @@ export const PriorityActionCenter: React.FC<PriorityActionCenterProps> = ({
         </div>
       </div>
 
-      {/* Footer Strip with Visible Scroll Indicator */}
+      {/* Footer Strip */}
       <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-        <span className="text-[11px] font-medium text-slate-500 flex items-center gap-1.5">
-          <span className="text-slate-400">↕</span>
-          <span>{filteredTasks.length} action items (Scroll to view all)</span>
+        <span className="text-[11px] text-slate-500 flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          <span>Action Queue Active</span>
         </span>
         <button
           onClick={onNavigateToTasks}
           className="text-[11px] font-semibold text-slate-700 hover:text-slate-900 inline-flex items-center gap-1 cursor-pointer"
         >
-          <span>Full Queue ({tasks.length})</span>
+          <span>Queue</span>
           <ArrowUpRight className="w-3 h-3 text-slate-400" />
         </button>
       </div>

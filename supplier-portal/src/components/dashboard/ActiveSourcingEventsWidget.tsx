@@ -98,10 +98,9 @@ export const ActiveSourcingEventsWidget: React.FC<ActiveSourcingEventsWidgetProp
         </div>
       </div>
 
-      {/* Events List (Visible Scroll Up & Down) */}
+      {/* Events List (Visible Scrollbar) */}
       <div 
-        className="divide-y divide-slate-100 flex-1 overflow-y-auto pr-1 focus:outline-none scroll-smooth"
-        style={{ scrollbarWidth: 'thin', scrollbarColor: '#94a3b8 #f1f5f9' }}
+        className="divide-y divide-slate-100 flex-1 overflow-y-auto pr-1 focus:outline-none scroll-smooth visible-scrollbar"
       >
         {activeEvents.length === 0 ? (
           <div className="p-8 text-center text-slate-400 h-full flex flex-col items-center justify-center">
@@ -179,17 +178,17 @@ export const ActiveSourcingEventsWidget: React.FC<ActiveSourcingEventsWidgetProp
         )}
       </div>
 
-      {/* Footer bar with Visible Scroll Indicator */}
+      {/* Footer bar */}
       <div className="p-2.5 px-4 bg-slate-50/70 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 shrink-0">
-        <span className="font-medium text-slate-600 flex items-center gap-1.5">
-          <span className="text-slate-400">↕</span>
-          <span>{activeEvents.length} active tenders (Scroll to review)</span>
+        <span className="font-medium text-slate-500 flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          <span>Bidding Gateway Active</span>
         </span>
         <button
           onClick={() => onNavigateToRfps()}
           className="font-semibold text-indigo-700 hover:text-indigo-800 transition cursor-pointer"
         >
-          View All RFPs ({activeEvents.length}) &rarr;
+          View All RFPs &rarr;
         </button>
       </div>
     </div>
