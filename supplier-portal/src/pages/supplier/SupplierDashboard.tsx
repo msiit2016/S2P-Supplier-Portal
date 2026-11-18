@@ -18,7 +18,6 @@ import { Sparkline } from '../../components/dashboard/Sparkline.js';
 import { CashflowRunwayChart } from '../../components/dashboard/CashflowRunwayChart.js';
 import { BuyerRevenueDonutChart } from '../../components/dashboard/BuyerRevenueDonutChart.js';
 import { OrderToCashFunnelChart } from '../../components/dashboard/OrderToCashFunnelChart.js';
-import { OperationalSlaTrendChart } from '../../components/dashboard/OperationalSlaTrendChart.js';
 import { PriorityActionCenter } from '../../components/dashboard/PriorityActionCenter.js';
 import { SupplierProfileGovernanceHeader } from '../../components/dashboard/SupplierProfileGovernanceHeader.js';
 import { ActiveSourcingEventsWidget } from '../../components/dashboard/ActiveSourcingEventsWidget.js';
@@ -524,13 +523,6 @@ export const SupplierDashboard: React.FC = () => {
           />
         </div>
       </div>
-
-      {/* Row 5: Operational SLA & Quality Radar */}
-      <OperationalSlaTrendChart 
-        onNavigateToInvoices={() => navigate('/invoices')}
-        onNavigateToAsns={() => navigate('/asns')}
-        onNavigateToDocuments={() => navigate('/documents')}
-      />
     </div>
   );
 };

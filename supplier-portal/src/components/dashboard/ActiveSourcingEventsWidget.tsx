@@ -74,7 +74,7 @@ export const ActiveSourcingEventsWidget: React.FC<ActiveSourcingEventsWidgetProp
             <Layers className="w-4 h-4" />
           </div>
           <div className="flex items-center gap-2">
-            <h2 className="text-sm font-bold text-slate-900 tracking-tight">Active Sourcing &amp; Tenders</h2>
+            <h2 className="text-sm font-semibold text-slate-900 tracking-tight">Active Sourcing &amp; Tenders</h2>
             <span className="px-2 py-0.2 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
               {activeEvents.length} Active
             </span>
@@ -136,7 +136,7 @@ export const ActiveSourcingEventsWidget: React.FC<ActiveSourcingEventsWidgetProp
                     </span>
                   </div>
 
-                  <h3 className="text-xs font-semibold text-slate-900 group-hover:text-indigo-700 transition mt-1 truncate">
+                  <h3 className="text-xs font-medium text-slate-800 group-hover:text-indigo-600 transition mt-1 truncate">
                     {event.title}
                   </h3>
 
