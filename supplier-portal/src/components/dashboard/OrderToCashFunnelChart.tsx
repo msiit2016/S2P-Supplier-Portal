@@ -138,9 +138,14 @@ export const OrderToCashFunnelChart: React.FC<OrderToCashFunnelChartProps> = ({
             <h3 className="text-sm font-semibold text-slate-900 tracking-tight">
               Order-to-Cash (O2C) Pipeline Waterfall
             </h3>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80 font-mono">
-              98.4% Touchless Rate
-            </span>
+            <button
+              onClick={() => onNavigate('/invoices')}
+              className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/80 font-mono transition flex items-center gap-1 cursor-pointer"
+              title="98.4% of invoices verified touchless via automated 3-way match. Click to inspect invoice ledger."
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              <span>98.4% Touchless Rate</span>
+            </button>
           </div>
         </div>
 
