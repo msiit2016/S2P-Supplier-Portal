@@ -14,25 +14,27 @@ interface SlaDataPoint {
   month: string;
   otif: number;
   threeWay: number;
-  dso: number;
+  poAck: number;
 }
 
 const SLA_MONTHLY: SlaDataPoint[] = [
-  { month: 'Jun', otif: 97.5, threeWay: 96.0, dso: 27.5 },
-  { month: 'Jul', otif: 98.0, threeWay: 96.8, dso: 26.2 },
-  { month: 'Aug', otif: 98.4, threeWay: 97.2, dso: 25.8 },
-  { month: 'Sep', otif: 98.8, threeWay: 97.9, dso: 25.1 },
-  { month: 'Oct', otif: 99.0, threeWay: 98.1, dso: 24.6 },
-  { month: 'Nov', otif: 99.2, threeWay: 98.4, dso: 24.2 },
+  { month: 'Jun', otif: 97.5, threeWay: 96.0, poAck: 98.8 },
+  { month: 'Jul', otif: 98.0, threeWay: 96.8, poAck: 99.0 },
+  { month: 'Aug', otif: 98.4, threeWay: 97.2, poAck: 99.2 },
+  { month: 'Sep', otif: 98.8, threeWay: 97.9, poAck: 99.4 },
+  { month: 'Oct', otif: 99.0, threeWay: 98.1, poAck: 99.5 },
+  { month: 'Nov', otif: 99.2, threeWay: 98.4, poAck: 99.6 },
 ];
 
 interface OperationalSlaTrendChartProps {
+  onNavigateToOrders: () => void;
   onNavigateToInvoices: () => void;
   onNavigateToAsns: () => void;
   onNavigateToDocuments: () => void;
 }
 
 export const OperationalSlaTrendChart: React.FC<OperationalSlaTrendChartProps> = ({
+  onNavigateToOrders,
   onNavigateToInvoices,
   onNavigateToAsns,
   onNavigateToDocuments
@@ -80,71 +82,44 @@ export const OperationalSlaTrendChart: React.FC<OperationalSlaTrendChartProps> =
             </h3>
           </div>
           <p className="text-[11px] text-slate-500 mt-0.5">
-            Carrier on-time delivery and automated 3-way match tracking against contractual SLAs
+            End-to-end order acknowledgment, carrier delivery, and touchless 3-way match tracking
           </p>
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
-          <button
-            onClick={onNavigateToAsns}
-            className="text-xs text-slate-600 hover:text-slate-900 font-medium inline-flex items-center gap-1 group cursor-pointer px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 shadow-2xs transition"
-            title="Open Carrier Shipment Telemetry"
-          >
-            <span>Carrier Telemetry</span>
-            <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform text-slate-400" />
-          </button>
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200/70 text-emerald-700 text-xs font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            <span>Contract SLAs Active</span>
+          </div>
         </div>
       </div>
 
-      {/* 4 B2B Core KPIs (Synchronized with Dashboard Grid System) */}
+      {/* 4 B2B Core Operational Pillars (End-to-End SLA Lifecycle) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-        {/* DSO Velocity */}
+        {/* 1. PO Acknowledgment (Order Lifecycle) */}
         <div 
-          onClick={onNavigateToInvoices}
+          onClick={onNavigateToOrders}
           className="p-3.5 rounded-xl border border-slate-200/90 bg-white hover:border-indigo-300 hover:shadow-2xs transition cursor-pointer group shadow-2xs flex flex-col justify-between"
-          title="View invoice payment settlement timeline"
+          title="View purchase order confirmation and acknowledgment performance"
         >
           <div>
             <div className="flex items-center justify-between text-[10px] font-medium text-slate-400 uppercase tracking-wider">
-              <span>DSO Velocity</span>
+              <span>PO Acknowledgment</span>
               <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
-                Top Decile
+                &lt; 24h SLA
               </span>
             </div>
             <div className="text-base font-semibold font-mono text-slate-900 mt-1.5">
-              24.2 <span className="text-xs font-normal text-slate-500 font-sans">Days</span>
-            </div>
-          </div>
-          <div className="flex items-center justify-between text-[11px] text-emerald-700 font-medium mt-2 pt-2 border-t border-slate-100">
-            <span>↓ 14.3d vs industry median</span>
-            <ArrowUpRight className="w-3 h-3 text-slate-400 group-hover:text-slate-700 transition" />
-          </div>
-        </div>
-
-        {/* 3-Way Match */}
-        <div 
-          onClick={onNavigateToInvoices}
-          className="p-3.5 rounded-xl border border-slate-200/90 bg-white hover:border-indigo-300 hover:shadow-2xs transition cursor-pointer group shadow-2xs flex flex-col justify-between"
-          title="View touchless 3-way match invoice ledger"
-        >
-          <div>
-            <div className="flex items-center justify-between text-[10px] font-medium text-slate-400 uppercase tracking-wider">
-              <span>3-Way Match</span>
-              <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
-                Touchless
-              </span>
-            </div>
-            <div className="text-base font-semibold font-mono text-slate-900 mt-1.5">
-              98.4% <span className="text-xs font-normal text-slate-500 font-sans">Auto</span>
+              99.6% <span className="text-xs font-normal text-slate-500 font-sans">Avg 1.8h</span>
             </div>
           </div>
           <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium mt-2 pt-2 border-t border-slate-100">
-            <span>32/33 Invoices Matched</span>
+            <span>48/48 Orders Confirmed</span>
             <ArrowUpRight className="w-3 h-3 text-slate-400 group-hover:text-slate-700 transition" />
           </div>
         </div>
 
-        {/* OTIF Delivery */}
+        {/* 2. OTIF Delivery (Logistics & Fulfillment) */}
         <div 
           onClick={onNavigateToAsns}
           className="p-3.5 rounded-xl border border-slate-200/90 bg-white hover:border-indigo-300 hover:shadow-2xs transition cursor-pointer group shadow-2xs flex flex-col justify-between"
@@ -167,15 +142,38 @@ export const OperationalSlaTrendChart: React.FC<OperationalSlaTrendChartProps> =
           </div>
         </div>
 
-        {/* Compliance Vault */}
+        {/* 3. 3-Way Match (Billing & Reconciliation) */}
         <div 
-          onClick={onNavigateToDocuments}
+          onClick={onNavigateToInvoices}
           className="p-3.5 rounded-xl border border-slate-200/90 bg-white hover:border-indigo-300 hover:shadow-2xs transition cursor-pointer group shadow-2xs flex flex-col justify-between"
-          title="View verified compliance credentials"
+          title="View touchless 3-way match invoice ledger"
         >
           <div>
             <div className="flex items-center justify-between text-[10px] font-medium text-slate-400 uppercase tracking-wider">
-              <span>Compliance Vault</span>
+              <span>3-Way Match</span>
+              <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                Touchless
+              </span>
+            </div>
+            <div className="text-base font-semibold font-mono text-slate-900 mt-1.5">
+              98.4% <span className="text-xs font-normal text-slate-500 font-sans">Auto</span>
+            </div>
+          </div>
+          <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium mt-2 pt-2 border-t border-slate-100">
+            <span>32/33 Invoices Matched</span>
+            <ArrowUpRight className="w-3 h-3 text-slate-400 group-hover:text-slate-700 transition" />
+          </div>
+        </div>
+
+        {/* 4. Contract Compliance (Governance & Audit) */}
+        <div 
+          onClick={onNavigateToDocuments}
+          className="p-3.5 rounded-xl border border-slate-200/90 bg-white hover:border-indigo-300 hover:shadow-2xs transition cursor-pointer group shadow-2xs flex flex-col justify-between"
+          title="View verified compliance certificates and audit credentials"
+        >
+          <div>
+            <div className="flex items-center justify-between text-[10px] font-medium text-slate-400 uppercase tracking-wider">
+              <span>Contract Compliance</span>
               <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
                 Audit Ready
               </span>
@@ -332,8 +330,8 @@ export const OperationalSlaTrendChart: React.FC<OperationalSlaTrendChartProps> =
             }}
           >
             <div className="font-semibold text-slate-200 border-b border-slate-700/80 pb-0.5 flex items-center justify-between gap-3">
-              <span>{activeData.month} Telemetry</span>
-              <span className="text-[10px] text-emerald-400 font-mono">DSO: {activeData.dso}d</span>
+              <span>{activeData.month} Performance</span>
+              <span className="text-[10px] text-emerald-400 font-mono">SLA Exceeded</span>
             </div>
             <div className="space-y-0.5 text-[10px]">
               <div className="flex items-center justify-between gap-3">
@@ -349,6 +347,13 @@ export const OperationalSlaTrendChart: React.FC<OperationalSlaTrendChartProps> =
                   3-Way Match:
                 </span>
                 <span className="font-mono font-bold text-purple-300">{activeData.threeWay}%</span>
+              </div>
+              <div className="flex items-center justify-between gap-3 pt-0.5 border-t border-slate-800">
+                <span className="text-slate-400 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-sky-400"></span>
+                  PO Ack Rate:
+                </span>
+                <span className="font-mono font-bold text-sky-300">{activeData.poAck}%</span>
               </div>
             </div>
           </div>

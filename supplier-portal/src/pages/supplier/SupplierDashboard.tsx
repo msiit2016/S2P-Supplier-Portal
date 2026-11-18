@@ -528,8 +528,9 @@ export const SupplierDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Row 5: Operational SLA & Quality Radar (Trends) */}
+      {/* Row 5: Operational Performance & SLA Fulfillment (Trends) */}
       <OperationalSlaTrendChart 
+        onNavigateToOrders={() => navigate('/orders')}
         onNavigateToInvoices={() => navigate('/invoices')}
         onNavigateToAsns={() => navigate('/asns')}
         onNavigateToDocuments={() => navigate('/documents')}
