@@ -59,8 +59,10 @@ export const PriorityActionCenter: React.FC<PriorityActionCenterProps> = ({
     return 'bg-slate-900 hover:bg-slate-800 text-white shadow-2xs';
   };
 
+  const displayedTasks = filteredTasks.slice(0, 3);
+
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/90 p-3.5 sm:p-4 shadow-2xs flex flex-col justify-between h-[390px]">
+    <div className="bg-white rounded-2xl border border-slate-200/90 p-3.5 sm:p-4 shadow-2xs flex flex-col justify-between h-full min-h-[380px]">
       {/* Top Header */}
       <div>
         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
@@ -142,9 +144,9 @@ export const PriorityActionCenter: React.FC<PriorityActionCenterProps> = ({
           </button>
         </div>
 
-        {/* Scrollable Compact Task Cards */}
-        <div className="space-y-2 flex-1 overflow-y-auto pr-1">
-          {filteredTasks.map(task => {
+        {/* Action Cards (No internal scrollbar) */}
+        <div className="space-y-2 overflow-hidden">
+          {displayedTasks.map(task => {
             return (
               <div
                 key={task.id}
@@ -222,12 +224,14 @@ export const PriorityActionCenter: React.FC<PriorityActionCenterProps> = ({
 
       {/* Footer Strip */}
       <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-        <span className="text-[11px]">SLA Response Avg: 4.2h</span>
+        <span className="text-[11px] font-medium text-slate-500">
+          Showing top {displayedTasks.length} of {filteredTasks.length} pending
+        </span>
         <button
           onClick={onNavigateToTasks}
           className="text-[11px] font-semibold text-slate-700 hover:text-slate-900 inline-flex items-center gap-1 cursor-pointer"
         >
-          <span>View All Deliverables</span>
+          <span>Full Queue ({tasks.length})</span>
           <ArrowUpRight className="w-3 h-3 text-slate-400" />
         </button>
       </div>

@@ -39,12 +39,12 @@ export const OperationalSlaTrendChart: React.FC<OperationalSlaTrendChartProps> =
 }) => {
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
 
-  const svgWidth = 460;
-  const svgHeight = 140;
-  const padLeft = 38;
-  const padRight = 14;
-  const padTop = 14;
-  const padBottom = 24;
+  const svgWidth = 1000;
+  const svgHeight = 150;
+  const padLeft = 46;
+  const padRight = 50;
+  const padTop = 16;
+  const padBottom = 26;
   const chartW = svgWidth - padLeft - padRight;
   const chartH = svgHeight - padTop - padBottom;
 
@@ -173,7 +173,8 @@ export const OperationalSlaTrendChart: React.FC<OperationalSlaTrendChartProps> =
       <div className="relative pt-2">
         <svg 
           viewBox={`0 0 ${svgWidth} ${svgHeight}`} 
-          className="w-full h-32 sm:h-36 overflow-visible select-none"
+          preserveAspectRatio="none"
+          className="w-full h-36 sm:h-40 overflow-visible select-none"
           onMouseLeave={() => setActiveIdx(null)}
         >
           {/* Target Reference Line: 97% OTIF Contractual Target */}
@@ -189,7 +190,7 @@ export const OperationalSlaTrendChart: React.FC<OperationalSlaTrendChartProps> =
           <text 
             x={svgWidth - padRight + 2} 
             y={targetOtifY + 3} 
-            className="text-[8px] fill-slate-400 font-mono"
+            className="text-[9px] fill-slate-400 font-mono"
           >
             SLA 97%
           </text>
@@ -204,7 +205,7 @@ export const OperationalSlaTrendChart: React.FC<OperationalSlaTrendChartProps> =
                   y1={y} 
                   x2={svgWidth - padRight} 
                   y2={y} 
-                  stroke="#f8fafc" 
+                  stroke="#f1f5f9" 
                   strokeWidth="1" 
                 />
                 <text 

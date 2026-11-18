@@ -66,7 +66,7 @@ export const ActiveSourcingEventsWidget: React.FC<ActiveSourcingEventsWidgetProp
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden flex flex-col h-[390px]">
+    <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden flex flex-col justify-between h-full min-h-[380px]">
       {/* Header */}
       <div className="p-3.5 sm:p-4 border-b border-slate-100 flex items-center justify-between gap-3 shrink-0">
         <div className="flex items-center gap-2.5">
@@ -98,8 +98,8 @@ export const ActiveSourcingEventsWidget: React.FC<ActiveSourcingEventsWidgetProp
         </div>
       </div>
 
-      {/* Events List */}
-      <div className="divide-y divide-slate-100 flex-1 overflow-y-auto">
+      {/* Events List (No internal scrollbar) */}
+      <div className="divide-y divide-slate-100 flex-1 overflow-hidden">
         {activeEvents.length === 0 ? (
           <div className="p-8 text-center text-slate-400 h-full flex flex-col items-center justify-center">
             <Layers className="w-8 h-8 mb-2 opacity-40 text-slate-400" />
@@ -118,7 +118,7 @@ export const ActiveSourcingEventsWidget: React.FC<ActiveSourcingEventsWidgetProp
               <div 
                 key={event.id}
                 onClick={() => onNavigateToRfps(event.id)}
-                className="p-3 sm:px-4 sm:py-3 hover:bg-slate-50/80 transition cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 group"
+                className="p-2.5 sm:px-4 sm:py-2.5 hover:bg-slate-50/80 transition cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 group"
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -178,9 +178,9 @@ export const ActiveSourcingEventsWidget: React.FC<ActiveSourcingEventsWidgetProp
 
       {/* Footer bar */}
       <div className="p-2.5 px-4 bg-slate-50/70 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 shrink-0">
-        <span className="font-medium text-slate-600 flex items-center gap-1">
+        <span className="font-medium text-slate-600 flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-          <span>Bidding Portal Active</span>
+          <span>Showing top {Math.min(activeEvents.length, 3)} of {activeEvents.length} active tenders</span>
         </span>
         <button
           onClick={() => onNavigateToRfps()}

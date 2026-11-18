@@ -18,6 +18,7 @@ import { Sparkline } from '../../components/dashboard/Sparkline.js';
 import { CashflowRunwayChart } from '../../components/dashboard/CashflowRunwayChart.js';
 import { BuyerRevenueDonutChart } from '../../components/dashboard/BuyerRevenueDonutChart.js';
 import { OrderToCashFunnelChart } from '../../components/dashboard/OrderToCashFunnelChart.js';
+import { OperationalSlaTrendChart } from '../../components/dashboard/OperationalSlaTrendChart.js';
 import { PriorityActionCenter } from '../../components/dashboard/PriorityActionCenter.js';
 import { SupplierProfileGovernanceHeader } from '../../components/dashboard/SupplierProfileGovernanceHeader.js';
 import { ActiveSourcingEventsWidget } from '../../components/dashboard/ActiveSourcingEventsWidget.js';
@@ -485,7 +486,7 @@ export const SupplierDashboard: React.FC = () => {
       {/* Row 3: Active Sourcing & Tenders + Priority Action Center (Balanced 7 : 5 Grid) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-stretch">
         {/* Left (7 cols): Active Sourcing & Tenders Widget */}
-        <div className="lg:col-span-7">
+        <div className="lg:col-span-7 flex flex-col">
           <ActiveSourcingEventsWidget
             onNavigateToRfps={(rfpId) => navigate('/rfps', rfpId ? { rfpId } : undefined)}
             selectedBuyerOrgId={selectedBuyerId}
@@ -493,7 +494,7 @@ export const SupplierDashboard: React.FC = () => {
         </div>
 
         {/* Right (5 cols): Priority Action Center */}
-        <div className="lg:col-span-5">
+        <div className="lg:col-span-5 flex flex-col">
           <PriorityActionCenter
             tasks={priorityTasks}
             onExecuteAction={handleExecuteTaskAction}
@@ -505,7 +506,7 @@ export const SupplierDashboard: React.FC = () => {
       {/* Row 4: Financial Intelligence & Buyer Concentration (Balanced 7 : 5 Grid) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-stretch">
         {/* Left (7 cols): Cash Runway & Liquidity Flow Chart */}
-        <div className="lg:col-span-7">
+        <div className="lg:col-span-7 flex flex-col">
           <CashflowRunwayChart 
             onNavigateToInvoices={(params) => navigate('/invoices', params)}
             earlyPaymentEnabled={settings.earlyPaymentHighlighting}
@@ -514,7 +515,7 @@ export const SupplierDashboard: React.FC = () => {
         </div>
 
         {/* Right (5 cols): Buyer Concentration & DSO Donut Chart */}
-        <div className="lg:col-span-5">
+        <div className="lg:col-span-5 flex flex-col">
           <BuyerRevenueDonutChart 
             buyers={buyers}
             onNavigateToOrders={(buyerOrgId) => navigate('/orders', buyerOrgId ? { buyerOrgId } : undefined)}
@@ -523,6 +524,13 @@ export const SupplierDashboard: React.FC = () => {
           />
         </div>
       </div>
+
+      {/* Row 5: Operational SLA & Quality Radar (Trends) */}
+      <OperationalSlaTrendChart 
+        onNavigateToInvoices={() => navigate('/invoices')}
+        onNavigateToAsns={() => navigate('/asns')}
+        onNavigateToDocuments={() => navigate('/documents')}
+      />
     </div>
   );
 };
