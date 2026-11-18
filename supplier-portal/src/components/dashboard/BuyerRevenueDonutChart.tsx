@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   BarChart3, 
   ExternalLink, 
@@ -7,7 +7,9 @@ import {
   Truck, 
   Receipt,
   Layers,
-  ArrowUpRight
+  ArrowUpRight,
+  Search,
+  X
 } from 'lucide-react';
 import { BuyerSpecificProfile } from '../../types/index.js';
 
@@ -80,8 +82,10 @@ export const BuyerRevenueDonutChart: React.FC<BuyerRevenueDonutChartProps> = ({
     };
   });
 
+  const [searchQuery, setSearchQuery] = useState('');
+
   // Calculate dynamic portfolio concentration insights
-  const sortedSlices = [...slices].sort((a, b) => b.spend - a.spend);
+  const sortedSlices = useMemo(() => [...slices].sort((a, b) => b.spend - a.spend), [slices]);
   const topSlice = sortedSlices[0] || slices[0];
 
   const weightedDso = totalSpend > 0 
@@ -104,6 +108,42 @@ export const BuyerRevenueDonutChart: React.FC<BuyerRevenueDonutChartProps> = ({
     ? 'bg-sky-500' 
     : 'bg-emerald-500';
 
+  // If more than 5 clients, aggregate tail slices into "Other Clients" for clear donut readability
+  const donutSlices = useMemo(() => {
+    if (sortedSlices.length <= 5) return sortedSlices;
+    const top4 = sortedSlices.slice(0, 4);
+    const others = sortedSlices.slice(4);
+    const otherSpend = others.reduce((sum, s) => sum + s.spend, 0);
+    const otherPct = totalSpend > 0 ? (otherSpend / totalSpend) * 100 : 0;
+    const otherDso = (others.reduce((sum, s) => sum + (s.spend * s.dso), 0) / (otherSpend || 1));
+
+    const otherSlice: BuyerSlice = {
+      id: 'other-clients-aggregate',
+      name: `Other Clients (${others.length})`,
+      logoText: '+N',
+      spend: otherSpend,
+      pct: otherPct,
+      dso: parseFloat(otherDso.toFixed(1)),
+      terms: 'Mixed Terms',
+      color: '#94a3b8',
+      strokeColor: '#64748b',
+      buyerOrgId: 'OTHER'
+    };
+
+    return [...top4, otherSlice];
+  }, [sortedSlices, totalSpend]);
+
+  // Filtered list for search when client volume expands
+  const filteredListSlices = useMemo(() => {
+    if (!searchQuery.trim()) return sortedSlices;
+    const q = searchQuery.toLowerCase();
+    return sortedSlices.filter(s => 
+      s.name.toLowerCase().includes(q) || 
+      s.terms.toLowerCase().includes(q) ||
+      s.buyerOrgId.toLowerCase().includes(q)
+    );
+  }, [sortedSlices, searchQuery]);
+
   // Calculate SVG arc paths
   const size = 160;
   const cx = size / 2;
@@ -113,7 +153,7 @@ export const BuyerRevenueDonutChart: React.FC<BuyerRevenueDonutChartProps> = ({
   const circumference = 2 * Math.PI * radius;
 
   let cumulativeAngle = 0;
-  const arcSegments = slices.map((slice, index) => {
+  const arcSegments = donutSlices.map((slice, index) => {
     const strokeDasharray = `${(slice.pct / 100) * circumference} ${circumference}`;
     const strokeDashoffset = -cumulativeAngle;
     cumulativeAngle += (slice.pct / 100) * circumference;
@@ -125,7 +165,7 @@ export const BuyerRevenueDonutChart: React.FC<BuyerRevenueDonutChartProps> = ({
     };
   });
 
-  const activeSlice = activeIdx !== null ? slices[activeIdx] : null;
+  const activeSlice = activeIdx !== null ? donutSlices[activeIdx] || sortedSlices[activeIdx] : null;
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-2xs space-y-3.5 flex flex-col justify-between h-full">
@@ -221,66 +261,97 @@ export const BuyerRevenueDonutChart: React.FC<BuyerRevenueDonutChartProps> = ({
         </div>
 
         {/* Interactive Client List (Scrollable & Scalable for 3 to 100+ clients) */}
-        <div className="space-y-1.5 pt-1 max-h-[175px] overflow-y-auto pr-1 visible-scrollbar">
-          {slices.map((slice, idx) => {
-            const isHovered = activeIdx === idx;
+        <div>
+          {/* Compact search bar if more than 4 clients */}
+          {buyers.length > 4 && (
+            <div className="relative mb-2">
+              <Search className="w-3 h-3 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search clients..."
+                className="w-full pl-7 pr-6 py-1 bg-slate-50 border border-slate-200 rounded-lg text-[11px] placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white transition"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              )}
+            </div>
+          )}
 
-            return (
-              <div
-                key={slice.id}
-                onMouseEnter={() => setActiveIdx(idx)}
-                onMouseLeave={() => setActiveIdx(null)}
-                onClick={() => onNavigateToClients ? onNavigateToClients() : onNavigateToOrders(slice.buyerOrgId)}
-                className={`p-2 sm:px-2.5 sm:py-2 rounded-xl border transition flex items-center justify-between gap-2 cursor-pointer group ${
-                  isHovered 
-                    ? 'border-indigo-300 bg-indigo-50/50 shadow-2xs' 
-                    : 'border-slate-100 bg-slate-50/70 hover:bg-slate-50 hover:border-slate-200'
-                }`}
-                title={`Open ${slice.name} Client Workspace`}
-              >
-                <div className="flex items-center space-x-2.5 min-w-0">
-                  <div 
-                    className="w-7 h-7 rounded-lg text-white flex items-center justify-center font-bold text-[10px] shrink-0 shadow-2xs"
-                    style={{ backgroundColor: slice.color }}
-                  >
-                    {slice.logoText.slice(0, 2)}
+          <div className="space-y-1.5 pt-1 max-h-[160px] overflow-y-auto pr-1 visible-scrollbar">
+            {filteredListSlices.map((slice, idx) => {
+              const isHovered = activeIdx === idx;
+
+              return (
+                <div
+                  key={slice.id}
+                  onMouseEnter={() => setActiveIdx(idx)}
+                  onMouseLeave={() => setActiveIdx(null)}
+                  onClick={() => onNavigateToClients ? onNavigateToClients() : onNavigateToOrders(slice.buyerOrgId)}
+                  className={`p-2 sm:px-2.5 sm:py-2 rounded-xl border transition flex items-center justify-between gap-2 cursor-pointer group ${
+                    isHovered 
+                      ? 'border-indigo-300 bg-indigo-50/50 shadow-2xs' 
+                      : 'border-slate-100 bg-slate-50/70 hover:bg-slate-50 hover:border-slate-200'
+                  }`}
+                  title={`Open ${slice.name} Client Workspace`}
+                >
+                  <div className="flex items-center space-x-2.5 min-w-0">
+                    <div 
+                      className="w-7 h-7 rounded-lg text-white flex items-center justify-center font-bold text-[10px] shrink-0 shadow-2xs"
+                      style={{ backgroundColor: slice.color }}
+                    >
+                      {slice.logoText.slice(0, 2)}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="font-medium text-xs text-slate-900 truncate flex items-center gap-1.5">
+                        <span className="group-hover:text-indigo-600 transition truncate">{slice.name}</span>
+                        <span className="text-[10px] font-mono text-slate-400 shrink-0">({slice.pct.toFixed(0)}%)</span>
+                      </div>
+                      <div className="text-[10px] text-slate-500 flex items-center gap-1.5">
+                        <span className="font-mono font-medium text-slate-700">${slice.spend.toLocaleString()}</span>
+                        <span>•</span>
+                        <span className="text-emerald-700 font-medium">{slice.dso}d DSO</span>
+                        <span className="hidden sm:inline">•</span>
+                        <span className="hidden sm:inline text-slate-400 truncate">{slice.terms}</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <div className="font-medium text-xs text-slate-900 truncate flex items-center gap-1.5">
-                      <span className="group-hover:text-indigo-600 transition truncate">{slice.name}</span>
-                      <span className="text-[10px] font-mono text-slate-400 shrink-0">({slice.pct.toFixed(0)}%)</span>
-                    </div>
-                    <div className="text-[10px] text-slate-500 flex items-center gap-1.5">
-                      <span className="font-mono font-medium text-slate-700">${slice.spend.toLocaleString()}</span>
-                      <span>•</span>
-                      <span className="text-emerald-700 font-medium">{slice.dso}d DSO</span>
-                      <span className="hidden sm:inline">•</span>
-                      <span className="hidden sm:inline text-slate-400 truncate">{slice.terms}</span>
-                    </div>
+
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); onNavigateToOrders(slice.buyerOrgId); }}
+                      className="px-2 py-1 text-[10px] font-medium text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-100 border border-slate-200 rounded-md transition cursor-pointer shadow-2xs"
+                      title={`View ${slice.name} Orders`}
+                    >
+                      Orders
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); onNavigateToInvoices(slice.buyerOrgId); }}
+                      className="px-2 py-1 text-[10px] font-medium text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/70 rounded-md transition cursor-pointer shadow-2xs"
+                      title={`View ${slice.name} Invoices`}
+                    >
+                      Invoices
+                    </button>
                   </div>
                 </div>
+              );
+            })}
 
-                <div className="flex items-center gap-1 shrink-0">
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); onNavigateToOrders(slice.buyerOrgId); }}
-                    className="px-2 py-1 text-[10px] font-medium text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-100 border border-slate-200 rounded-md transition cursor-pointer shadow-2xs"
-                    title={`View ${slice.name} Orders`}
-                  >
-                    Orders
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); onNavigateToInvoices(slice.buyerOrgId); }}
-                    className="px-2 py-1 text-[10px] font-medium text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/70 rounded-md transition cursor-pointer shadow-2xs"
-                    title={`View ${slice.name} Invoices`}
-                  >
-                    Invoices
-                  </button>
-                </div>
+            {filteredListSlices.length === 0 && (
+              <div className="py-4 text-center text-xs text-slate-400">
+                No clients matching &ldquo;{searchQuery}&rdquo;
               </div>
-            );
-          })}
+            )}
+          </div>
         </div>
       </div>
 
