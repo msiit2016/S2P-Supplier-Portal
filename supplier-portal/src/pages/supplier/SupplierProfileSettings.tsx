@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext.js';
 import { usePortal } from '../../context/PortalContext.js';
 import { useSupplierSettings, SupplierPortalSettings } from '../../services/supplierSettingsService.js';
+import { VerisourceVerifiedBadge } from '../../components/common/VerisourceVerifiedBadge.js';
 import { 
   Building2, 
   ShieldCheck, 
@@ -39,7 +40,6 @@ export const SupplierProfileSettings: React.FC = () => {
   const [isDirty, setIsDirty] = useState(false);
   const [savedToast, setSavedToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('Settings successfully saved.');
-  const [showVerifiedTooltip, setShowVerifiedTooltip] = useState(false);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const showToast = (message: string, durationMs: number = 3500) => {
@@ -146,24 +146,8 @@ export const SupplierProfileSettings: React.FC = () => {
               {draft.legalName}
             </h1>
 
-            {/* Verified Badge Icon with Hover Tooltip */}
-            <div 
-              className="relative inline-flex items-center group cursor-pointer"
-              onMouseEnter={() => setShowVerifiedTooltip(true)}
-              onMouseLeave={() => setShowVerifiedTooltip(false)}
-            >
-              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200/80 transition hover:bg-emerald-100 hover:scale-105 shadow-2xs" title="Verisource Verified">
-                <ShieldCheck className="w-3.5 h-3.5" />
-              </span>
-
-              {showVerifiedTooltip && (
-                <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 z-50 px-2.5 py-1 bg-slate-900 text-white text-[11px] font-medium rounded-lg shadow-lg border border-slate-800 whitespace-nowrap pointer-events-none flex items-center gap-1.5 animate-in fade-in-50 zoom-in-95">
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-900" />
-                  <ShieldCheck className="w-3 h-3 text-emerald-400 shrink-0" />
-                  <span>Verisource Verified</span>
-                </div>
-              )}
-            </div>
+            {/* Unified Verified Badge with Enterprise Provenance Tooltip */}
+            <VerisourceVerifiedBadge placement="top" />
           </div>
         </div>
       </div>

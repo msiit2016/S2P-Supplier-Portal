@@ -11,6 +11,7 @@ import {
   CheckSquare
 } from 'lucide-react';
 import { BuyerSpecificProfile, GlobalSupplierProfile } from '../../types/index.js';
+import { VerisourceVerifiedBadge } from '../common/VerisourceVerifiedBadge.js';
 
 interface SupplierProfileGovernanceHeaderProps {
   globalProfile: GlobalSupplierProfile | null;
@@ -196,23 +197,8 @@ export const SupplierProfileGovernanceHeader: React.FC<SupplierProfileGovernance
                 {legalName}
               </h1>
               
-              {/* Verified Badge with Instant Sleek Hover Tooltip */}
-              <div className="relative group inline-flex items-center">
-                <button
-                  type="button"
-                  aria-label="Verified by Verisource"
-                  className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200/80 shadow-2xs hover:bg-emerald-100 transition cursor-help shrink-0"
-                >
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                </button>
-                {/* Micro-animated Instant Tooltip */}
-                <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:flex items-center gap-1.5 px-2.5 py-1 bg-slate-900 text-white text-[11px] font-medium rounded-lg shadow-xl whitespace-nowrap z-50 pointer-events-none animate-in fade-in zoom-in-95 duration-100">
-                  <ShieldCheck className="w-3 h-3 text-emerald-400 shrink-0" />
-                  <span>Verified by Verisource</span>
-                  {/* Tooltip Down Arrow */}
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-900" />
-                </div>
-              </div>
+              {/* Unified Verified Badge with Enterprise Provenance Tooltip */}
+              <VerisourceVerifiedBadge placement="top" />
             </div>
 
             {/* Clean Enterprise Subline */}
