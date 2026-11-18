@@ -1987,6 +1987,34 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({ inline = f
         const isNearRightEdge = typeof window !== 'undefined' ? launcherPos.x > window.innerWidth / 2 : true;
         const isNearTopEdge = launcherPos.y < 220;
 
+        const getDynamicPageContextDescription = (route: string, pageName: string) => {
+          if (route.startsWith('/onboarding') || route.startsWith('/onboarding-request')) {
+            return 'Assisting with vendor onboarding: auto-fill verified fields from Master Profile, W-9 tax certificate OCR, and compliance sign-off.';
+          }
+          if (route.startsWith('/invoices')) {
+            return 'Assisting with commercial billing: 3-way PO matching, payment term tracking, invoice dispute resolution, and early cash payout.';
+          }
+          if (route.startsWith('/orders') || route.startsWith('/purchase-orders')) {
+            return 'Assisting with purchase order execution: line-item acknowledgments, order change requests, delivery schedules, and fulfillment.';
+          }
+          if (route.startsWith('/shipments') || route.startsWith('/asns')) {
+            return 'Assisting with logistics and dispatch: Advance Shipping Notices (ASNs), carrier tracking, delivery ETAs, and receiving dock manifests.';
+          }
+          if (route.startsWith('/rfps') || route.startsWith('/bids') || route.startsWith('/sourcing')) {
+            return 'Assisting with strategic sourcing: RFP questionnaire responses, compliance validation, pricing sheet calculations, and bid submission.';
+          }
+          if (route.startsWith('/catalog') || route.startsWith('/catalog-vault')) {
+            return 'Assisting with catalog management: UNSPSC category mapping, unit pricing contracts, and ERP item master synchronization.';
+          }
+          if (route.startsWith('/documents') || route.startsWith('/vault') || route.startsWith('/doc-vault')) {
+            return 'Assisting with compliance vault: ISO certifications, SOC2 audit reports, insurance COIs, and document expiry alerts.';
+          }
+          if (route === '/' || route.startsWith('/dashboard')) {
+            return 'Assisting with executive operations: live cash pipeline analysis, PO-to-cash velocity, overdue invoices, and active fulfillment bottlenecks.';
+          }
+          return `Real-time procurement intelligence and automated workflow assistance for ${pageName}.`;
+        };
+
         return (
           <div
             style={{
@@ -2003,43 +2031,46 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({ inline = f
                 isNearRightEdge ? 'right-0' : 'left-0'
               } ${
                 isNearTopEdge ? 'top-full mt-2.5' : 'bottom-full mb-2.5'
-              } w-[280px] sm:w-[300px] p-3.5 bg-white text-slate-800 rounded-2xl shadow-xl shadow-slate-900/15 border border-slate-200/90 ring-1 ring-slate-900/5 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-200 transform ${
+              } w-[300px] sm:w-[320px] p-3.5 bg-white text-slate-800 rounded-2xl shadow-xl shadow-slate-900/15 border border-slate-200/90 ring-1 ring-slate-900/5 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-200 transform ${
                 isNearTopEdge ? '-translate-y-1 group-hover:translate-y-0' : 'translate-y-1 group-hover:translate-y-0'
               } z-50`}
             >
-              {/* 1. Header Row: Avatar, Title & Subagent Tag */}
+              {/* 1. Header Row: Avatar, Title & Subagent Status */}
               <div className="flex items-center justify-between pb-2.5 border-b border-slate-100">
-                <div className="flex items-center space-x-2 min-w-0">
-                  <div className="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
-                    <Sparkles className="w-3.5 h-3.5" />
+                <div className="flex items-center space-x-2.5 min-w-0">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                    <Sparkles className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
                     <div className="text-xs font-bold text-slate-900 truncate tracking-tight">
-                      Ava AI Copilot
+                      Ava Agent
                     </div>
-                    <div className="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
+                    <div className="text-[10px] text-emerald-600 font-semibold flex items-center gap-1 mt-0.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                       <span>Ready to assist</span>
                     </div>
                   </div>
                 </div>
                 <span 
-                  className="text-[10px] font-mono font-medium text-slate-600 bg-slate-100 border border-slate-200/80 px-2 py-0.5 rounded-md truncate max-w-[95px]" 
-                  title={activeSubagent?.name || 'S2P Agent'}
+                  className="text-[10px] font-mono font-semibold text-slate-600 bg-slate-100 border border-slate-200/90 px-2 py-0.5 rounded-md shrink-0" 
+                  title={activeSubagent?.name || 'Verisource Agent'}
                 >
-                  {activeSubagent?.shortName || 'Copilot'}
+                  {activeSubagent?.shortName || 'Agent'}
                 </span>
               </div>
 
-              {/* 2. Page Context & Brief Description */}
-              <div className="py-2.5 space-y-1.5">
-                <div className="flex items-center gap-1.5 text-xs text-slate-600">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Context</span>
-                  <span className="text-slate-300">•</span>
-                  <span className="font-semibold text-slate-800 truncate">{config.pageContextName}</span>
+              {/* 2. Page Context Box & Dynamic Description */}
+              <div className="py-2.5 space-y-2">
+                <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-2.5 space-y-1">
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    Active Page Context
+                  </div>
+                  <div className="text-xs font-bold text-slate-900 leading-snug break-words">
+                    {config.pageContextName}
+                  </div>
                 </div>
-                <p className="text-[11px] text-slate-500 leading-relaxed">
-                  Click to open interactive AI assistance, auto-fill verified profile fields, or verify transaction records.
+                <p className="text-[11px] text-slate-600 leading-relaxed px-0.5">
+                  {getDynamicPageContextDescription(currentRoute, config.pageContextName)}
                 </p>
               </div>
 
@@ -2051,9 +2082,9 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({ inline = f
                     setCopilotViewMode('DOCK');
                     setAiDrawerOpen(true);
                   }}
-                  className="w-full py-1.5 px-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition shadow-xs cursor-pointer group/btn"
+                  className="w-full py-2 px-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition shadow-xs cursor-pointer group/btn"
                 >
-                  <span>Open Ava Copilot</span>
+                  <span>Open Ava Agent</span>
                   <ChevronRight className="w-3.5 h-3.5 text-emerald-400 group-hover/btn:translate-x-0.5 transition-transform" />
                 </button>
                 <div className="flex items-center justify-center text-[10px] text-slate-400 gap-1 select-none">
