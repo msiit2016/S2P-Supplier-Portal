@@ -59,9 +59,9 @@ export const OrderToCashFunnelChart: React.FC<OrderToCashFunnelChartProps> = ({
       cycleTime: 'New Arrival',
       status: 'OPTIMAL',
       icon: ShoppingCart,
-      color: 'text-sky-600',
-      bgColor: 'bg-sky-50',
-      borderColor: 'border-sky-200/80',
+      color: 'text-slate-700',
+      bgColor: 'bg-slate-100',
+      borderColor: 'border-slate-200',
       route: '/orders'
     },
     {
@@ -74,7 +74,7 @@ export const OrderToCashFunnelChart: React.FC<OrderToCashFunnelChartProps> = ({
       cycleTime: '4.2h avg response',
       status: 'OPTIMAL',
       icon: CheckCheck,
-      color: 'text-indigo-600',
+      color: 'text-indigo-700',
       bgColor: 'bg-indigo-50',
       borderColor: 'border-indigo-200/80',
       route: '/orders'
@@ -89,9 +89,9 @@ export const OrderToCashFunnelChart: React.FC<OrderToCashFunnelChartProps> = ({
       cycleTime: 'FedEx & UPS',
       status: 'ACTIVE',
       icon: Truck,
-      color: 'text-teal-600',
-      bgColor: 'bg-teal-50',
-      borderColor: 'border-teal-200/80',
+      color: 'text-indigo-700',
+      bgColor: 'bg-indigo-50',
+      borderColor: 'border-indigo-200/80',
       route: '/asns'
     },
     {
@@ -104,9 +104,9 @@ export const OrderToCashFunnelChart: React.FC<OrderToCashFunnelChartProps> = ({
       cycleTime: 'Touchless Auto-Match',
       status: 'OPTIMAL',
       icon: Receipt,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50',
-      borderColor: 'border-purple-200/80',
+      color: 'text-emerald-700',
+      bgColor: 'bg-emerald-50',
+      borderColor: 'border-emerald-200/80',
       route: '/invoices'
     },
     {
@@ -119,7 +119,7 @@ export const OrderToCashFunnelChart: React.FC<OrderToCashFunnelChartProps> = ({
       cycleTime: '24.2d DSO Top Decile',
       status: 'OPTIMAL',
       icon: CheckCircle2,
-      color: 'text-emerald-600',
+      color: 'text-emerald-700',
       bgColor: 'bg-emerald-50',
       borderColor: 'border-emerald-200/80',
       route: '/invoices'
@@ -216,11 +216,11 @@ export const OrderToCashFunnelChart: React.FC<OrderToCashFunnelChartProps> = ({
           <span className="font-mono text-slate-700 font-semibold">Overall Funnel Health: 99.4%</span>
         </div>
         <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden flex">
-          <div className="bg-sky-500 h-full" style={{ width: '25%' }} title="PO Received: 100%"></div>
-          <div className="bg-indigo-500 h-full" style={{ width: '25%' }} title="Acknowledged: 100%"></div>
-          <div className="bg-teal-500 h-full" style={{ width: '20%' }} title="In-Transit: 100%"></div>
-          <div className="bg-purple-500 h-full" style={{ width: '15%' }} title="Matched: 98.4%"></div>
-          <div className="bg-emerald-500 h-full" style={{ width: '15%' }} title="Settled: 100%"></div>
+          <div className="bg-slate-700 h-full" style={{ width: '25%' }} title="PO Received: 100%"></div>
+          <div className="bg-indigo-600 h-full" style={{ width: '25%' }} title="Acknowledged: 100%"></div>
+          <div className="bg-indigo-500 h-full" style={{ width: '20%' }} title="In-Transit: 100%"></div>
+          <div className="bg-emerald-500 h-full" style={{ width: '15%' }} title="Matched: 98.4%"></div>
+          <div className="bg-emerald-600 h-full" style={{ width: '15%' }} title="Settled: 100%"></div>
         </div>
       </div>
     </div>

@@ -60,7 +60,7 @@ export const PriorityActionCenter: React.FC<PriorityActionCenterProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-2xs flex flex-col justify-between h-full">
+    <div className="bg-white rounded-2xl border border-slate-200/90 p-3.5 sm:p-4 shadow-2xs flex flex-col justify-between h-[390px]">
       {/* Top Header */}
       <div>
         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
@@ -143,7 +143,7 @@ export const PriorityActionCenter: React.FC<PriorityActionCenterProps> = ({
         </div>
 
         {/* Scrollable Compact Task Cards */}
-        <div className="space-y-2 flex-1 min-h-[280px] max-h-[295px] overflow-y-auto pr-1">
+        <div className="space-y-2 flex-1 overflow-y-auto pr-1">
           {filteredTasks.map(task => {
             return (
               <div

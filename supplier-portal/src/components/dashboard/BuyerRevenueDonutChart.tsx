@@ -238,7 +238,7 @@ export const BuyerRevenueDonutChart: React.FC<BuyerRevenueDonutChartProps> = ({
       {/* Footer Navigation Strip */}
       <div className="pt-2 border-t border-slate-100">
         <div className="flex items-center justify-between text-xs text-slate-500">
-          <span className="text-[11px] font-medium">Multi-Buyer ERP Links: Active</span>
+          <span className="text-[11px] font-medium text-slate-500">Connected Buyer Workspaces: Active</span>
           <button
             onClick={() => onNavigateToOrders()}
             className="hover:text-slate-900 inline-flex items-center gap-1 font-semibold text-slate-700 cursor-pointer transition text-[11px]"

@@ -6,10 +6,7 @@ import {
   DollarSign, 
   Building2, 
   ChevronRight, 
-  Send, 
-  Sparkles,
-  CheckCircle2,
-  FileText
+  CheckCircle2
 } from 'lucide-react';
 import { useSharedRfps, SourcingEvent } from '../../services/rfpService.js';
 
@@ -39,24 +36,24 @@ export const ActiveSourcingEventsWidget: React.FC<ActiveSourcingEventsWidgetProp
     switch (status) {
       case 'INVITED':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
-            <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse"></span>
-            Invited to Bid
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
+            Invited
           </span>
         );
       case 'IN_PROGRESS':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200/80">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-            Draft In Progress
+            Drafting
           </span>
         );
       case 'SUBMITTED':
       case 'UNDER_EVALUATION':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-200">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
             <CheckCircle2 className="w-2.5 h-2.5" />
-            Bid Submitted
+            Submitted
           </span>
         );
       default:
@@ -69,16 +66,16 @@ export const ActiveSourcingEventsWidget: React.FC<ActiveSourcingEventsWidgetProp
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden flex flex-col h-full">
+    <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden flex flex-col h-[390px]">
       {/* Header */}
-      <div className="p-4 sm:p-4.5 border-b border-slate-100 flex items-center justify-between gap-3">
+      <div className="p-3.5 sm:p-4 border-b border-slate-100 flex items-center justify-between gap-3 shrink-0">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 ring-1 ring-purple-500/20 flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 ring-1 ring-indigo-500/20 flex items-center justify-center shrink-0">
             <Layers className="w-4 h-4" />
           </div>
           <div className="flex items-center gap-2">
             <h2 className="text-sm font-bold text-slate-900 tracking-tight">Active Sourcing &amp; Tenders</h2>
-            <span className="px-2 py-0.2 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+            <span className="px-2 py-0.2 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
               {activeEvents.length} Active
             </span>
           </div>
@@ -86,30 +83,30 @@ export const ActiveSourcingEventsWidget: React.FC<ActiveSourcingEventsWidgetProp
 
         <div className="flex items-center gap-3">
           <div className="hidden sm:block text-right">
-            <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Tender Pipeline</div>
-            <div className="text-xs font-bold font-mono text-purple-700">
+            <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Pipeline</div>
+            <div className="text-xs font-bold font-mono text-slate-900">
               ${totalPipeline.toLocaleString()}
             </div>
           </div>
           <button
             onClick={() => onNavigateToRfps()}
-            className="text-xs text-purple-700 hover:text-purple-900 font-semibold inline-flex items-center gap-1 group cursor-pointer"
+            className="text-xs text-slate-600 hover:text-slate-900 font-semibold inline-flex items-center gap-1 group cursor-pointer"
           >
             <span>All Bids</span>
-            <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform text-slate-400" />
           </button>
         </div>
       </div>
 
       {/* Events List */}
-      <div className="divide-y divide-slate-100 flex-1 overflow-y-auto min-h-[220px]">
+      <div className="divide-y divide-slate-100 flex-1 overflow-y-auto">
         {activeEvents.length === 0 ? (
-          <div className="p-8 text-center text-slate-400">
-            <Layers className="w-8 h-8 mx-auto mb-2 opacity-40 text-slate-400" />
+          <div className="p-8 text-center text-slate-400 h-full flex flex-col items-center justify-center">
+            <Layers className="w-8 h-8 mb-2 opacity-40 text-slate-400" />
             <p className="text-xs font-medium">No active tenders for the selected view.</p>
             <button
               onClick={() => onNavigateToRfps()}
-              className="mt-2 text-xs text-purple-600 hover:text-purple-700 font-semibold"
+              className="mt-2 text-xs text-indigo-600 hover:text-indigo-700 font-semibold cursor-pointer"
             >
               Browse Sourcing Portal &rarr;
             </button>
@@ -121,25 +118,25 @@ export const ActiveSourcingEventsWidget: React.FC<ActiveSourcingEventsWidgetProp
               <div 
                 key={event.id}
                 onClick={() => onNavigateToRfps(event.id)}
-                className="p-3.5 sm:p-4 hover:bg-slate-50/80 transition cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
+                className="p-3 sm:px-4 sm:py-3 hover:bg-slate-50/80 transition cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 group"
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-mono text-[11px] font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded">
+                    <span className="font-mono text-[10px] font-bold text-slate-700 bg-slate-100 px-1.5 py-0.2 rounded">
                       {event.eventNumber}
                     </span>
-                    <span className="text-[11px] font-bold text-purple-700">
+                    <span className="text-[10px] font-bold text-indigo-700">
                       [{event.type}]
                     </span>
                     {getStatusBadge(event.status)}
-                    <span className="text-[11px] text-slate-400 hidden sm:inline">•</span>
+                    <span className="text-slate-300 hidden sm:inline">•</span>
                     <span className="text-[11px] text-slate-500 truncate flex items-center gap-1">
-                      <Building2 className="w-3 h-3 text-slate-400" />
+                      <Building2 className="w-3 h-3 text-slate-400 shrink-0" />
                       {event.buyerName}
                     </span>
                   </div>
 
-                  <h3 className="text-xs sm:text-sm font-semibold text-slate-900 group-hover:text-purple-700 transition mt-1 truncate">
+                  <h3 className="text-xs font-semibold text-slate-900 group-hover:text-indigo-700 transition mt-1 truncate">
                     {event.title}
                   </h3>
 
@@ -153,10 +150,6 @@ export const ActiveSourcingEventsWidget: React.FC<ActiveSourcingEventsWidgetProp
                       <Clock className="w-3 h-3 text-amber-500" />
                       Deadline: {event.submissionDeadline}
                     </span>
-                    <span className="text-slate-300">•</span>
-                    <span className="text-slate-500">
-                      {event.lineItems?.length || 0} Line Items
-                    </span>
                   </div>
                 </div>
 
@@ -169,11 +162,11 @@ export const ActiveSourcingEventsWidget: React.FC<ActiveSourcingEventsWidgetProp
                     }}
                     className={`px-3 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition flex items-center gap-1 cursor-pointer ${
                       isInvited
-                        ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-purple-600/20'
+                        ? 'bg-slate-900 hover:bg-slate-800 text-white shadow-xs'
                         : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
                     }`}
                   >
-                    <span>{isInvited ? 'Submit Bid' : 'View Tender'}</span>
+                    <span>{isInvited ? 'Submit Bid' : 'View'}</span>
                     <ChevronRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -184,13 +177,14 @@ export const ActiveSourcingEventsWidget: React.FC<ActiveSourcingEventsWidgetProp
       </div>
 
       {/* Footer bar */}
-      <div className="p-2.5 px-4 bg-slate-50/70 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-        <span className="font-mono font-medium text-purple-700">
-          Electronic Bid Submissions Open
+      <div className="p-2.5 px-4 bg-slate-50/70 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 shrink-0">
+        <span className="font-medium text-slate-600 flex items-center gap-1">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          <span>Bidding Portal Active</span>
         </span>
         <button
           onClick={() => onNavigateToRfps()}
-          className="font-semibold text-purple-700 hover:text-purple-800 transition cursor-pointer"
+          className="font-semibold text-indigo-700 hover:text-indigo-800 transition cursor-pointer"
         >
           View All RFPs ({activeEvents.length}) &rarr;
         </button>

@@ -88,24 +88,19 @@ export const CashflowRunwayChart: React.FC<CashflowRunwayChartProps> = ({
   const activePoint = activeHoverIdx !== null ? data[activeHoverIdx] : null;
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-2xs space-y-4">
+    <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-2xs space-y-4 h-full flex flex-col justify-between">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
-        <div>
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-200/70 text-emerald-700 flex items-center justify-center shrink-0">
-              <TrendingUp className="w-3.5 h-3.5" />
-            </div>
-            <h3 className="text-sm font-semibold text-slate-900 tracking-tight">
-              Cash Runway &amp; Liquidity Flow
-            </h3>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
-              +14.8% MoM
-            </span>
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-200/70 text-emerald-700 flex items-center justify-center shrink-0">
+            <TrendingUp className="w-3.5 h-3.5" />
           </div>
-          <p className="text-[11px] text-slate-500 mt-0.5">
-            Billed receivables vs. cash collected across verified buyer accounts
-          </p>
+          <h3 className="text-sm font-semibold text-slate-900 tracking-tight">
+            Cash Runway &amp; Liquidity Flow
+          </h3>
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+            +14.8% MoM
+          </span>
         </div>
 
         {/* Controls: Mode Switcher & Timeframe Tabs */}

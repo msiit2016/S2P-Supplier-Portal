@@ -263,7 +263,7 @@ export const SupplierDashboard: React.FC = () => {
     try {
       setIsSyncing(true);
       await loadDashboardData();
-      setToastMessage('Master Profile & ERP ledger synced across all connected buyers.');
+      setToastMessage('Master Profile & transaction ledger synced across all connected buyers.');
       setTimeout(() => setToastMessage(null), 4000);
     } finally {
       setTimeout(() => setIsSyncing(false), 500);
@@ -326,7 +326,7 @@ export const SupplierDashboard: React.FC = () => {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-12">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-xl border border-slate-700 text-xs font-semibold flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2">
@@ -342,8 +342,6 @@ export const SupplierDashboard: React.FC = () => {
         selectedBuyerId={selectedBuyerId}
         onSelectBuyerId={(id) => setSelectedBuyerId(id)}
         onNavigate={(route, state) => navigate(route, state)}
-        onSyncAll={handleManualSync}
-        isSyncing={isSyncing}
       />
 
       {/* Minimal 4-KPI Metric Strip with Sparklines & Actionable status badges */}
@@ -351,69 +349,75 @@ export const SupplierDashboard: React.FC = () => {
         {/* KPI 1: Active Receivables */}
         <div 
           onClick={() => navigate('/invoices')}
-          className="bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-2xs hover:border-slate-300 transition cursor-pointer group"
+          className="bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-2xs hover:border-slate-300 transition cursor-pointer group flex flex-col justify-between"
           title="View all active receivables & invoice ledger"
         >
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Active Receivables</span>
-            <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 ring-1 ring-emerald-500/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-              <Receipt className="w-3.5 h-3.5" />
+          <div>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Active Receivables</span>
+              <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-700 border border-slate-200/70 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                <Receipt className="w-3.5 h-3.5" />
+              </div>
+            </div>
+            <div className="text-base font-bold text-slate-900 mt-1 font-mono">
+              ${totalReceivables.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
           </div>
-          <div className="text-base font-bold text-slate-900 mt-1 font-mono">
-            ${totalReceivables.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </div>
-          <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
-            <span className="text-[11px] text-slate-500 group-hover:text-emerald-700 font-medium truncate transition">
+          <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 gap-2">
+            <span className="text-[11px] text-slate-500 group-hover:text-emerald-700 font-medium truncate min-w-0 transition">
               {filteredInvoices.length} active invoices
             </span>
-            <Sparkline data={[52000, 58000, 61000, 69000, 72000, 78570]} color="#10b981" width={68} height={20} />
+            <Sparkline data={[52000, 58000, 61000, 69000, 72000, 78570]} color="#10b981" width={60} height={18} />
           </div>
         </div>
 
         {/* KPI 2: Open Purchase Orders */}
         <div 
           onClick={() => navigate('/orders')}
-          className="bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-2xs hover:border-slate-300 transition cursor-pointer group"
+          className="bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-2xs hover:border-slate-300 transition cursor-pointer group flex flex-col justify-between"
           title="View all purchase orders across enterprise vendors"
         >
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Open Orders</span>
-            <div className="w-7 h-7 rounded-lg bg-sky-50 text-sky-600 ring-1 ring-sky-500/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-              <ShoppingCart className="w-3.5 h-3.5" />
+          <div>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Open Orders</span>
+              <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-700 border border-slate-200/70 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                <ShoppingCart className="w-3.5 h-3.5" />
+              </div>
+            </div>
+            <div className="text-base font-bold text-slate-900 mt-1 font-mono">
+              {filteredOrders.length} <span className="text-xs font-normal text-slate-500 font-sans">Orders</span>
             </div>
           </div>
-          <div className="text-base font-bold text-slate-900 mt-1 font-mono">
-            {filteredOrders.length} <span className="text-xs font-normal text-slate-500 font-sans">Orders</span>
-          </div>
-          <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
-            <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">
+          <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 gap-2">
+            <span className="inline-flex items-center text-[10px] font-bold text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 truncate shrink-0">
               2 Require Ack
             </span>
-            <Sparkline data={[3, 4, 4, 5, 5, 6]} color="#0284c7" width={68} height={20} />
+            <Sparkline data={[3, 4, 4, 5, 5, 6]} color="#6366f1" width={60} height={18} />
           </div>
         </div>
 
         {/* KPI 3: In-Transit ASNs */}
         <div 
           onClick={() => navigate('/asns')}
-          className="bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-2xs hover:border-slate-300 transition cursor-pointer group"
+          className="bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-2xs hover:border-slate-300 transition cursor-pointer group flex flex-col justify-between"
           title="Track active carrier shipments & dispatch new ASNs"
         >
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">In-Transit Shipments</span>
-            <div className="w-7 h-7 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-500/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-              <Truck className="w-3.5 h-3.5" />
+          <div>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">In-Transit Shipments</span>
+              <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-700 border border-slate-200/70 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                <Truck className="w-3.5 h-3.5" />
+              </div>
+            </div>
+            <div className="text-base font-bold text-slate-900 mt-1 font-mono">
+              {inTransitAsnCount} <span className="text-xs font-normal text-slate-500 font-sans">Shipments</span>
             </div>
           </div>
-          <div className="text-base font-bold text-slate-900 mt-1 font-mono">
-            {inTransitAsnCount} <span className="text-xs font-normal text-slate-500 font-sans">Shipments</span>
-          </div>
-          <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
-            <span className="text-[10px] font-semibold text-teal-800 bg-teal-50 px-1.5 py-0.2 rounded border border-teal-200">
+          <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 gap-2">
+            <span className="inline-flex items-center text-[10px] font-semibold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 truncate shrink-0">
               On Schedule
             </span>
-            <Sparkline data={[1, 2, 1, 3, 2, 2]} color="#0d9488" width={68} height={20} />
+            <Sparkline data={[1, 2, 1, 3, 2, 2]} color="#64748b" width={60} height={18} />
           </div>
         </div>
 
@@ -421,45 +425,49 @@ export const SupplierDashboard: React.FC = () => {
         {settings.earlyPaymentHighlighting ? (
           <div 
             onClick={() => navigate('/invoices', { earlyPay: true, invoiceNumber: 'INV-2026-022', timestamp: Date.now() })}
-            className="bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-2xs hover:border-slate-300 transition cursor-pointer group"
+            className="bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-2xs hover:border-slate-300 transition cursor-pointer group flex flex-col justify-between"
             title="View accelerated cash payout offers"
           >
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Early Cash Available</span>
-              <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 ring-1 ring-amber-500/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                <Zap className="w-3.5 h-3.5" />
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Early Cash Available</span>
+                <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-700 border border-amber-200/70 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <Zap className="w-3.5 h-3.5" />
+                </div>
+              </div>
+              <div className="text-base font-bold text-slate-900 mt-1 font-mono">
+                ${acceleratedCashAvailable > 0 ? acceleratedCashAvailable.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '30,870.00'}
               </div>
             </div>
-            <div className="text-base font-bold text-slate-900 mt-1 font-mono">
-              ${acceleratedCashAvailable > 0 ? acceleratedCashAvailable.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '30,870.00'}
-            </div>
-            <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
-              <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">
+            <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 gap-2">
+              <span className="inline-flex items-center text-[10px] font-bold text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 truncate shrink-0">
                 Instant Eligible
               </span>
-              <Sparkline data={[28000, 34000, 39000, 44000, 51594]} color="#d97706" width={68} height={20} />
+              <Sparkline data={[28000, 34000, 39000, 44000, 51594]} color="#d97706" width={60} height={18} />
             </div>
           </div>
         ) : (
           <div 
             onClick={() => navigate('/invoices')}
-            className="bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-2xs hover:border-slate-300 transition cursor-pointer group"
+            className="bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-2xs hover:border-slate-300 transition cursor-pointer group flex flex-col justify-between"
             title="View settled invoice history"
           >
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Settled &amp; Paid</span>
-              <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 ring-1 ring-emerald-500/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                <CheckCircle2 className="w-3.5 h-3.5" />
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Settled &amp; Paid</span>
+                <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-200/70 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                </div>
+              </div>
+              <div className="text-base font-bold text-slate-900 mt-1 font-mono">
+                $115,480.00
               </div>
             </div>
-            <div className="text-base font-bold text-slate-900 mt-1 font-mono">
-              $115,480.00
-            </div>
-            <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
-              <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
+            <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 gap-2">
+              <span className="inline-flex items-center text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 truncate shrink-0">
                 100% On-Time
               </span>
-              <Sparkline data={[82000, 91000, 98000, 104000, 115480]} color="#10b981" width={68} height={20} />
+              <Sparkline data={[82000, 91000, 98000, 104000, 115480]} color="#10b981" width={60} height={18} />
             </div>
           </div>
         )}
