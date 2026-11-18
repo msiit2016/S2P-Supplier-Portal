@@ -12,22 +12,28 @@ import { useSharedRfps, SourcingEvent } from '../../services/rfpService.js';
 
 interface ActiveSourcingEventsWidgetProps {
   onNavigateToRfps: (rfpId?: string) => void;
+  selectedBuyerOrgIds?: string[];
   selectedBuyerOrgId?: string;
 }
 
 export const ActiveSourcingEventsWidget: React.FC<ActiveSourcingEventsWidgetProps> = ({
   onNavigateToRfps,
+  selectedBuyerOrgIds,
   selectedBuyerOrgId
 }) => {
   const { events } = useSharedRfps();
 
-  // Filter by buyer if a specific buyer is selected
+  // Filter by buyer if a specific buyer is selected (supports multi-select)
   const filteredEvents = React.useMemo(() => {
+    if (selectedBuyerOrgIds && selectedBuyerOrgIds.length > 0) {
+      if (selectedBuyerOrgIds.includes('ALL')) return events;
+      return events.filter((e: SourcingEvent) => selectedBuyerOrgIds.includes(e.buyerOrgId));
+    }
     if (!selectedBuyerOrgId || selectedBuyerOrgId === 'ALL') {
       return events;
     }
     return events.filter((e: SourcingEvent) => e.buyerOrgId === selectedBuyerOrgId);
-  }, [events, selectedBuyerOrgId]);
+  }, [events, selectedBuyerOrgIds, selectedBuyerOrgId]);
 
   const activeEvents = filteredEvents.filter((e: SourcingEvent) => e.status !== 'AWARDED');
   const totalPipeline = activeEvents.reduce((acc: number, curr: SourcingEvent) => acc + (curr.estimatedValue || 0), 0);

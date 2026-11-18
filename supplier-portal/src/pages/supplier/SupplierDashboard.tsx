@@ -157,7 +157,7 @@ export const SupplierDashboard: React.FC = () => {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [asns, setAsns] = useState<AdvanceShippingNotice[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedBuyerId, setSelectedBuyerId] = useState<string>('ALL');
+  const [selectedBuyerIds, setSelectedBuyerIds] = useState<string[]>(['ALL']);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
 
@@ -278,21 +278,23 @@ export const SupplierDashboard: React.FC = () => {
     return i.totalAmount || 0;
   };
 
-  // Filter dataset based on selected buyer
+  // Filter dataset based on selected buyer(s) (supports multi-select)
+  const isAllBuyers = selectedBuyerIds.includes('ALL') || selectedBuyerIds.length === 0 || selectedBuyerIds.length === buyers.length;
+
   const filteredOrders = useMemo(() => {
-    if (selectedBuyerId === 'ALL') return orders;
-    return orders.filter(o => o.buyerOrgId === selectedBuyerId);
-  }, [orders, selectedBuyerId]);
+    if (isAllBuyers) return orders;
+    return orders.filter(o => selectedBuyerIds.includes(o.buyerOrgId));
+  }, [orders, selectedBuyerIds, isAllBuyers]);
 
   const filteredInvoices = useMemo(() => {
-    if (selectedBuyerId === 'ALL') return invoices;
-    return invoices.filter(i => i.buyerOrgId === selectedBuyerId);
-  }, [invoices, selectedBuyerId]);
+    if (isAllBuyers) return invoices;
+    return invoices.filter(i => selectedBuyerIds.includes(i.buyerOrgId));
+  }, [invoices, selectedBuyerIds, isAllBuyers]);
 
   const filteredAsns = useMemo(() => {
-    if (selectedBuyerId === 'ALL') return asns;
-    return asns.filter(a => a.buyerOrgId === selectedBuyerId);
-  }, [asns, selectedBuyerId]);
+    if (isAllBuyers) return asns;
+    return asns.filter(a => selectedBuyerIds.includes(a.buyerOrgId));
+  }, [asns, selectedBuyerIds, isAllBuyers]);
 
   // Calculations with resilient defaults for Acme Industrial Tech Inc.
   const totalReceivables = filteredInvoices.length > 0
@@ -339,8 +341,8 @@ export const SupplierDashboard: React.FC = () => {
       <SupplierProfileGovernanceHeader
         globalProfile={globalProfile}
         buyers={buyers}
-        selectedBuyerId={selectedBuyerId}
-        onSelectBuyerId={(id) => setSelectedBuyerId(id)}
+        selectedBuyerIds={selectedBuyerIds}
+        onSelectBuyerIds={(ids) => setSelectedBuyerIds(ids)}
         onNavigate={(route, state) => navigate(route, state)}
       />
 
@@ -489,7 +491,7 @@ export const SupplierDashboard: React.FC = () => {
         <div className="lg:col-span-7 flex flex-col">
           <ActiveSourcingEventsWidget
             onNavigateToRfps={(rfpId) => navigate('/rfps', rfpId ? { rfpId } : undefined)}
-            selectedBuyerOrgId={selectedBuyerId}
+            selectedBuyerOrgIds={selectedBuyerIds}
           />
         </div>
 
