@@ -1067,7 +1067,19 @@ export const OnboardingRequest: React.FC = () => {
   const [activeStageDetail, setActiveStageDetail] = useState<number | null>(null);
 
   // Left sidebar minimize / maximize state (ChatGPT-style collapse)
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 1440 && isAgentDocked) {
+      return true;
+    }
+    return false;
+  });
+
+  // Auto-collapse left sidebar when Ava agent is docked on screens < 1440px to give the center form pane room
+  useEffect(() => {
+    if (isAgentDocked && typeof window !== 'undefined' && window.innerWidth < 1440) {
+      setSidebarCollapsed(true);
+    }
+  }, [isAgentDocked]);
 
   // Top lifecycle journey banner expand / collapse state (saves 140px+ vertical form space)
   const [lifecycleExpanded, setLifecycleExpanded] = useState(false);
@@ -4322,7 +4334,7 @@ export const OnboardingRequest: React.FC = () => {
   }
 
   return (
-    <div className="space-y-3 flex flex-col h-[calc(100vh-125px)] min-h-[600px]">
+    <div className="space-y-2.5 flex flex-col flex-1 h-full min-h-0">
       {/* Top Breadcrumb & Return to Directory & Global Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs text-slate-500 shrink-0 px-0.5">
         <div className="flex items-center gap-2.5 flex-wrap">
@@ -5165,11 +5177,15 @@ export const OnboardingRequest: React.FC = () => {
               </div>
 
               {/* SECTION 1: BASIC DETAILS & CORPORATE GOVERNANCE (UNIFIED SINGLE GRID) */}
-              {activeStep === 1 && (
+              {activeStep === 1 && (() => {
+                const fieldSpan = isAgentDocked && !sidebarCollapsed ? 'lg:col-span-6 xl:col-span-3' : isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2';
+                const subcategorySpan = isAgentDocked && !sidebarCollapsed ? 'lg:col-span-6 xl:col-span-3' : 'lg:col-span-3';
+
+                return (
                 <div className="border border-slate-200 rounded-xl bg-white shadow-2xs p-4 sm:p-5 lg:p-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 sm:gap-4.5">
                     {/* Legal Company Name */}
-                    <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                    <div className={`space-y-1.5 ${fieldSpan}`}>
                       <div className="flex items-center justify-between min-h-[20px]">
                         <div className="flex items-center gap-1.5 min-w-0">
                           <label className="text-xs font-semibold text-slate-700 truncate" title="Legal Company Name">
@@ -5201,7 +5217,7 @@ export const OnboardingRequest: React.FC = () => {
                     </div>
 
                     {/* Doing Business As (Trade Name) */}
-                    <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                    <div className={`space-y-1.5 ${fieldSpan}`}>
                       <div className="flex items-center justify-between min-h-[20px]">
                         <label className="text-xs font-semibold text-slate-700 truncate" title="Doing Business As">
                           Doing Business As
@@ -5225,7 +5241,7 @@ export const OnboardingRequest: React.FC = () => {
                     </div>
 
                     {/* Formally Known As / Formerly Known As */}
-                    <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                    <div className={`space-y-1.5 ${fieldSpan}`}>
                       <div className="flex items-center justify-between min-h-[20px]">
                         <label className="text-xs font-semibold text-slate-700 truncate" title="Formally Known As">
                           Formally Known As
@@ -5249,7 +5265,7 @@ export const OnboardingRequest: React.FC = () => {
                     </div>
 
                     {/* Origination */}
-                    <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                    <div className={`space-y-1.5 ${fieldSpan}`}>
                       <div className="flex items-center justify-between min-h-[20px]">
                         <label className="text-xs font-semibold text-slate-700 truncate" title="Origination">
                           Origination
@@ -5264,7 +5280,7 @@ export const OnboardingRequest: React.FC = () => {
                     </div>
 
                     {/* Partner Status */}
-                    <div id="partnerStatus" className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'} rounded-xl transition ${
+                    <div id="partnerStatus" className={`space-y-1.5 ${fieldSpan} rounded-xl transition ${
                       isFieldHighlighted('partnerStatus') ? 'ring-2 ring-rose-500 border border-rose-400 p-1 rounded-xl bg-rose-50/30' : ''
                     }`}>
                       <div className="flex items-center justify-between min-h-[20px]">
@@ -5282,7 +5298,7 @@ export const OnboardingRequest: React.FC = () => {
                     </div>
 
                     {/* Supplier Manager Name */}
-                    <div id="supplierManager" className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'} rounded-xl transition ${
+                    <div id="supplierManager" className={`space-y-1.5 ${fieldSpan} rounded-xl transition ${
                       isFieldHighlighted('supplierManager') ? 'ring-2 ring-rose-500 border border-rose-400 p-1 rounded-xl bg-rose-50/30' : ''
                     }`}>
                       <div className="flex items-center justify-between min-h-[20px]">
@@ -5301,7 +5317,7 @@ export const OnboardingRequest: React.FC = () => {
                     </div>
 
                     {/* Does company have DUNS */}
-                    <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                    <div className={`space-y-1.5 ${fieldSpan}`}>
                       <div className="flex items-center justify-between min-h-[20px]">
                         <label className="text-xs font-semibold text-slate-700 truncate" title="Does your company have DUNS Numbers?">
                           Has D&B DUNS Number?
@@ -5318,7 +5334,7 @@ export const OnboardingRequest: React.FC = () => {
 
                     {/* DUNS Number */}
                     {hasDuns && (
-                      <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                      <div className={`space-y-1.5 ${fieldSpan}`}>
                         <div className="flex items-center justify-between min-h-[20px]">
                           <label className="text-xs font-semibold text-slate-700 truncate" title="DUNS Number">
                             DUNS Number <span className="text-red-500">*</span>
@@ -5345,7 +5361,7 @@ export const OnboardingRequest: React.FC = () => {
                     )}
 
                     {/* Normalised Corporate Name */}
-                    <div className={`space-y-1.5 ${hasDuns ? (isAgentDocked ? 'lg:col-span-6' : 'lg:col-span-2') : (isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-4')}`}>
+                    <div className={`space-y-1.5 ${hasDuns ? (isAgentDocked ? 'lg:col-span-6' : 'lg:col-span-2') : fieldSpan}`}>
                       <div className="flex items-center justify-between min-h-[20px]">
                         <label className="text-xs font-semibold text-slate-700 truncate" title="Normalised Corporate Name">
                           Normalised Corporate Name
@@ -5361,7 +5377,7 @@ export const OnboardingRequest: React.FC = () => {
                     </div>
 
                     {/* Primary Tax Identification Number */}
-                    <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                    <div className={`space-y-1.5 ${fieldSpan}`}>
                       <div className="flex items-center justify-between min-h-[20px]">
                         <div className="flex items-center gap-1.5 min-w-0">
                           <label className="text-xs font-semibold text-slate-700 truncate" title="Primary Tax Identification Number">
@@ -5399,7 +5415,7 @@ export const OnboardingRequest: React.FC = () => {
                     </div>
 
                     {/* Mobile Phone Number with Country Code */}
-                    <div className={`space-y-1.5 ${isAgentDocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                    <div className={`space-y-1.5 ${fieldSpan}`}>
                       <div className="flex items-center justify-between min-h-[20px]">
                         <label className="text-xs font-semibold text-slate-700 truncate" title="Mobile Phone Number">
                           Mobile Phone Number <span className="text-red-500">*</span>
@@ -5466,7 +5482,7 @@ export const OnboardingRequest: React.FC = () => {
                     </div>
 
                     {/* Subcategory */}
-                    <div id="subcategories" className={`space-y-2 lg:col-span-3 rounded-xl transition ${
+                    <div id="subcategories" className={`space-y-2 ${subcategorySpan} rounded-xl transition ${
                       isFieldHighlighted('subcategories') ? 'ring-2 ring-rose-500 border border-rose-400 p-1 rounded-xl bg-rose-50/30' : ''
                     }`}>
                       <div className="h-6 flex items-center gap-1.5 min-w-0">
@@ -5537,7 +5553,7 @@ export const OnboardingRequest: React.FC = () => {
                     </div>
 
                     {/* Service Locations */}
-                    <div id="serviceLocations" className={`space-y-2 lg:col-span-3 rounded-xl transition ${
+                    <div id="serviceLocations" className={`space-y-2 ${subcategorySpan} rounded-xl transition ${
                       isFieldHighlighted('serviceLocations') ? 'ring-2 ring-rose-500 border border-rose-400 p-1 rounded-xl bg-rose-50/30' : ''
                     }`}>
                       <div className="h-6 flex items-center gap-1.5 min-w-0">
@@ -5596,7 +5612,8 @@ export const OnboardingRequest: React.FC = () => {
                     </div>
                   </div>
                 </div>
-              )}
+              );
+            })()}
 
               {/* SECTION 2: BUSINESS INFORMATION (UNIFIED SINGLE GRID) */}
               {activeStep === 2 && (

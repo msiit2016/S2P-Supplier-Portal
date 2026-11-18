@@ -105,7 +105,9 @@ export const SupplierLayout: React.FC<SupplierLayoutProps> = ({ children }) => {
         >
           <div className={`flex-1 ${
             currentRoute.startsWith('/onboarding/detail') || currentRoute.startsWith('/onboarding-request')
-              ? 'max-w-[1750px] mx-auto px-2 sm:px-4 py-2 w-full pb-10' 
+              ? aiDrawerOpen && copilotViewMode === 'DOCK'
+                ? 'w-full px-2 sm:px-3 pt-2 pb-2 flex flex-col h-full min-h-0'
+                : 'max-w-[1750px] mx-auto px-2 sm:px-4 pt-2 pb-2 w-full flex flex-col h-full min-h-0'
               : aiDrawerOpen && copilotViewMode === 'DOCK'
               ? 'w-full px-3 sm:px-5 py-5 pb-16'
               : 'max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 pb-16'

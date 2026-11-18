@@ -1941,7 +1941,7 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({ inline = f
       {/* 1. DOCKED DRAWER VIEW (Standard Desktop Split Screen) */}
       {isDock && (
         <aside 
-          className="w-full lg:w-[420px] xl:w-[450px] shrink-0 border-l border-slate-200 flex flex-col h-full max-h-full overflow-hidden shadow-xs bg-white"
+          className="w-full lg:w-[360px] xl:w-[380px] 2xl:w-[400px] shrink-0 border-l border-slate-200 flex flex-col h-full max-h-full overflow-hidden shadow-xs bg-white"
         >
           {renderAgentInner()}
         </aside>
