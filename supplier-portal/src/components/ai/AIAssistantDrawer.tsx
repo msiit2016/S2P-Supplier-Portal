@@ -1989,30 +1989,30 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({ inline = f
 
         const getDynamicPageContextDescription = (route: string, pageName: string) => {
           if (route.startsWith('/onboarding') || route.startsWith('/onboarding-request')) {
-            return 'Assisting with vendor onboarding: auto-fill verified fields from Master Profile, W-9 tax certificate OCR, and compliance sign-off.';
+            return 'Auto-fill questionnaire, OCR W-9 tax forms, and verify mandatory compliance.';
           }
           if (route.startsWith('/invoices')) {
-            return 'Assisting with commercial billing: 3-way PO matching, payment term tracking, invoice dispute resolution, and early cash payout.';
+            return '3-way PO matching, payment term audits, dispute resolution & early payout.';
           }
           if (route.startsWith('/orders') || route.startsWith('/purchase-orders')) {
-            return 'Assisting with purchase order execution: line-item acknowledgments, order change requests, delivery schedules, and fulfillment.';
+            return 'PO line-item acknowledgments, order change tracking & delivery schedules.';
           }
           if (route.startsWith('/shipments') || route.startsWith('/asns')) {
-            return 'Assisting with logistics and dispatch: Advance Shipping Notices (ASNs), carrier tracking, delivery ETAs, and receiving dock manifests.';
+            return 'Track ASNs, carrier telemetry, delivery ETAs & receiving manifests.';
           }
           if (route.startsWith('/rfps') || route.startsWith('/bids') || route.startsWith('/sourcing')) {
-            return 'Assisting with strategic sourcing: RFP questionnaire responses, compliance validation, pricing sheet calculations, and bid submission.';
+            return 'Draft proposal responses, verify compliance clauses & commercial pricing.';
           }
           if (route.startsWith('/catalog') || route.startsWith('/catalog-vault')) {
-            return 'Assisting with catalog management: UNSPSC category mapping, unit pricing contracts, and ERP item master synchronization.';
+            return 'UNSPSC category mapping, unit pricing contracts & ERP item master sync.';
           }
           if (route.startsWith('/documents') || route.startsWith('/vault') || route.startsWith('/doc-vault')) {
-            return 'Assisting with compliance vault: ISO certifications, SOC2 audit reports, insurance COIs, and document expiry alerts.';
+            return 'Verify ISO certificates, SOC2 reports, insurance COIs & expiry alerts.';
           }
           if (route === '/' || route.startsWith('/dashboard')) {
-            return 'Assisting with executive operations: live cash pipeline analysis, PO-to-cash velocity, overdue invoices, and active fulfillment bottlenecks.';
+            return 'Live cash pipeline, PO-to-cash velocity, overdue invoices & fulfillment bottlenecks.';
           }
-          return `Real-time procurement intelligence and automated workflow assistance for ${pageName}.`;
+          return `Real-time AI assistance, workflow automation & compliance for ${pageName}.`;
         };
 
         return (
@@ -2025,76 +2025,65 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({ inline = f
             onMouseDown={handleLauncherMouseDown}
             className="z-[140] select-none cursor-grab active:cursor-grabbing group animate-in fade-in"
           >
-            {/* Rich Context Popover Card (Revealed on Hover - Clean Light Enterprise Card) */}
+            {/* Ultra-Sleek Hover Popover Card (Linear / Notion Style - Compact ~115px) */}
             <div 
               className={`absolute ${
                 isNearRightEdge ? 'right-0' : 'left-0'
               } ${
                 isNearTopEdge ? 'top-full mt-2.5' : 'bottom-full mb-2.5'
-              } w-[300px] sm:w-[320px] p-3.5 bg-white text-slate-800 rounded-2xl shadow-xl shadow-slate-900/15 border border-slate-200/90 ring-1 ring-slate-900/5 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-200 transform ${
+              } w-[260px] sm:w-[275px] p-3 bg-white text-slate-800 rounded-2xl shadow-xl shadow-slate-900/15 border border-slate-200/90 ring-1 ring-slate-900/5 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-200 transform ${
                 isNearTopEdge ? '-translate-y-1 group-hover:translate-y-0' : 'translate-y-1 group-hover:translate-y-0'
               } z-50`}
             >
-              {/* 1. Header Row: Avatar, Title & Subagent Status */}
-              <div className="flex items-center justify-between pb-2.5 border-b border-slate-100">
-                <div className="flex items-center space-x-2.5 min-w-0">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
-                    <Sparkles className="w-4 h-4" />
+              {/* 1. Integrated Header: Avatar, Name, Page Context & Subagent Tag */}
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                <div className="flex items-center space-x-2 min-w-0">
+                  <div className="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                    <Sparkles className="w-3.5 h-3.5" />
                   </div>
                   <div className="min-w-0">
-                    <div className="text-xs font-bold text-slate-900 truncate tracking-tight">
-                      Ava Agent
+                    <div className="text-xs font-bold text-slate-900 truncate leading-tight flex items-center gap-1.5">
+                      <span>Ava Agent</span>
                     </div>
-                    <div className="text-[10px] text-emerald-600 font-semibold flex items-center gap-1 mt-0.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                      <span>Ready to assist</span>
+                    <div className="text-[10px] text-slate-500 font-medium truncate">
+                      {config.pageContextName}
                     </div>
                   </div>
                 </div>
                 <span 
-                  className="text-[10px] font-mono font-semibold text-slate-600 bg-slate-100 border border-slate-200/90 px-2 py-0.5 rounded-md shrink-0" 
+                  className="text-[9px] font-mono font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-1.5 py-0.5 rounded shrink-0" 
                   title={activeSubagent?.name || 'Verisource Agent'}
                 >
                   {activeSubagent?.shortName || 'Agent'}
                 </span>
               </div>
 
-              {/* 2. Page Context Box & Dynamic Description */}
-              <div className="py-2.5 space-y-2">
-                <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-2.5 space-y-1">
-                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    Active Page Context
-                  </div>
-                  <div className="text-xs font-bold text-slate-900 leading-snug break-words">
-                    {config.pageContextName}
-                  </div>
-                </div>
-                <p className="text-[11px] text-slate-600 leading-relaxed px-0.5">
-                  {getDynamicPageContextDescription(currentRoute, config.pageContextName)}
-                </p>
-              </div>
+              {/* 2. Punchy Dynamic Capability Summary */}
+              <p className="py-2 text-[11px] text-slate-600 leading-relaxed">
+                {getDynamicPageContextDescription(currentRoute, config.pageContextName)}
+              </p>
 
-              {/* 3. Action Footer: 1-Click Open Button + Drag Hint */}
-              <div className="pt-2 border-t border-slate-100 space-y-1.5">
+              {/* 3. Subtle Action / Hint Footer */}
+              <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px]">
                 <button
                   type="button"
                   onClick={() => {
                     setCopilotViewMode('DOCK');
                     setAiDrawerOpen(true);
                   }}
-                  className="w-full py-2 px-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition shadow-xs cursor-pointer group/btn"
+                  className="font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 transition cursor-pointer"
                 >
-                  <span>Open Ava Agent</span>
-                  <ChevronRight className="w-3.5 h-3.5 text-emerald-400 group-hover/btn:translate-x-0.5 transition-transform" />
+                  <span>Click bubble to chat</span>
+                  <ChevronRight className="w-3 h-3 text-emerald-500" />
                 </button>
-                <div className="flex items-center justify-center text-[10px] text-slate-400 gap-1 select-none">
-                  <GripHorizontal className="w-3 h-3 text-slate-400" />
-                  <span>Drag bubble anywhere to reposition</span>
-                </div>
+                <span className="text-slate-400 flex items-center gap-1 text-[9px] select-none">
+                  <GripHorizontal className="w-2.5 h-2.5" />
+                  <span>Drag to move</span>
+                </span>
               </div>
             </div>
 
-            {/* Minimal Floating Button: Fixed 48px Circular FAB (Does NOT expand horizontally offscreen) */}
+            {/* Minimal Floating Button: Fixed 48px Circular FAB */}
             <button
               type="button"
               onClick={() => {
@@ -2104,7 +2093,7 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({ inline = f
                 }
               }}
               className="w-12 h-12 rounded-full bg-slate-900/95 hover:bg-slate-900 text-white shadow-xl shadow-slate-950/25 border border-emerald-500/40 hover:border-emerald-400 ring-1 ring-white/10 backdrop-blur-md flex items-center justify-center transition-all duration-200 cursor-pointer group-hover:scale-105 active:scale-95 group-hover:shadow-emerald-950/40"
-              title="Ava Agent (Click to Open • Drag to Reposition)"
+              aria-label="Open Ava Agent"
             >
               {/* Sparkles Icon with Online Pulse Dot */}
               <div className="relative flex items-center justify-center">
