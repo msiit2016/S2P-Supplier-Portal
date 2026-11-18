@@ -2205,8 +2205,8 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
 
       {/* Main Two-Column Layout (Sidebar Stepper on Left, Active Section on Right) */}
       <div className="flex flex-col lg:flex-row gap-5 items-start">
-        {/* Left Vertical Stepper Sidebar */}
-        <aside className="w-full lg:w-64 xl:w-72 shrink-0 lg:sticky lg:top-4 space-y-2 hidden lg:block">
+        {/* Left Vertical Stepper Sidebar (Sticky below main navbar) */}
+        <aside className="w-full lg:w-64 xl:w-72 shrink-0 lg:sticky lg:top-[72px] space-y-2 hidden lg:block">
           {/* Header */}
           <div className="flex items-center justify-between px-1.5 py-1">
             <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center space-x-1.5">
