@@ -4128,7 +4128,7 @@ export const OnboardingRequest: React.FC = () => {
                 3 <span className="text-xs font-normal text-slate-500 font-sans">Active Requests</span>
               </div>
               <div className="text-[11px] text-emerald-700 mt-0.5 font-medium truncate">
-                100% Verified Passport
+                100% Verified Profile
               </div>
             </div>
             <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">

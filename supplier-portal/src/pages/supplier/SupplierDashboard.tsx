@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { usePortal } from '../../context/PortalContext.js';
 import { useAuth } from '../../context/AuthContext.js';
 import { ApiClient } from '../../api/client.js';
@@ -20,6 +20,8 @@ import { BuyerRevenueDonutChart } from '../../components/dashboard/BuyerRevenueD
 import { OrderToCashFunnelChart } from '../../components/dashboard/OrderToCashFunnelChart.js';
 import { OperationalSlaTrendChart } from '../../components/dashboard/OperationalSlaTrendChart.js';
 import { PriorityActionCenter } from '../../components/dashboard/PriorityActionCenter.js';
+import { SupplierProfileGovernanceHeader } from '../../components/dashboard/SupplierProfileGovernanceHeader.js';
+import { ActiveSourcingEventsWidget } from '../../components/dashboard/ActiveSourcingEventsWidget.js';
 import { 
   LayoutDashboard,
   Building2, 
@@ -118,29 +120,30 @@ const DEFAULT_BUYERS: BuyerSpecificProfile[] = [
     id: 'bprof-meridian',
     supplierOrgId: 'supp-org-1',
     buyerOrgId: 'buyer-org-3',
-    buyerName: 'Meridian Health Network',
-    buyerLogoText: 'MERI',
+    buyerName: 'Meridian Logistics Global',
+    buyerLogoText: 'MERID',
     relationshipStatus: 'ACTIVE',
-    erpVendorId: 'VEND-7701',
-    connectedSince: 'Oct 2026',
-    annualSpendVolume: 185000,
+    erpVendorId: 'VEND-9104',
+    connectedSince: 'Nov 2025',
+    annualSpendVolume: 110000,
     customRemittanceAccount: {
-      bankName: 'JPMorgan Chase Bank, N.A.',
-      accountEnding: '4921',
-      routingNumberMasked: '••••0021',
+      bankName: 'Wells Fargo Bank, N.A.',
+      accountEnding: '8832',
+      routingNumberMasked: '121000248',
       currency: 'USD',
-      accountNickName: 'Operating Checking Account'
+      accountNickName: 'Commercial Freight Remittance Account'
     },
     negotiatedTerms: {
-      paymentTerms: 'Net 30 Days',
+      paymentTerms: 'Net 30 Standard',
       earlyPaymentEligible: false,
+      customDiscountRate: 0,
       preferredPaymentMethod: 'ACH_CREDIT'
     },
     customQuestionnaires: [],
     customDocumentOverrides: [],
-    customCatalogTier: 'Healthcare Equipment & S2P Telemetry',
+    customCatalogTier: 'Global Freight & Sensors Tier 2',
     lastSyncedAt: new Date().toISOString(),
-    syncCompletenessScore: 100
+    syncCompletenessScore: 98
   }
 ];
 
@@ -154,9 +157,8 @@ export const SupplierDashboard: React.FC = () => {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [asns, setAsns] = useState<AdvanceShippingNotice[]>([]);
   const [loading, setLoading] = useState(false);
-  const [copiedLink, setCopiedLink] = useState(false);
+  const [selectedBuyerId, setSelectedBuyerId] = useState<string>('ALL');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [taskCategoryFilter, setTaskCategoryFilter] = useState<'ALL' | 'ORDER' | 'ASN' | 'INVOICE' | 'ONBOARDING' | 'RFP'>('ALL');
   const [isSyncing, setIsSyncing] = useState(false);
 
   const { tasks: sharedTasks, pendingTasks: sharedPendingTasks } = useSharedTasks();
@@ -198,7 +200,7 @@ export const SupplierDashboard: React.FC = () => {
     loadDashboardData();
   }, [currentUser]);
 
-  // Broadcast live Executive Dashboard context to Ava Copilot
+  // Broadcast live Executive Dashboard context to Ava Agent
   useEffect(() => {
     broadcastPageContext({
       page: 'dashboard',
@@ -212,7 +214,7 @@ export const SupplierDashboard: React.FC = () => {
     });
   }, [buyers, orders, invoices, asns]);
 
-  // Listen to actions dispatched by Ava Copilot
+  // Listen to actions dispatched by Ava Agent
   useEffect(() => {
     const cleanup = onPageAction((action: PageAction) => {
       if (action.action === 'ACCEPT_EARLY_PAYMENT') {
@@ -261,23 +263,11 @@ export const SupplierDashboard: React.FC = () => {
     try {
       setIsSyncing(true);
       await loadDashboardData();
+      setToastMessage('Master Profile & ERP ledger synced across all connected buyers.');
+      setTimeout(() => setToastMessage(null), 4000);
     } finally {
       setTimeout(() => setIsSyncing(false), 500);
     }
-  };
-
-  const handleCopyPublicLink = () => {
-    const slug = globalProfile?.publicPassportSlug || 'acme-industrial-tech';
-    const url = typeof window !== 'undefined'
-      ? `${window.location.origin}/p/${slug}`
-      : `https://verisource.network/p/${slug}`;
-    navigator.clipboard.writeText(url);
-    setCopiedLink(true);
-    setToastMessage('Public Master Profile share link copied to clipboard!');
-    setTimeout(() => {
-      setCopiedLink(false);
-      setToastMessage(null);
-    }, 4000);
   };
 
   const getInvoiceGross = (i: any): number => {
@@ -288,22 +278,43 @@ export const SupplierDashboard: React.FC = () => {
     return i.totalAmount || 0;
   };
 
+  // Filter dataset based on selected buyer
+  const filteredOrders = useMemo(() => {
+    if (selectedBuyerId === 'ALL') return orders;
+    return orders.filter(o => o.buyerOrgId === selectedBuyerId);
+  }, [orders, selectedBuyerId]);
+
+  const filteredInvoices = useMemo(() => {
+    if (selectedBuyerId === 'ALL') return invoices;
+    return invoices.filter(i => i.buyerOrgId === selectedBuyerId);
+  }, [invoices, selectedBuyerId]);
+
+  const filteredAsns = useMemo(() => {
+    if (selectedBuyerId === 'ALL') return asns;
+    return asns.filter(a => a.buyerOrgId === selectedBuyerId);
+  }, [asns, selectedBuyerId]);
+
   // Calculations with resilient defaults for Acme Industrial Tech Inc.
-  const totalReceivables = invoices.length > 0
-    ? invoices.filter(i => i.paymentStatus !== 'PAID').reduce((sum, i) => sum + getInvoiceGross(i), 0)
+  const totalReceivables = filteredInvoices.length > 0
+    ? filteredInvoices.filter(i => i.paymentStatus !== 'PAID').reduce((sum, i) => sum + getInvoiceGross(i), 0)
     : 78570.00;
 
-  const totalPOValue = orders.length > 0
-    ? orders.reduce((sum, o) => sum + (o.totalAmount || 0), 0)
+  const totalPOValue = filteredOrders.length > 0
+    ? filteredOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0)
     : 214380.00;
 
-  const inTransitAsnCount = asns.filter(a => a.status === 'IN_TRANSIT').length || 2;
+  const inTransitAsnCount = filteredAsns.filter(a => a.status === 'IN_TRANSIT').length || 2;
 
-  const rawAccelerated = invoices
+  const rawAccelerated = filteredInvoices
     .filter(i => i.earlyPaymentOffer?.eligible && i.paymentStatus !== 'PAID')
     .reduce((sum, i) => sum + (i.earlyPaymentOffer?.acceleratedPayoutAmount || 0), 0);
 
   const acceleratedCashAvailable = rawAccelerated > 0 ? rawAccelerated : 51594.30;
+
+  const buyerOptions = [
+    { value: 'ALL', label: 'All Connected Buyers (Portfolio View)' },
+    ...buyers.map(b => ({ value: b.buyerOrgId, label: b.buyerName }))
+  ];
 
   if (loading) {
     return (
@@ -315,37 +326,68 @@ export const SupplierDashboard: React.FC = () => {
   }
 
   return (
-    <div className="space-y-5">
-      {/* Top Banner (Minimal, Balanced, Clean) */}
-      <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        {/* Left: Icon, Title & Subtitle */}
-        <div className="flex items-center gap-3.5">
-          <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200/80 flex items-center justify-center text-slate-700 shrink-0">
-            <LayoutDashboard className="w-5 h-5" />
+    <div className="space-y-4">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-xl border border-slate-700 text-xs font-semibold flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2">
+          <Sparkles className="w-4 h-4 text-emerald-400" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {/* Row 1: Enterprise Profile Governance & Verification Header */}
+      <SupplierProfileGovernanceHeader
+        globalProfile={globalProfile}
+        buyers={buyers}
+        onNavigate={(route, state) => navigate(route, state)}
+        onSyncAll={handleManualSync}
+        isSyncing={isSyncing}
+      />
+
+      {/* Portfolio Scope & Global Multi-Buyer Filter Strip */}
+      <div className="bg-white rounded-xl px-4 py-2.5 border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-slate-400 font-bold uppercase tracking-wider text-[10px] flex items-center gap-1">
+            <Filter className="w-3 h-3 text-slate-400" />
+            <span>Buyer Scope:</span>
+          </span>
+          <div className="w-72">
+            <FilterSelect
+              value={selectedBuyerId}
+              onChange={(e: any) => setSelectedBuyerId(typeof e === 'string' ? e : e?.target?.value || 'ALL')}
+              options={buyerOptions}
+              icon={<Building2 className="w-3.5 h-3.5 text-slate-400" />}
+            />
           </div>
-          <div>
-            <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">Executive Dashboard</h1>
-            <p className="text-xs text-slate-500 font-normal mt-0.5">
-              Real-time overview of cash pipeline, orders, and fulfillment.
-            </p>
-          </div>
+          {selectedBuyerId !== 'ALL' && (
+            <button
+              onClick={() => setSelectedBuyerId('ALL')}
+              className="text-[11px] text-slate-500 hover:text-slate-800 font-medium underline underline-offset-2 ml-1 cursor-pointer"
+            >
+              Reset to Portfolio View
+            </button>
+          )}
         </div>
 
-        {/* Right: Master Profile Quick Action */}
-        <div className="flex items-center gap-2.5 self-end sm:self-auto shrink-0">
+        <div className="flex items-center gap-3 self-end sm:self-auto text-slate-500 text-[11px]">
+          <span className="flex items-center gap-1.5 font-medium">
+            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>ERP Ledger Synced</span>
+          </span>
+          <span className="text-slate-300">•</span>
           <button
-            onClick={() => navigate('/public-profile')}
-            className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center gap-1.5 cursor-pointer"
-            title="View verified master public profile & passport"
+            onClick={handleManualSync}
+            disabled={isSyncing}
+            className="flex items-center gap-1 hover:text-slate-900 transition font-medium cursor-pointer disabled:opacity-50"
+            title="Refresh ERP cache & verified records"
           >
-            <Globe className="w-3.5 h-3.5 text-slate-300" />
-            <span>Master Profile</span>
-            <ArrowUpRight className="w-3 h-3 text-slate-400" />
+            <RotateCw className={`w-3 h-3 ${isSyncing ? 'animate-spin text-emerald-600' : 'text-slate-400'}`} />
+            <span>{isSyncing ? 'Syncing...' : 'Refresh'}</span>
           </button>
         </div>
       </div>
 
-      {/* Minimal 4-KPI Metric Strip with Sparklines */}
+      {/* Minimal 4-KPI Metric Strip with Sparklines & Actionable status badges */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
         {/* KPI 1: Active Receivables */}
         <div 
@@ -364,7 +406,7 @@ export const SupplierDashboard: React.FC = () => {
           </div>
           <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
             <span className="text-[11px] text-slate-500 group-hover:text-emerald-700 font-medium truncate transition">
-              {invoices.length} active invoices
+              {filteredInvoices.length} active invoices
             </span>
             <Sparkline data={[52000, 58000, 61000, 69000, 72000, 78570]} color="#10b981" width={68} height={20} />
           </div>
@@ -383,7 +425,7 @@ export const SupplierDashboard: React.FC = () => {
             </div>
           </div>
           <div className="text-base font-bold text-slate-900 mt-1 font-mono">
-            {orders.length} <span className="text-xs font-normal text-slate-500 font-sans">Orders</span>
+            {filteredOrders.length} <span className="text-xs font-normal text-slate-500 font-sans">Orders</span>
           </div>
           <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
             <span className="text-[11px] text-slate-500 group-hover:text-sky-700 font-medium mt-0.5 truncate transition">
@@ -464,32 +506,27 @@ export const SupplierDashboard: React.FC = () => {
         )}
       </div>
 
-      {/* =========================================================================
-          ROW 2: ORDER-TO-CASH (O2C) PIPELINE WATERFALL (FULL WIDTH MISSION CONTROL)
-          ========================================================================= */}
+      {/* Row 2: Order-to-Cash (O2C) Pipeline Waterfall (Full Width Mission Control) */}
       <OrderToCashFunnelChart 
         onNavigate={(route, params) => navigate(route, params)}
-        orderCount={orders.length || 6}
+        orderCount={filteredOrders.length || 6}
         totalOrderValue={totalPOValue}
         inTransitAsnCount={inTransitAsnCount}
-        invoiceCount={invoices.length || 4}
+        invoiceCount={filteredInvoices.length || 4}
         totalReceivables={totalReceivables}
       />
 
-      {/* =========================================================================
-          ROW 3: FINANCIAL INTELLIGENCE & PRIORITY ACTION CENTER (BALANCED 7 : 5)
-          ========================================================================= */}
+      {/* Row 3: Active Sourcing & Tenders + Priority Action Center (Balanced 7 : 5 Grid) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-stretch">
-        {/* Left (7 cols): Cash Runway & Liquidity Flow Chart */}
+        {/* Left (7 cols): Active Sourcing & Tenders Widget */}
         <div className="lg:col-span-7">
-          <CashflowRunwayChart 
-            onNavigateToInvoices={(params) => navigate('/invoices', params)}
-            earlyPaymentEnabled={settings.earlyPaymentHighlighting}
-            onAccelerateCash={() => navigate('/invoices', { earlyPay: true, invoiceNumber: 'INV-2026-022', timestamp: Date.now() })}
+          <ActiveSourcingEventsWidget
+            onNavigateToRfps={(rfpId) => navigate('/rfps', rfpId ? { rfpId } : undefined)}
+            selectedBuyerOrgId={selectedBuyerId}
           />
         </div>
 
-        {/* Right (5 cols): Compact, Ergonomic Priority Action Center */}
+        {/* Right (5 cols): Priority Action Center */}
         <div className="lg:col-span-5">
           <PriorityActionCenter
             tasks={priorityTasks}
@@ -499,16 +536,14 @@ export const SupplierDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* =========================================================================
-          ROW 4: OPERATIONAL QUALITY RADAR & BUYER CONCENTRATION DONUT (BALANCED 7 : 5)
-          ========================================================================= */}
+      {/* Row 4: Financial Intelligence & Buyer Concentration (Balanced 7 : 5 Grid) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-stretch">
-        {/* Left (7 cols): Operational SLA & Quality Radar */}
+        {/* Left (7 cols): Cash Runway & Liquidity Flow Chart */}
         <div className="lg:col-span-7">
-          <OperationalSlaTrendChart 
-            onNavigateToInvoices={() => navigate('/invoices')}
-            onNavigateToAsns={() => navigate('/asns')}
-            onNavigateToDocuments={() => navigate('/documents')}
+          <CashflowRunwayChart 
+            onNavigateToInvoices={(params) => navigate('/invoices', params)}
+            earlyPaymentEnabled={settings.earlyPaymentHighlighting}
+            onAccelerateCash={() => navigate('/invoices', { earlyPay: true, invoiceNumber: 'INV-2026-022', timestamp: Date.now() })}
           />
         </div>
 
@@ -523,9 +558,14 @@ export const SupplierDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* =========================================================================
-          SECTION 3: OPERATIONS & MASTER VAULTS (BALANCED 4-CARD LAUNCHPAD)
-          ========================================================================= */}
+      {/* Row 5: Operational SLA & Quality Radar */}
+      <OperationalSlaTrendChart 
+        onNavigateToInvoices={() => navigate('/invoices')}
+        onNavigateToAsns={() => navigate('/asns')}
+        onNavigateToDocuments={() => navigate('/documents')}
+      />
+
+      {/* Row 6: Master Operations & Vault Launchpad (4-Card Grid) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
         {/* Buyer Onboarding Card */}
         <div 

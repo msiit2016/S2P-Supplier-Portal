@@ -127,7 +127,7 @@ export const PortalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   // Sync portal mode automatically when user switches, keeping public links intact
   useEffect(() => {
     if (currentUser) {
-      const isPublicLink = currentRoute.startsWith('/p/') || currentRoute.startsWith('/passport/');
+      const isPublicLink = currentRoute.startsWith('/p/') || currentRoute.startsWith('/profile/');
       if (!isPublicLink) {
         if (currentUser.userType === 'SUPPLIER' && portal !== 'SUPPLIER') {
           setPortal('SUPPLIER');

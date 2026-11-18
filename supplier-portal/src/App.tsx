@@ -53,7 +53,7 @@ const AppContent: React.FC = () => {
   // Public View-Only Supplier Profile (Access via shareable URL without requiring login)
   if (
     currentRoute.startsWith('/p/') || 
-    currentRoute.startsWith('/passport/') || 
+    currentRoute.startsWith('/profile/') || 
     currentRoute.startsWith('/share/') ||
     (currentRoute.startsWith('/public-profile/') && currentRoute.split('/').length > 2 && !currentUser)
   ) {

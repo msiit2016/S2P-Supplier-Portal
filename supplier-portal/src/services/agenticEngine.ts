@@ -1310,8 +1310,8 @@ How can I assist with your enterprise profile credentials today?`;
   );
 
   return {
-    agentName: 'MasterPassportAgent',
-    role: 'Master Passport & Trust Agent',
+    agentName: 'MasterProfileAgent',
+    role: 'Master Profile & Trust Agent',
     route: '/public-profile',
     pageContextName: 'Master Public Profile',
     contextMetric: `${completeness}% Verified Golden Record`,

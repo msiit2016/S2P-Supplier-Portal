@@ -17,7 +17,7 @@ Architecture:
     6. SourcingBidsAgent             (/rfps)
     7. ComplianceVaultAgent          (/documents)
     8. ExecutiveSupervisorAgent      (/dashboard)
-    9. MasterPassportAgent           (/public-profile)
+    9. MasterProfileAgent            (/public-profile)
    10. TaskPrioritizationAgent       (/tasks)
    11. FinancialLedgerAgent          (/transactions)
 - AgentRegistry: Routes URLs to corresponding specialized page agent.
@@ -723,7 +723,7 @@ class ExecutiveSupervisorAgent(BaseS2PAgent):
 # 9. MASTER PUBLIC PROFILE AGENT (/public-profile, /master-profile)
 # ==============================================================================
 
-class MasterPassportAgent(BaseS2PAgent):
+class MasterProfileAgent(BaseS2PAgent):
     """
     Manages universal corporate golden record identity, banking remittance routes,
     D&B DUNS validation, and bilateral buyer ERP synchronization.
@@ -758,7 +758,7 @@ class MasterPassportAgent(BaseS2PAgent):
         buyers_count = context.get('connectedBuyersCount', 3)
 
         return (
-            f"Hi! I'm **Ava**, your **Master Passport & Trust Agent**.\n\n"
+            f"Hi! I'm **Ava**, your **Master Profile & Trust Agent**.\n\n"
             f"Your Master Public Profile serves as your universal golden record across the Verisource network:\n"
             f"• **Legal Entity:** {legal}{trade}\n"
             f"• **Verified TIN:** {tax_id} (W-9 matched with zero IRS discrepancy)\n"
@@ -934,7 +934,7 @@ class S2PAgentRegistry:
         InvoicingSettlementAgent("InvoicingSettlementAgent", "Invoicing & Cash Settlement Agent", "/invoices", "Invoices & Settlement"),
         SourcingBidsAgent("SourcingBidsAgent", "Sourcing & Bids Agent", "/rfps", "Sourcing & RFPs"),
         ComplianceVaultAgent("ComplianceVaultAgent", "Compliance & Regulatory Vault Agent", "/documents", "Document Vault"),
-        MasterPassportAgent("MasterPassportAgent", "Master Passport & Trust Agent", "/public-profile", "Master Public Profile"),
+        MasterProfileAgent("MasterProfileAgent", "Master Profile & Trust Agent", "/public-profile", "Master Public Profile"),
         TaskPrioritizationAgent("TaskPrioritizationAgent", "Workflow & Prioritization Agent", "/tasks", "Task Queue"),
         FinancialLedgerAgent("FinancialLedgerAgent", "Financial Ledger & Audit Agent", "/transactions", "All Transactions"),
         ExecutiveSupervisorAgent("ExecutiveSupervisorAgent", "Executive Operations Supervisor", "/dashboard", "Executive Dashboard")

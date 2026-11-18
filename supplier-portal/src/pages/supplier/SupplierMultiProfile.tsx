@@ -146,8 +146,8 @@ export const createBlankSupplierProfile = (
     serviceLocations: [],
     businessUnits: [],
     operatingLanguages: ['English'],
-    publicPassportSlug: slug,
-    passportUrl: `https://verisource.network/p/${slug}`,
+    publicProfileSlug: slug,
+    profileUrl: `https://verisource.network/p/${slug}`,
     isPubliclyListed: false,
     profileCompletionScore: 15,
     verificationBadges: {
@@ -274,8 +274,8 @@ const DEFAULT_ACME_PROFILE: GlobalSupplierProfile = {
     'German',
     'Spanish'
   ],
-  publicPassportSlug: 'acme-industrial-tech',
-  passportUrl: 'https://verisource.network/p/acme-industrial-tech',
+  publicProfileSlug: 'acme-industrial-tech',
+  profileUrl: 'https://verisource.network/p/acme-industrial-tech',
   isPubliclyListed: true,
   profileCompletionScore: 98,
   verificationBadges: {
@@ -1355,11 +1355,11 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
   const selectedBuyer = buyerProfiles.find(b => b.buyerOrgId === selectedBuyerId) || buyerProfiles[0];
 
   const getShareableUrl = () => {
+    const slug = globalProfile?.publicProfileSlug || 'acme-industrial-tech';
     if (typeof window !== 'undefined') {
-      const slug = globalProfile?.publicPassportSlug || 'acme-industrial-tech';
       return `${window.location.origin}/p/${slug}`;
     }
-    return `https://verisource.network/p/${globalProfile?.publicPassportSlug || 'acme-industrial-tech'}`;
+    return `https://verisource.network/p/${slug}`;
   };
 
   const handleCopyLink = () => {
@@ -3349,7 +3349,7 @@ export const SupplierMultiProfile: React.FC<SupplierMultiProfileProps> = ({
         </div>
       </div>
       {/* ========================================================================= */}
-      {/* 4. MODALS: SHARE PASSPORT, EXPORT ONE-PAGER, CONNECT BUYER, INQUIRY       */}
+      {/* 4. MODALS: SHARE MASTER PROFILE, EXPORT ONE-PAGER, CONNECT BUYER, INQUIRY */}
       {/* ========================================================================= */}
 
       {/* Modal 1: Share Profile URL Modal (Minimal Modern Design) */}

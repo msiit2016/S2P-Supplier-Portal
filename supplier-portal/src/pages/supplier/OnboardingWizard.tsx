@@ -688,7 +688,7 @@ export const OnboardingWizard: React.FC = () => {
     const lower = userText.toLowerCase();
     setChatInput('');
 
-    if (lower.includes('auto') || lower.includes('fill') || lower.includes('passport') || lower.includes('profile')) {
+    if (lower.includes('auto') || lower.includes('fill') || lower.includes('sync') || lower.includes('profile')) {
       executeMasterAutoFillTool();
       return;
     }

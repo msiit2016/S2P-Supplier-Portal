@@ -55,8 +55,8 @@ export const globalProfiles: Record<string, GlobalSupplierProfile> = {
       'German',
       'Spanish'
     ],
-    publicPassportSlug: 'acme-industrial-tech',
-    passportUrl: 'https://verisource.network/p/acme-industrial-tech',
+    publicProfileSlug: 'acme-industrial-tech',
+    profileUrl: 'https://verisource.network/p/acme-industrial-tech',
     isPubliclyListed: true,
     profileCompletionScore: 98,
     verificationBadges: {
@@ -483,7 +483,7 @@ export const globalProfiles: Record<string, GlobalSupplierProfile> = {
 // Helper for public unauthenticated access
 export const getPublicProfileBySlug = (slug: string) => {
   const profile = Object.values(globalProfiles).find(
-    p => p.publicPassportSlug === slug || p.supplierOrgId === slug || p.id === slug
+    p => (p as any).publicProfileSlug === slug || p.supplierOrgId === slug || p.id === slug
   ) || globalProfiles['supp-org-1'];
 
   if (!profile) return null;
@@ -688,7 +688,7 @@ router.put('/global', (req: AuthenticatedRequest, res: Response) => {
   };
 
   globalProfiles[supplierOrgId] = updated;
-  res.json({ profile: updated, message: 'Global Master Profile & B2B Trust Passport updated successfully.' });
+  res.json({ profile: updated, message: 'Global Master Profile & Verified Credentials updated successfully.' });
 });
 
 // GET all Connected Buyer Profiles
@@ -758,7 +758,7 @@ router.post('/buyers/:buyerOrgId/sync-ai', (req: AuthenticatedRequest, res: Resp
 
   // Autonomous Agentic Sync Logic
   const syncedFields = [
-    { field: 'legalName', source: 'Global Master Passport', status: 'AUTO_POPULATED', confidence: 1.0 },
+    { field: 'legalName', source: 'Global Master Profile', status: 'AUTO_POPULATED', confidence: 1.0 },
     { field: 'taxId', source: 'IRS W-9 Master Vault (TIN Verified)', status: 'AUTO_POPULATED', confidence: 1.0 },
     { field: 'hqAddress', source: 'Corporate Registration', status: 'AUTO_POPULATED', confidence: 0.99 },
     { field: 'dunsNumber', source: 'D&B Verified Master Record', status: 'AUTO_POPULATED', confidence: 1.0 },
@@ -784,7 +784,7 @@ router.post('/buyers/:buyerOrgId/sync-ai', (req: AuthenticatedRequest, res: Resp
     syncedFieldsCount: syncedFields.length,
     syncedFields,
     unfulfilledDeltas,
-    autonomousAgentNote: `Verisource Copilot auto-mapped ${syncedFields.length} master fields from your Global Passport with 99.4% confidence. ${unfulfilledDeltas.length} buyer-specific requirement(s) flagged for final review.`
+    autonomousAgentNote: `Verisource Copilot auto-mapped ${syncedFields.length} master fields from your Global Master Profile with 99.4% confidence. ${unfulfilledDeltas.length} buyer-specific requirement(s) flagged for final review.`
   });
 });
 
@@ -825,7 +825,7 @@ router.post('/buyers/connect', (req: AuthenticatedRequest, res: Response) => {
       {
         questionId: 'q-new-1',
         questionText: `${buyerName} Standard Vendor Code of Conduct & ESG Declarations`,
-        answer: 'Auto-accepted via Verisource Master B2B Trust Passport',
+        answer: 'Auto-accepted via Verisource Master B2B Trust Profile',
         category: 'Compliance'
       }
     ],
@@ -841,7 +841,7 @@ router.post('/buyers/connect', (req: AuthenticatedRequest, res: Response) => {
   buyerProfiles[supplierOrgId].unshift(newProfile);
 
   const message = isEmailInvite
-    ? `Onboarding invitation sent to ${buyerEmail || 'procurement team'} for ${buyerName}! Master Passport credentials attached.`
+    ? `Onboarding invitation sent to ${buyerEmail || 'procurement team'} for ${buyerName}! Master Profile credentials attached.`
     : `Invitation code ${invitationCode || 'INV-VERIFIED'} verified! Connected with ${buyerName} and pre-populated onboarding workspace.`;
 
   res.status(201).json({

@@ -393,7 +393,7 @@ export const SupplierProfileSettings: React.FC = () => {
             <div>
               <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-amber-500" />
-                <span>Ava AI Copilot Preferences</span>
+                <span>Ava Agent Preferences</span>
               </h2>
               <p className="text-[11px] text-slate-500 mt-0.5">
                 Controls AI auto-drafting, bid discounting calculations, and 1-click execution across pages.
@@ -622,9 +622,9 @@ export const SupplierProfileSettings: React.FC = () => {
             {/* Setting 6: Proactive Ava Drawer */}
             <div className="py-3.5 flex items-center justify-between gap-4">
               <div className="space-y-0.5">
-                <div className="text-xs font-semibold text-slate-900">Auto-Open Ava Copilot on Action Items</div>
+                <div className="text-xs font-semibold text-slate-900">Auto-Open Ava Agent on Action Items</div>
                 <div className="text-[11px] text-slate-500">
-                  Automatically slides open Ava Copilot when opening urgent tasks or RFP bids.
+                  Automatically slides open Ava Agent when opening urgent tasks or RFP bids.
                 </div>
               </div>
               <button

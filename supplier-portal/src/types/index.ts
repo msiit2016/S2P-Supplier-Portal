@@ -468,8 +468,8 @@ export interface GlobalSupplierProfile {
   industryCategory: string;
   employeeCountRange: string;
   description: string;
-  publicPassportSlug: string;
-  passportUrl: string;
+  publicProfileSlug: string;
+  profileUrl: string;
   isPubliclyListed: boolean;
   profileCompletionScore: number;
   verificationBadges: {
