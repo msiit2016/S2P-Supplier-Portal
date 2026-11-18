@@ -472,7 +472,18 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({ inline = f
   // Draggable floating launcher coordinates (for MINIMIZE mode)
   const [launcherPos, setLauncherPos] = useState<{ x: number; y: number }>(() => {
     if (typeof window !== 'undefined') {
-      return { x: Math.max(20, window.innerWidth - 150), y: Math.max(80, window.innerHeight - 70) };
+      try {
+        const saved = localStorage.getItem('verisource_ava_launcher_pos');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && typeof parsed.x === 'number' && typeof parsed.y === 'number') {
+            const safeX = Math.min(Math.max(10, parsed.x), window.innerWidth - 64);
+            const safeY = Math.min(Math.max(65, parsed.y), window.innerHeight - 64);
+            return { x: safeX, y: safeY };
+          }
+        }
+      } catch {}
+      return { x: Math.max(20, window.innerWidth - 68), y: Math.max(80, window.innerHeight - 68) };
     }
     return { x: 950, y: 680 };
   });
@@ -547,9 +558,9 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({ inline = f
         }
 
         const minX = 10;
-        const maxX = Math.max(minX, window.innerWidth - 140);
+        const maxX = Math.max(minX, window.innerWidth - 60);
         const minY = 65;
-        const maxY = Math.max(minY, window.innerHeight - 50);
+        const maxY = Math.max(minY, window.innerHeight - 60);
 
         const nextX = Math.min(Math.max(launcherDragStartRef.current.startX + dx, minX), maxX);
         const nextY = Math.min(Math.max(launcherDragStartRef.current.startY + dy, minY), maxY);
@@ -567,6 +578,9 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({ inline = f
       if (isDraggingLauncherRef.current) {
         isDraggingLauncherRef.current = false;
         document.body.style.userSelect = '';
+        try {
+          localStorage.setItem('verisource_ava_launcher_pos', JSON.stringify(launcherPosRef.current));
+        } catch {}
       }
     };
 
@@ -1977,24 +1991,83 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({ inline = f
             position: 'fixed'
           }}
           onMouseDown={handleLauncherMouseDown}
-          onClick={() => {
-            if (!launcherDragStartRef.current.moved) {
-              setCopilotViewMode('DOCK');
-              setAiDrawerOpen(true);
-            }
-          }}
           className="z-[140] select-none cursor-grab active:cursor-grabbing group animate-in fade-in"
-          title="Ava Agent (Click to Open • Drag to Reposition)"
         >
-          <div className="px-3.5 py-2 bg-gradient-to-r from-emerald-600 via-teal-600 to-slate-900 hover:from-emerald-500 hover:to-slate-850 text-white rounded-full shadow-2xl shadow-emerald-950/40 flex items-center space-x-2 border border-emerald-400/40 hover:scale-105 active:scale-95 transition-transform backdrop-blur-md">
-            <div className="relative shrink-0 flex items-center justify-center">
-              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-              <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+          {/* Rich Context Popover Card (Revealed on Hover) */}
+          <div className="absolute bottom-full right-0 mb-3 w-64 p-3.5 bg-slate-900/95 text-white rounded-2xl shadow-2xl border border-slate-700/80 backdrop-blur-md opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-200 transform translate-y-1.5 group-hover:translate-y-0 z-50">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+              <div className="flex items-center space-x-2">
+                <div className="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
+                  <Sparkles className="w-3.5 h-3.5" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-white tracking-tight">Ava Copilot</div>
+                  <div className="text-[10px] text-emerald-400 font-medium flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>Ready to assist</span>
+                  </div>
+                </div>
+              </div>
+              <span className="text-[9px] font-mono text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700">
+                {activeSubagent?.shortName || 'AI'}
+              </span>
             </div>
-            <span className="text-xs font-bold tracking-tight text-white">Ava</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
-            <GripHorizontal className="w-3 h-3 text-white/50 group-hover:text-white shrink-0" />
+
+            <div className="py-2 space-y-1">
+              <div className="text-[11px] text-slate-300 font-medium">
+                Context: <span className="text-emerald-300 font-semibold">{config.pageContextName}</span>
+              </div>
+              <p className="text-[10px] text-slate-400 leading-relaxed">
+                Click to open interactive AI assistance, auto-fill fields, or verify information.
+              </p>
+            </div>
+
+            <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px] text-slate-400">
+              <button
+                type="button"
+                onClick={() => {
+                  setCopilotViewMode('DOCK');
+                  setAiDrawerOpen(true);
+                }}
+                className="text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1 cursor-pointer"
+              >
+                <span>Click to chat</span>
+                <ChevronRight className="w-3 h-3" />
+              </button>
+              <span className="text-slate-500 text-[9px] flex items-center gap-1">
+                <GripHorizontal className="w-2.5 h-2.5" />
+                <span>Drag to move</span>
+              </span>
+            </div>
           </div>
+
+          {/* Minimal Floating Button: 44px Circular FAB at rest -> Smoothly expands on hover */}
+          <button
+            type="button"
+            onClick={() => {
+              if (!launcherDragStartRef.current.moved) {
+                setCopilotViewMode('DOCK');
+                setAiDrawerOpen(true);
+              }
+            }}
+            className="h-11 rounded-full bg-slate-900/95 hover:bg-slate-900 text-white shadow-xl shadow-slate-950/30 border border-emerald-500/40 hover:border-emerald-400 ring-1 ring-white/10 backdrop-blur-md flex items-center transition-all duration-300 ease-out cursor-pointer group-hover:shadow-emerald-950/40 px-2.5 group-hover:px-3.5 space-x-0 group-hover:space-x-2"
+            title="Ava Agent (Click to Open • Drag to Reposition)"
+          >
+            {/* Sparkles Icon with Online Pulse Dot */}
+            <div className="relative shrink-0 flex items-center justify-center w-6 h-6">
+              <Sparkles className="w-4 h-4 text-emerald-400 group-hover:text-amber-300 transition-colors" />
+              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-slate-900 animate-pulse"></span>
+            </div>
+
+            {/* Hidden Text & Grip at rest, smoothly transitions in on hover */}
+            <div className="max-w-0 opacity-0 group-hover:max-w-[120px] group-hover:opacity-100 transition-all duration-300 ease-out overflow-hidden flex items-center space-x-1.5 whitespace-nowrap">
+              <span className="text-xs font-bold tracking-tight text-white">Ava</span>
+              <span className="text-[10px] text-emerald-400 font-medium bg-emerald-950/60 border border-emerald-800/60 px-1.5 py-0.2 rounded-full">
+                Copilot
+              </span>
+              <GripHorizontal className="w-3 h-3 text-slate-500 shrink-0 ml-0.5" />
+            </div>
+          </button>
         </div>
       )}
     </>

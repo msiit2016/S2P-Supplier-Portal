@@ -4658,7 +4658,7 @@ export const OnboardingRequest: React.FC = () => {
             (Hidden only in FULL agent view)
            ======================================================== */}
         {!isFull && (
-          <main ref={mainScrollRef} className="flex-1 min-w-0 bg-slate-50 overflow-y-auto h-full p-3 sm:p-4 lg:p-5 space-y-3.5">
+          <main ref={mainScrollRef} className="flex-1 min-w-0 bg-slate-50 overflow-y-auto h-full p-3 sm:p-4 lg:p-5 pb-16 sm:pb-20 space-y-3.5">
             
             {/* Ava Agent Real-Time Live Update Toast Banner */}
             {agentActionToast && (
