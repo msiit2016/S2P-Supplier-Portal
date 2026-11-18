@@ -523,7 +523,6 @@ export const SupplierDashboard: React.FC = () => {
             onNavigateToOrders={(buyerOrgId) => navigate('/orders', buyerOrgId ? { buyerOrgId } : undefined)}
             onNavigateToAsns={(buyerOrgId) => navigate('/asns', buyerOrgId ? { buyerOrgId } : undefined)}
             onNavigateToInvoices={(buyerOrgId) => navigate('/invoices', buyerOrgId ? { buyerOrgId } : undefined)}
-            onNavigateToClients={(buyerOrgId) => navigate('/profiles', buyerOrgId ? { buyerOrgId } : undefined)}
           />
         </div>
       </div>

@@ -294,13 +294,13 @@ export const BuyerRevenueDonutChart: React.FC<BuyerRevenueDonutChartProps> = ({
                   key={slice.id}
                   onMouseEnter={() => setActiveIdx(idx)}
                   onMouseLeave={() => setActiveIdx(null)}
-                  onClick={() => onNavigateToClients ? onNavigateToClients(slice.buyerOrgId) : onNavigateToOrders(slice.buyerOrgId)}
+                  onClick={() => onNavigateToOrders(slice.buyerOrgId)}
                   className={`p-2 sm:px-2.5 sm:py-2 rounded-xl border transition flex items-center justify-between gap-2 cursor-pointer group ${
                     isHovered 
                       ? 'border-indigo-300 bg-indigo-50/50 shadow-2xs' 
                       : 'border-slate-100 bg-slate-50/70 hover:bg-slate-50 hover:border-slate-200'
                   }`}
-                  title={`Open ${slice.name} Account & Terms`}
+                  title={`View ${slice.name} Orders`}
                 >
                   <div className="flex items-center space-x-2.5 min-w-0">
                     <div 
@@ -355,21 +355,16 @@ export const BuyerRevenueDonutChart: React.FC<BuyerRevenueDonutChartProps> = ({
         </div>
       </div>
 
-      {/* Footer Navigation Strip (Aligned & Relevant Hyperlinks) */}
+      {/* Footer Status Strip */}
       <div className="pt-2 border-t border-slate-100 shrink-0">
         <div className="flex items-center justify-between text-xs text-slate-500">
-          <span className="text-[11px] font-medium text-slate-500 flex items-center gap-1.5">
+          <span className="text-[11px] font-medium text-slate-600 flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
             <span>{buyers.length} Connected Client Accounts</span>
           </span>
-          <button
-            onClick={() => onNavigateToClients ? onNavigateToClients() : onNavigateToOrders()}
-            className="hover:text-indigo-700 text-slate-700 inline-flex items-center gap-1 font-semibold cursor-pointer transition text-[11px]"
-            title="View client account profiles, ERP vendor IDs, and negotiated payment terms"
-          >
-            <span>Client Accounts &amp; Terms</span>
-            <ArrowUpRight className="w-3.5 h-3.5 text-slate-400" />
-          </button>
+          <span className="text-[11px] text-slate-400 font-medium">
+            100% Active Relationships
+          </span>
         </div>
       </div>
     </div>

@@ -69,28 +69,24 @@ export const OperationalSlaTrendChart: React.FC<OperationalSlaTrendChartProps> =
   const activeData = activeIdx !== null ? SLA_MONTHLY[activeIdx] : null;
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-2xs space-y-4">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
-        <div>
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-200/70 text-emerald-700 flex items-center justify-center shrink-0">
-              <ShieldCheck className="w-3.5 h-3.5" />
-            </div>
-            <h3 className="text-sm font-semibold text-slate-900 tracking-tight">
-              Operational Performance &amp; SLA Fulfillment
-            </h3>
+    <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-2xs space-y-3.5">
+      {/* Header (Synchronized with Cash Runway & Client Concentration) */}
+      <div className="flex items-center justify-between pb-2.5 border-b border-slate-100">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-200/70 text-emerald-700 flex items-center justify-center shrink-0">
+            <ShieldCheck className="w-3.5 h-3.5" />
           </div>
-          <p className="text-[11px] text-slate-500 mt-0.5">
-            End-to-end order acknowledgment, carrier delivery, and touchless 3-way match tracking
-          </p>
+          <h3 className="text-sm font-semibold text-slate-900 tracking-tight">
+            Operational Performance &amp; SLA Fulfillment
+          </h3>
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80 font-mono">
+            99.2% OTIF
+          </span>
         </div>
 
-        <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200/70 text-emerald-700 text-xs font-medium">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-            <span>Contract SLAs Active</span>
-          </div>
+        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200/80 text-[11px] font-medium text-slate-700 shrink-0">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          <span>Contract SLAs Met</span>
         </div>
       </div>
 
