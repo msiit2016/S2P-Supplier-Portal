@@ -1983,93 +1983,107 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({ inline = f
       )}
 
       {/* 4. FLOATING DRAGGABLE BUBBLE LAUNCHER (MINIMIZE VIEW) */}
-      {isMinimized && (
-        <div
-          style={{
-            left: `${launcherPos.x}px`,
-            top: `${launcherPos.y}px`,
-            position: 'fixed'
-          }}
-          onMouseDown={handleLauncherMouseDown}
-          className="z-[140] select-none cursor-grab active:cursor-grabbing group animate-in fade-in"
-        >
-          {/* Rich Context Popover Card (Revealed on Hover) */}
-          <div className="absolute bottom-full right-0 mb-3 w-64 p-3.5 bg-slate-900/95 text-white rounded-2xl shadow-2xl border border-slate-700/80 backdrop-blur-md opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-200 transform translate-y-1.5 group-hover:translate-y-0 z-50">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-              <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
-                  <Sparkles className="w-3.5 h-3.5" />
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-white tracking-tight">Ava Copilot</div>
-                  <div className="text-[10px] text-emerald-400 font-medium flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>Ready to assist</span>
+      {isMinimized && (() => {
+        const isNearRightEdge = typeof window !== 'undefined' ? launcherPos.x > window.innerWidth / 2 : true;
+        const isNearTopEdge = launcherPos.y < 220;
+
+        return (
+          <div
+            style={{
+              left: `${launcherPos.x}px`,
+              top: `${launcherPos.y}px`,
+              position: 'fixed'
+            }}
+            onMouseDown={handleLauncherMouseDown}
+            className="z-[140] select-none cursor-grab active:cursor-grabbing group animate-in fade-in"
+          >
+            {/* Rich Context Popover Card (Revealed on Hover - Clean Light Enterprise Card) */}
+            <div 
+              className={`absolute ${
+                isNearRightEdge ? 'right-0' : 'left-0'
+              } ${
+                isNearTopEdge ? 'top-full mt-2.5' : 'bottom-full mb-2.5'
+              } w-[280px] sm:w-[300px] p-3.5 bg-white text-slate-800 rounded-2xl shadow-xl shadow-slate-900/15 border border-slate-200/90 ring-1 ring-slate-900/5 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-200 transform ${
+                isNearTopEdge ? '-translate-y-1 group-hover:translate-y-0' : 'translate-y-1 group-hover:translate-y-0'
+              } z-50`}
+            >
+              {/* 1. Header Row: Avatar, Title & Subagent Tag */}
+              <div className="flex items-center justify-between pb-2.5 border-b border-slate-100">
+                <div className="flex items-center space-x-2 min-w-0">
+                  <div className="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                    <Sparkles className="w-3.5 h-3.5" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs font-bold text-slate-900 truncate tracking-tight">
+                      Ava AI Copilot
+                    </div>
+                    <div className="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                      <span>Ready to assist</span>
+                    </div>
                   </div>
                 </div>
+                <span 
+                  className="text-[10px] font-mono font-medium text-slate-600 bg-slate-100 border border-slate-200/80 px-2 py-0.5 rounded-md truncate max-w-[95px]" 
+                  title={activeSubagent?.name || 'S2P Agent'}
+                >
+                  {activeSubagent?.shortName || 'Copilot'}
+                </span>
               </div>
-              <span className="text-[9px] font-mono text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700">
-                {activeSubagent?.shortName || 'AI'}
-              </span>
+
+              {/* 2. Page Context & Brief Description */}
+              <div className="py-2.5 space-y-1.5">
+                <div className="flex items-center gap-1.5 text-xs text-slate-600">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Context</span>
+                  <span className="text-slate-300">•</span>
+                  <span className="font-semibold text-slate-800 truncate">{config.pageContextName}</span>
+                </div>
+                <p className="text-[11px] text-slate-500 leading-relaxed">
+                  Click to open interactive AI assistance, auto-fill verified profile fields, or verify transaction records.
+                </p>
+              </div>
+
+              {/* 3. Action Footer: 1-Click Open Button + Drag Hint */}
+              <div className="pt-2 border-t border-slate-100 space-y-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCopilotViewMode('DOCK');
+                    setAiDrawerOpen(true);
+                  }}
+                  className="w-full py-1.5 px-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition shadow-xs cursor-pointer group/btn"
+                >
+                  <span>Open Ava Copilot</span>
+                  <ChevronRight className="w-3.5 h-3.5 text-emerald-400 group-hover/btn:translate-x-0.5 transition-transform" />
+                </button>
+                <div className="flex items-center justify-center text-[10px] text-slate-400 gap-1 select-none">
+                  <GripHorizontal className="w-3 h-3 text-slate-400" />
+                  <span>Drag bubble anywhere to reposition</span>
+                </div>
+              </div>
             </div>
 
-            <div className="py-2 space-y-1">
-              <div className="text-[11px] text-slate-300 font-medium">
-                Context: <span className="text-emerald-300 font-semibold">{config.pageContextName}</span>
-              </div>
-              <p className="text-[10px] text-slate-400 leading-relaxed">
-                Click to open interactive AI assistance, auto-fill fields, or verify information.
-              </p>
-            </div>
-
-            <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px] text-slate-400">
-              <button
-                type="button"
-                onClick={() => {
+            {/* Minimal Floating Button: Fixed 48px Circular FAB (Does NOT expand horizontally offscreen) */}
+            <button
+              type="button"
+              onClick={() => {
+                if (!launcherDragStartRef.current.moved) {
                   setCopilotViewMode('DOCK');
                   setAiDrawerOpen(true);
-                }}
-                className="text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1 cursor-pointer"
-              >
-                <span>Click to chat</span>
-                <ChevronRight className="w-3 h-3" />
-              </button>
-              <span className="text-slate-500 text-[9px] flex items-center gap-1">
-                <GripHorizontal className="w-2.5 h-2.5" />
-                <span>Drag to move</span>
-              </span>
-            </div>
+                }
+              }}
+              className="w-12 h-12 rounded-full bg-slate-900/95 hover:bg-slate-900 text-white shadow-xl shadow-slate-950/25 border border-emerald-500/40 hover:border-emerald-400 ring-1 ring-white/10 backdrop-blur-md flex items-center justify-center transition-all duration-200 cursor-pointer group-hover:scale-105 active:scale-95 group-hover:shadow-emerald-950/40"
+              title="Ava Agent (Click to Open • Drag to Reposition)"
+            >
+              {/* Sparkles Icon with Online Pulse Dot */}
+              <div className="relative flex items-center justify-center">
+                <Sparkles className="w-5 h-5 text-emerald-400 group-hover:text-amber-300 transition-colors" />
+                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-slate-900 animate-pulse"></span>
+              </div>
+            </button>
           </div>
-
-          {/* Minimal Floating Button: 44px Circular FAB at rest -> Smoothly expands on hover */}
-          <button
-            type="button"
-            onClick={() => {
-              if (!launcherDragStartRef.current.moved) {
-                setCopilotViewMode('DOCK');
-                setAiDrawerOpen(true);
-              }
-            }}
-            className="h-11 rounded-full bg-slate-900/95 hover:bg-slate-900 text-white shadow-xl shadow-slate-950/30 border border-emerald-500/40 hover:border-emerald-400 ring-1 ring-white/10 backdrop-blur-md flex items-center transition-all duration-300 ease-out cursor-pointer group-hover:shadow-emerald-950/40 px-2.5 group-hover:px-3.5 space-x-0 group-hover:space-x-2"
-            title="Ava Agent (Click to Open • Drag to Reposition)"
-          >
-            {/* Sparkles Icon with Online Pulse Dot */}
-            <div className="relative shrink-0 flex items-center justify-center w-6 h-6">
-              <Sparkles className="w-4 h-4 text-emerald-400 group-hover:text-amber-300 transition-colors" />
-              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-slate-900 animate-pulse"></span>
-            </div>
-
-            {/* Hidden Text & Grip at rest, smoothly transitions in on hover */}
-            <div className="max-w-0 opacity-0 group-hover:max-w-[120px] group-hover:opacity-100 transition-all duration-300 ease-out overflow-hidden flex items-center space-x-1.5 whitespace-nowrap">
-              <span className="text-xs font-bold tracking-tight text-white">Ava</span>
-              <span className="text-[10px] text-emerald-400 font-medium bg-emerald-950/60 border border-emerald-800/60 px-1.5 py-0.2 rounded-full">
-                Copilot
-              </span>
-              <GripHorizontal className="w-3 h-3 text-slate-500 shrink-0 ml-0.5" />
-            </div>
-          </button>
-        </div>
-      )}
+        );
+      })()}
     </>
   );
 };
