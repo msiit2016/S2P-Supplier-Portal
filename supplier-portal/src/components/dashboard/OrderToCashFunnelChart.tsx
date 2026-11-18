@@ -142,9 +142,6 @@ export const OrderToCashFunnelChart: React.FC<OrderToCashFunnelChartProps> = ({
               98.4% Touchless Rate
             </span>
           </div>
-          <p className="text-[11px] text-slate-500 mt-0.5">
-            End-to-end transaction velocity from buyer purchase order to settled bank cash
-          </p>
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">

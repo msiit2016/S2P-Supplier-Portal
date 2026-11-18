@@ -335,57 +335,16 @@ export const SupplierDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Row 1: Enterprise Profile Governance & Verification Header */}
+      {/* Row 1: Enterprise Profile Governance & Verification Header (Single-Row with embedded buyer filter) */}
       <SupplierProfileGovernanceHeader
         globalProfile={globalProfile}
         buyers={buyers}
+        selectedBuyerId={selectedBuyerId}
+        onSelectBuyerId={(id) => setSelectedBuyerId(id)}
         onNavigate={(route, state) => navigate(route, state)}
         onSyncAll={handleManualSync}
         isSyncing={isSyncing}
       />
-
-      {/* Portfolio Scope & Global Multi-Buyer Filter Strip */}
-      <div className="bg-white rounded-xl px-4 py-2.5 border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-slate-400 font-bold uppercase tracking-wider text-[10px] flex items-center gap-1">
-            <Filter className="w-3 h-3 text-slate-400" />
-            <span>Buyer Scope:</span>
-          </span>
-          <div className="w-72">
-            <FilterSelect
-              value={selectedBuyerId}
-              onChange={(e: any) => setSelectedBuyerId(typeof e === 'string' ? e : e?.target?.value || 'ALL')}
-              options={buyerOptions}
-              icon={<Building2 className="w-3.5 h-3.5 text-slate-400" />}
-            />
-          </div>
-          {selectedBuyerId !== 'ALL' && (
-            <button
-              onClick={() => setSelectedBuyerId('ALL')}
-              className="text-[11px] text-slate-500 hover:text-slate-800 font-medium underline underline-offset-2 ml-1 cursor-pointer"
-            >
-              Reset to Portfolio View
-            </button>
-          )}
-        </div>
-
-        <div className="flex items-center gap-3 self-end sm:self-auto text-slate-500 text-[11px]">
-          <span className="flex items-center gap-1.5 font-medium">
-            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span>ERP Ledger Synced</span>
-          </span>
-          <span className="text-slate-300">•</span>
-          <button
-            onClick={handleManualSync}
-            disabled={isSyncing}
-            className="flex items-center gap-1 hover:text-slate-900 transition font-medium cursor-pointer disabled:opacity-50"
-            title="Refresh ERP cache & verified records"
-          >
-            <RotateCw className={`w-3 h-3 ${isSyncing ? 'animate-spin text-emerald-600' : 'text-slate-400'}`} />
-            <span>{isSyncing ? 'Syncing...' : 'Refresh'}</span>
-          </button>
-        </div>
-      </div>
 
       {/* Minimal 4-KPI Metric Strip with Sparklines & Actionable status badges */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
@@ -428,8 +387,8 @@ export const SupplierDashboard: React.FC = () => {
             {filteredOrders.length} <span className="text-xs font-normal text-slate-500 font-sans">Orders</span>
           </div>
           <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
-            <span className="text-[11px] text-slate-500 group-hover:text-sky-700 font-medium mt-0.5 truncate transition">
-              ${Math.round(totalPOValue / 1000)}k pipeline
+            <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">
+              2 Require Ack
             </span>
             <Sparkline data={[3, 4, 4, 5, 5, 6]} color="#0284c7" width={68} height={20} />
           </div>
@@ -451,8 +410,8 @@ export const SupplierDashboard: React.FC = () => {
             {inTransitAsnCount} <span className="text-xs font-normal text-slate-500 font-sans">Shipments</span>
           </div>
           <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
-            <span className="text-[11px] text-slate-500 group-hover:text-teal-700 font-medium mt-0.5 truncate transition">
-              On schedule
+            <span className="text-[10px] font-semibold text-teal-800 bg-teal-50 px-1.5 py-0.2 rounded border border-teal-200">
+              On Schedule
             </span>
             <Sparkline data={[1, 2, 1, 3, 2, 2]} color="#0d9488" width={68} height={20} />
           </div>
@@ -475,8 +434,8 @@ export const SupplierDashboard: React.FC = () => {
               ${acceleratedCashAvailable > 0 ? acceleratedCashAvailable.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '30,870.00'}
             </div>
             <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
-              <span className="text-[11px] text-amber-700 group-hover:text-amber-800 font-medium mt-0.5 truncate transition">
-                Instant eligible
+              <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">
+                Instant Eligible
               </span>
               <Sparkline data={[28000, 34000, 39000, 44000, 51594]} color="#d97706" width={68} height={20} />
             </div>
@@ -497,8 +456,8 @@ export const SupplierDashboard: React.FC = () => {
               $115,480.00
             </div>
             <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
-              <span className="text-[11px] text-emerald-700 group-hover:text-emerald-800 font-medium mt-0.5 truncate transition">
-                100% on-time
+              <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
+                100% On-Time
               </span>
               <Sparkline data={[82000, 91000, 98000, 104000, 115480]} color="#10b981" width={68} height={20} />
             </div>
@@ -564,75 +523,6 @@ export const SupplierDashboard: React.FC = () => {
         onNavigateToAsns={() => navigate('/asns')}
         onNavigateToDocuments={() => navigate('/documents')}
       />
-
-      {/* Row 6: Master Operations & Vault Launchpad (4-Card Grid) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-        {/* Buyer Onboarding Card */}
-        <div 
-          onClick={() => navigate('/onboarding')}
-          className="bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-2xs hover:border-slate-300 transition cursor-pointer group flex items-center gap-3.5"
-        >
-          <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 ring-1 ring-emerald-500/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-            <FileCheck2 className="w-4 h-4" />
-          </div>
-          <div className="min-w-0">
-            <h3 className="text-xs font-semibold text-slate-900 group-hover:text-slate-950 transition">
-              Buyer Onboarding Requests
-            </h3>
-            <p className="text-[11px] text-emerald-700 font-medium">3 Active • 1 Action Required</p>
-          </div>
-        </div>
-
-        {/* Sourcing RFPs & Bids Card */}
-        <div 
-          onClick={() => navigate('/rfps')}
-          className="bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-2xs hover:border-slate-300 transition cursor-pointer group flex items-center gap-3.5"
-        >
-          <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 ring-1 ring-purple-500/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-            <Layers className="w-4 h-4" />
-          </div>
-          <div className="min-w-0">
-            <h3 className="text-xs font-semibold text-slate-900 group-hover:text-slate-950 transition">
-              Sourcing RFPs &amp; Bids
-            </h3>
-            <p className="text-[11px] text-purple-700 font-medium">
-              {activeRfpCount} Active • ${Math.round(totalRfpPipeline / 1000)}k Pipeline
-            </p>
-          </div>
-        </div>
-
-        {/* Document Vault Card */}
-        <div 
-          onClick={() => navigate('/documents')}
-          className="bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-2xs hover:border-slate-300 transition cursor-pointer group flex items-center gap-3.5"
-        >
-          <div className="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 ring-1 ring-sky-500/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-            <FolderLock className="w-4 h-4" />
-          </div>
-          <div className="min-w-0">
-            <h3 className="text-xs font-semibold text-slate-900 group-hover:text-slate-950 transition">
-              Document Vault
-            </h3>
-            <p className="text-[11px] text-sky-700 font-medium">6 Verified Credentials</p>
-          </div>
-        </div>
-
-        {/* Catalog Items Card */}
-        <div 
-          onClick={() => navigate('/catalog')}
-          className="bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-2xs hover:border-slate-300 transition cursor-pointer group flex items-center gap-3.5"
-        >
-          <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 ring-1 ring-indigo-500/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-            <Package className="w-4 h-4" />
-          </div>
-          <div className="min-w-0">
-            <h3 className="text-xs font-semibold text-slate-900 group-hover:text-slate-950 transition">
-              Catalog Items
-            </h3>
-            <p className="text-[11px] text-indigo-700 font-medium">5 Standard Item Codes</p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

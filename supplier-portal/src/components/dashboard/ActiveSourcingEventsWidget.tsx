@@ -76,16 +76,11 @@ export const ActiveSourcingEventsWidget: React.FC<ActiveSourcingEventsWidgetProp
           <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 ring-1 ring-purple-500/20 flex items-center justify-center shrink-0">
             <Layers className="w-4 h-4" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-sm font-bold text-slate-900 tracking-tight">Active Sourcing &amp; Tenders</h2>
-              <span className="px-2 py-0.2 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
-                {activeEvents.length} Active
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-500 mt-0.5">
-              Enterprise RFPs, RFIs, and reverse auction opportunities
-            </p>
+          <div className="flex items-center gap-2">
+            <h2 className="text-sm font-bold text-slate-900 tracking-tight">Active Sourcing &amp; Tenders</h2>
+            <span className="px-2 py-0.2 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+              {activeEvents.length} Active
+            </span>
           </div>
         </div>
 
@@ -190,9 +185,8 @@ export const ActiveSourcingEventsWidget: React.FC<ActiveSourcingEventsWidgetProp
 
       {/* Footer bar */}
       <div className="p-2.5 px-4 bg-slate-50/70 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-        <span className="flex items-center gap-1.5">
-          <Sparkles className="w-3 h-3 text-purple-600" />
-          <span>Ava AI can auto-draft technical compliance responses from your Master Profile</span>
+        <span className="font-mono font-medium text-purple-700">
+          Electronic Bid Submissions Open
         </span>
         <button
           onClick={() => onNavigateToRfps()}
